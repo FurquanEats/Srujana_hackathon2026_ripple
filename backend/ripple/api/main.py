@@ -136,6 +136,17 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
             raise HTTPException(status_code=404, detail="run scripts/consortium_eval.py first")
         return json.loads(path.read_text(encoding="utf-8"))
 
+    @app.get("/redteam")
+    def get_redteam() -> dict:
+        """Red-team results from scripts/redteam.py: the latest run, and the run before the last fixes if kept."""
+        data_dir = Path(__file__).resolve().parents[3] / "data"
+        latest = data_dir / "redteam.json"
+        if not latest.is_file():
+            raise HTTPException(status_code=404, detail="run scripts/redteam.py first")
+        before = data_dir / "redteam_before.json"
+        return {"latest": json.loads(latest.read_text(encoding="utf-8")),
+                "before": json.loads(before.read_text(encoding="utf-8")) if before.is_file() else None}
+
     @app.post("/ingest")
     def post_ingest(txns: list[Transaction]) -> list[ScoredTransaction]:
         """Scores transactions in the order given (for example from the simulator's inject buttons)."""

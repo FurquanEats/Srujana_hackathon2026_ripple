@@ -1,0 +1,320 @@
+{
+  "generated_at": "2026-10-24T17:04:14",
+  "plans_tried": 192,
+  "evading_plans": 37,
+  "caught_share": 0.427,
+  "min_laundered": 50000,
+  "rounds": [
+    {
+      "round": 1,
+      "plans": 24,
+      "evaded": 2,
+      "caught_share": 0.917,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 49000,
+          "hops": 2,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 49,000, 2 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 288120.0
+      }
+    },
+    {
+      "round": 2,
+      "plans": 24,
+      "evaded": 9,
+      "caught_share": 0.625,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 49000,
+          "hops": 2,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 49,000, 2 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 288120.0
+      }
+    },
+    {
+      "round": 3,
+      "plans": 24,
+      "evaded": 17,
+      "caught_share": 0.292,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 49000,
+          "hops": 3,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 49,000, 3 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 288120.32
+      }
+    },
+    {
+      "round": 4,
+      "plans": 24,
+      "evaded": 16,
+      "caught_share": 0.333,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 49000,
+          "hops": 3,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 49,000, 3 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 288120.32
+      }
+    },
+    {
+      "round": 5,
+      "plans": 24,
+      "evaded": 19,
+      "caught_share": 0.208,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 90000,
+          "hops": 4,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 90,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 529200.64
+      }
+    },
+    {
+      "round": 6,
+      "plans": 24,
+      "evaded": 17,
+      "caught_share": 0.292,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 150000,
+          "hops": 4,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 150,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 881999.36
+      }
+    },
+    {
+      "round": 7,
+      "plans": 24,
+      "evaded": 15,
+      "caught_share": 0.375,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 150000,
+          "hops": 4,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 150,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 881999.36
+      }
+    },
+    {
+      "round": 8,
+      "plans": 24,
+      "evaded": 15,
+      "caught_share": 0.375,
+      "best": {
+        "plan": {
+          "victims": 6,
+          "victim_amount": 150000,
+          "hops": 4,
+          "split": 4,
+          "delay_minutes": 1440,
+          "pass_share": 1.0,
+          "cash_out": "atm"
+        },
+        "description": "6 victims x Rs 150,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+        "evaded": true,
+        "max_probability": 0.6225,
+        "laundered": 881999.36
+      }
+    }
+  ],
+  "blind_spots": [
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 150000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "6 victims x Rs 150,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 881999.36,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 5,
+        "victim_amount": 150000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "5 victims x Rs 150,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 734999.04,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 90000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "none"
+      },
+      "description": "6 victims x Rs 90,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via none",
+      "laundered": 540001.28,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 90000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "6 victims x Rs 90,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 529200.64,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 90000,
+        "hops": 3,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "6 victims x Rs 90,000, 3 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 529200.0,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 8,
+        "victim_amount": 49000,
+        "hops": 3,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "8 victims x Rs 49,000, 3 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 384160.0,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 4,
+        "victim_amount": 90000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "none"
+      },
+      "description": "4 victims x Rs 90,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via none",
+      "laundered": 360000.0,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 4,
+        "victim_amount": 90000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "4 victims x Rs 90,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 352798.72,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 49000,
+        "hops": 3,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "6 victims x Rs 49,000, 3 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 288120.32,
+      "max_probability": 0.6225
+    },
+    {
+      "plan": {
+        "victims": 6,
+        "victim_amount": 49000,
+        "hops": 4,
+        "split": 4,
+        "delay_minutes": 1440,
+        "pass_share": 1.0,
+        "cash_out": "atm"
+      },
+      "description": "6 victims x Rs 49,000, 4 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
+      "laundered": 288120.32,
+      "max_probability": 0.6225
+    }
+  ],
+  "note": "Plans that moved at least Rs 50,000 without any payment reaching Review. Each is a scenario to turn into a test and a fix."
+}

@@ -181,6 +181,16 @@ export interface ConsortiumReport {
   note: string;
 }
 
+export interface RedTeamRun {
+  generated_at: string;
+  plans_tried: number;
+  evading_plans: number;
+  caught_share: number;
+  rounds: { round: number; plans: number; evaded: number; caught_share: number; best: { description: string; evaded: boolean; max_probability: number; laundered: number } }[];
+  blind_spots: { description: string; laundered: number; max_probability: number }[];
+  note: string;
+}
+
 export interface InjectResult {
   kind: string;
   at: string;
@@ -223,6 +233,7 @@ export const api = {
     ),
   eval: () => request<EvalReport>("/eval"),
   consortium: () => request<ConsortiumReport>("/consortium"),
+  redteam: () => request<{ latest: RedTeamRun; before: RedTeamRun | null }>("/redteam"),
   inject: (kind: string) => request<InjectResult>(`/inject/${kind}`, post()),
   trace: (account: string, from_ts?: string, amount?: number) =>
     request<InterdictionPlan>("/trace", post({ account, from_ts: from_ts || null, amount: amount ?? null })),

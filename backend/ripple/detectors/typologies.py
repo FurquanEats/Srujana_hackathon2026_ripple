@@ -8,7 +8,7 @@ from datetime import timedelta
 from typing import Any, Callable
 
 from ripple.features.store import AccountState, Edge, FeatureStore, baseline, window
-from ripple.cash import is_cash_deposit
+from ripple.cash import CASH_OUT_PREFIXES, is_cash_deposit, is_cash_out
 from ripple.fmt import duration, ids, money, names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
@@ -38,9 +38,11 @@ def _ramp(value: float, start: float, full: float) -> float:
 
 
 def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
-    """Money from new senders sent on within minutes of arriving: the core mule behaviour.
+    """Money from new senders sent on soon after arriving: the core mule behaviour.
 
     Requiring new senders keeps a salaried customer who pays rent right after a known employer's salary out of it.
+    Forwarding within `within_minutes` is the strongest sign; the signal fades out by `max_minutes`, so a mule that
+    waits 45 minutes is still caught (the red team found the hard 30-minute edge and laundered past it).
     """
     if is_cash_deposit(txn):
         return None
@@ -49,8 +51,10 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
     if not received or len(received) > HUB_LIMIT:
         return None
     gap = txn.ts - received[-1].ts
-    if gap > timedelta(minutes=p["within_minutes"]):
+    if gap > timedelta(minutes=p["max_minutes"]):
         return None
+    fast, slow = timedelta(minutes=p["within_minutes"]), timedelta(minutes=p["max_minutes"])
+    timing = 1.0 if gap <= fast else 1 - (gap - fast) / (slow - fast)
     inflow = sum(e.amount for e in received)
     if inflow < p["min_inflow"]:  # an alerting floor only; an STR has no minimum amount
         return None
@@ -66,7 +70,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
     senders = {e.counterparty for e in received}
     new_senders = {c for c in senders if src.senders.get(c, cutoff) >= cutoff}
     from_new = [e for e in received if e.counterparty in new_senders]
-    strength = 0.6 + 0.2 * _ramp(ratio, p["forward_share"], 1.0) + 0.1 * (1 - gap / timedelta(minutes=p["within_minutes"])) + 0.1 * new_share
+    strength = 0.55 + 0.2 * _ramp(ratio, p["forward_share"], 1.0) + 0.15 * timing + 0.1 * new_share
     return _reason(
         "pass_through",
         f"{txn.src_account} received {money(inflow, txn.currency)} from {len(senders)} sender{'s' if len(senders) > 1 else ''}, "
@@ -76,7 +80,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
         strength,
         [e.txn_id for e in from_new] + [e.txn_id for e in sent],
         f"Not flagged if less than {p['forward_share']:.0%} had been sent on, or if it had left more than "
-        f"{p['within_minutes']} minutes after arriving",
+        f"{p['max_minutes'] // 60} hours after arriving",
     )
 
 
@@ -312,6 +316,35 @@ def device_takeover(txn: Transaction, store: FeatureStore, src: AccountState, ds
     )
 
 
+def rapid_cash_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
+    """Money from new senders turned into cash or crypto within a day: the last step of a mule chain, whatever the
+    mule waited before. Found by the red team, which laundered past the pass-through window by waiting longer."""
+    if not is_cash_out(txn):
+        return None
+    lookback = timedelta(hours=p["lookback_hours"])
+    since = txn.ts - lookback
+    received = [e for e in window(src.incoming, txn.ts, lookback) if src.senders.get(e.counterparty, since) >= since]
+    inflow = sum(e.amount for e in received)
+    if inflow < p["min_inflow"]:
+        return None
+    cashed = [e for e in window(src.outgoing, txn.ts, lookback) if e.counterparty.upper().startswith(CASH_OUT_PREFIXES)]
+    if txn.txn_id not in {e.txn_id for e in cashed}:
+        cashed.append(Edge(txn.txn_id, txn.ts, txn.dst_account, txn.amount))
+    share = sum(e.amount for e in cashed) / inflow
+    if share < p["min_share"]:
+        return None
+    strength = 0.8 + 0.2 * _ramp(min(share, 1.0), p["min_share"], 1.0)
+    return _reason(
+        "rapid_cash_out",
+        f"{txn.src_account} received {money(inflow, txn.currency)} from {len({e.counterparty for e in received})} new "
+        f"senders in the last {p['lookback_hours']} hours and has sent {min(share, 1.0):.0%} of it to cash or crypto "
+        f"({ids([e.txn_id for e in cashed])})",
+        strength,
+        [e.txn_id for e in received] + [e.txn_id for e in cashed],
+        f"Not flagged if less than {p['min_share']:.0%} had gone to cash or crypto within {p['lookback_hours']} hours",
+    )
+
+
 def coerced_transfer(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """A victim being coached by a scammer ("digital arrest", fake investment): a lump sum arrives, often a fixed
     deposit broken early, and most of it goes straight to a payee the customer has never paid, in the largest payment
@@ -366,6 +399,7 @@ DETECTORS: dict[str, Detector] = {
     "cash_structuring": cash_structuring,
     "device_takeover": device_takeover,
     "coerced_transfer": coerced_transfer,
+    "rapid_cash_out": rapid_cash_out,
 }
 
 

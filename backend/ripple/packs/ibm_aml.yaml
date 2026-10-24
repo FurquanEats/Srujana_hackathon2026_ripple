@@ -8,7 +8,8 @@ currency: USD
 rails: [ACH, WIRE, CHEQUE, CARD, CASH, CRYPTO, REINVESTMENT]
 
 detectors:
-  pass_through: {forward_share: 0.8, within_minutes: 30, lookback_hours: 24, min_new_sender_share: 0.5,
+  pass_through: {forward_share: 0.8, within_minutes: 30, max_minutes: 360, lookback_hours: 24,
+                 min_new_sender_share: 0.5,
                  min_inflow: 0}
   fan_in_out: {min_senders: 5, window_hours: 24, min_outflow_share: 0.7}
   fan_out_burst: {min_new_payees: 5, window_minutes: 60}
@@ -23,6 +24,7 @@ detectors:
     window_days: 7
     ctr_monthly_limit: null
   device_takeover: {window_minutes: 120}
+  rapid_cash_out: {lookback_hours: 24, min_share: 0.5, min_inflow: 250}
   coerced_transfer: {min_amount: 1200, median_multiple: 5, drain_share: 0.7, lookback_hours: 72,
                      own_deposit_prefixes: ["FD-", "RD-"], min_history_days: 7}
 

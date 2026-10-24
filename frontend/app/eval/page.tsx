@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, ErrorNote, Stat } from "@/components/ui";
-import { api, pct, type ConsortiumReport, type EvalReport } from "@/lib/api";
+import { api, money, pct, type ConsortiumReport, type EvalReport, type RedTeamRun } from "@/lib/api";
 
 const tooltip = { contentStyle: { background: "#0f172a", border: "1px solid #334155" } };
 
@@ -12,10 +12,12 @@ export default function Evaluation() {
   const [report, setReport] = useState<EvalReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consortium, setConsortium] = useState<ConsortiumReport | null>(null);
+  const [redteam, setRedteam] = useState<{ latest: RedTeamRun; before: RedTeamRun | null } | null>(null);
 
   useEffect(() => {
     api.eval().then(setReport).catch((e) => setError(e.message));
     api.consortium().then(setConsortium).catch(() => setConsortium(null));
+    api.redteam().then(setRedteam).catch(() => setRedteam(null));
   }, []);
 
   if (error) return <ErrorNote error={error} />;
@@ -114,6 +116,28 @@ export default function Evaluation() {
             </tbody>
           </table>
           <p className="mt-2 text-xs text-slate-500">{consortium.dataset}, {consortium.rows.toLocaleString("en-IN")} payments. {consortium.note}</p>
+        </Card>
+      )}
+
+      {redteam && (
+        <Card title="Red team: an adaptive attacker searching for laundering plans Ripple misses">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {redteam.before && (
+              <Stat label="Evading plans before the fix" value={redteam.before.evading_plans} hint={`of ${redteam.before.plans_tried} tried`} tone="bad" />
+            )}
+            <Stat label="Evading plans now" value={redteam.latest.evading_plans} hint={`of ${redteam.latest.plans_tried} tried`} />
+            <Stat label="Plans caught" value={pct(redteam.latest.caught_share)} hint="some payment reached Review or Critical" tone="good" />
+          </div>
+          <h3 className="mt-4 text-xs uppercase text-slate-500">Remaining blind spots (what to fix next)</h3>
+          <ul className="mt-1 space-y-1 text-sm">
+            {redteam.latest.blind_spots.slice(0, 4).map((b) => (
+              <li key={b.description} className="flex flex-wrap justify-between gap-2 border-t border-slate-800 py-1.5">
+                <span className="text-slate-300">{b.description}</span>
+                <span className="tabular-nums text-red-300">{money(b.laundered)} moved, top score {b.max_probability.toFixed(2)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-slate-500">{redteam.latest.note}</p>
         </Card>
       )}
 
