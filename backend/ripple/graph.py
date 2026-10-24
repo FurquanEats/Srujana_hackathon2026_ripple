@@ -1,7 +1,8 @@
 """Graph layer: a rolling payment graph with Louvain communities and PageRank around alerted accounts.
 
 Communities and PageRank are recomputed every `recompute_every` transactions, and only on the neighbourhood of
-accounts that have alerts (each alerted account plus its direct counterparties, capped at MAX_NEIGHBOURHOOD nodes).
+accounts with alerts inside the graph window (each plus its direct counterparties, newest alerts first, capped at
+MAX_NEIGHBOURHOOD nodes).
 That is the only place they are used, and computing them on the whole graph does not scale: on IBM AML's 5 million
 transactions a full recompute took longer than the 20,000 transactions between recomputes. Scores between recomputes
 use the last result. An account scores high when its community holds several alerted accounts, or when it sits
@@ -20,7 +21,7 @@ from ripple.fmt import names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 MIN_COMMUNITY, MAX_COMMUNITY = 3, 60
-MAX_NEIGHBOURHOOD = 20_000
+MAX_NEIGHBOURHOOD = 5_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,7 +40,7 @@ class GraphLayer:
         self.seed = seed
         self.graph = nx.DiGraph()
         self.edges: deque[_Edge] = deque()
-        self.alerted: set[str] = set()
+        self.alerted: dict[str, datetime] = {}  # account -> time of its latest alert
         self.confirmed: set[str] = set()
         self.community_of: dict[str, int] = {}
         self.communities: list[set[str]] = []
@@ -85,9 +86,10 @@ class GraphLayer:
 
     def recompute(self) -> None:
         self._since_recompute = 0
-        self.alerted &= set(self.graph)  # forget alerted accounts whose edges have aged out of the window
+        now = self.edges[-1].ts if self.edges else None
+        self.alerted = {a: ts for a, ts in self.alerted.items() if a in self.graph and now and now - ts <= self.window}
         nodes: set[str] = set()
-        for account in sorted(self.alerted):
+        for account in sorted(self.alerted, key=self.alerted.get, reverse=True):
             nodes.add(account)
             nodes.update(self.graph.successors(account))
             nodes.update(self.graph.predecessors(account))
@@ -101,8 +103,9 @@ class GraphLayer:
         self.community_of = {a: i for i, c in enumerate(self.communities) for a in c}
         self.pagerank = nx.pagerank(sub, weight="weight")
 
-    def mark_alert(self, *accounts: str) -> None:
-        self.alerted.update(accounts)
+    def mark_alert(self, ts: datetime, *accounts: str) -> None:
+        for account in accounts:
+            self.alerted[account] = ts
 
     def mark_confirmed(self, accounts: set[str]) -> None:
         self.confirmed |= accounts
@@ -122,7 +125,7 @@ class GraphLayer:
         if idx is None:
             return 0.0, None
         members = self.communities[idx]
-        flagged = members & self.alerted
+        flagged = members & self.alerted.keys()
         if not MIN_COMMUNITY <= len(members) <= MAX_COMMUNITY or len(flagged) < 2:
             return 0.0, None
         share = len(flagged) / len(members)

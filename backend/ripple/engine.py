@@ -146,7 +146,7 @@ class Engine:
         if scored.is_alert:
             self.alerts += 1
             self.shap[txn.txn_id] = shap
-            self.graph.mark_alert(txn.src_account, txn.dst_account)
+            self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
             case = self.cases.add(scored)
         self.processed += 1
         self._latency_ms.append((time.perf_counter() - began) * 1000)

@@ -31,7 +31,7 @@ fusion:
   baseline_only_cap: 0.69
   dismiss_days: 7
 graph:
-  recompute_every: 20000         # millions of rows: recompute communities less often
+  recompute_every: 50000         # millions of rows: recompute communities less often
   window_days: 3               # days of payments kept in the graph
 
 tiers:
