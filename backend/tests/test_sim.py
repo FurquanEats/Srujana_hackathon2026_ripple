@@ -41,8 +41,6 @@ def test_engine_alerts_on_each_fraud_scenario(scored, kind):
     assert alerts, f"no alert on {kind}"
 
 
-@pytest.mark.xfail(reason="graph community layer snowballs on dense legitimate shopping graphs; see Tina update 02",
-                   strict=False)
 def test_diwali_spike_mostly_stays_below_review(scored):
     _, results = scored
     diwali = [s for row, s in results.values() if row.scenario == "diwali_spike"]

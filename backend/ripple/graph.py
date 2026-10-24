@@ -21,6 +21,8 @@ from ripple.fmt import names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 MIN_COMMUNITY, MAX_COMMUNITY = 3, 60
+MIN_FLAGGED, MIN_FLAGGED_SHARE = 3, 0.3  # a community scores only when this many of its members, and this share, are flagged
+MERCHANT_SENDERS = 20  # an account paid by more distinct senders than this is treated as a merchant and never flagged
 MAX_NEIGHBOURHOOD = 5_000
 
 
@@ -104,7 +106,12 @@ class GraphLayer:
         self.pagerank = nx.pagerank(sub, weight="weight")
 
     def mark_alert(self, ts: datetime, *accounts: str) -> None:
+        """Flags accounts from an alert backed by detector evidence. The engine never calls this for alerts that rest
+        on the graph layer itself, so one false alert cannot snowball through a shop's customers. A merchant (paid by
+        many distinct senders) is never flagged, because its community is simply its customers."""
         for account in accounts:
+            if account in self.graph and self.graph.in_degree(account) > MERCHANT_SENDERS:
+                continue
             self.alerted[account] = ts
 
     def mark_confirmed(self, accounts: set[str]) -> None:
@@ -126,10 +133,10 @@ class GraphLayer:
             return 0.0, None
         members = self.communities[idx]
         flagged = members & self.alerted.keys()
-        if not MIN_COMMUNITY <= len(members) <= MAX_COMMUNITY or len(flagged) < 2:
+        share = len(flagged) / len(members) if members else 0.0
+        if not MIN_COMMUNITY <= len(members) <= MAX_COMMUNITY or len(flagged) < MIN_FLAGGED or share < MIN_FLAGGED_SHARE:
             return 0.0, None
-        share = len(flagged) / len(members)
-        strength = min(1.0, 0.4 + share)
+        strength = min(1.0, 0.3 + share)
         hub = max(members, key=lambda a: self.pagerank.get(a, 0.0))
         txn_ids = [t for u in flagged for v, d in self.graph.adj.get(u, {}).items() if v in flagged for t in d["txns"]][:12]
         return strength, Reason(

@@ -37,6 +37,7 @@ from ripple.schema import (
     Transaction,
 )
 
+DETECTOR_EVIDENCE = 0.5  # detector score an alert needs before it may flag accounts in the graph layer
 LOG_WINDOW = timedelta(days=8)  # covers the longest evidence window (7-day cash structuring)
 CONTEXT_WINDOW = timedelta(hours=24)
 
@@ -146,7 +147,8 @@ class Engine:
         if scored.is_alert:
             self.alerts += 1
             self.shap[txn.txn_id] = shap
-            self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
+            if detector_score >= DETECTOR_EVIDENCE:
+                self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
             case = self.cases.add(scored)
         self.processed += 1
         self._latency_ms.append((time.perf_counter() - began) * 1000)

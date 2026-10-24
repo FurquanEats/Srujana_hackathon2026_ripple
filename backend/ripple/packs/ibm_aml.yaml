@@ -8,10 +8,12 @@ currency: USD
 rails: [ACH, WIRE, CHEQUE, CARD, CASH, CRYPTO, REINVESTMENT]
 
 detectors:
-  pass_through: {forward_share: 0.8, within_minutes: 30, lookback_hours: 24, min_new_sender_share: 0.5}
+  pass_through: {forward_share: 0.8, within_minutes: 30, lookback_hours: 24, min_new_sender_share: 0.5,
+                 min_inflow: 0}
   fan_in_out: {min_senders: 5, window_hours: 24, min_outflow_share: 0.7}
   fan_out_burst: {min_new_payees: 5, window_minutes: 60}
-  scatter_gather: {min_intermediaries: 3, window_hours: 48}
+  scatter_gather: {min_intermediaries: 3, window_hours: 48, min_pass_share: 0.5, max_gather_senders: 30,
+                   max_origin_payees: 10}
   temporal_cycle: {max_hops: 5, window_hours: 72}
   cash_structuring:
     band_low: 9000

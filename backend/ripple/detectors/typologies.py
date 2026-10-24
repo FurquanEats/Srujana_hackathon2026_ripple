@@ -51,6 +51,8 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
     if gap > timedelta(minutes=p["within_minutes"]):
         return None
     inflow = sum(e.amount for e in received)
+    if inflow < p["min_inflow"]:  # an alerting floor only; an STR has no minimum amount
+        return None
     sent = [e for e in window(src.outgoing, txn.ts, lookback) if e.ts >= received[0].ts]
     outflow = sum(e.amount for e in sent)
     ratio = outflow / inflow
@@ -81,7 +83,10 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     """Many first-time senders into one account, which then empties it: a collection account.
 
     Counting only senders who never paid the account before keeps regular relationships (family, employer, repeat
-    customers) from adding up to an alert.
+    customers) from adding up to an alert. The burst of new senders must also be at least twice the account's usual
+    daily rate of new senders, so a shop that gains new customers every day is not a collection account, and the
+    outflow must be close to the inflow: a shop paying its supplier many times what customers paid it today is
+    spending its own money, not passing someone else's along.
     """
     if txn.rail == Rail.CASH:
         return None
@@ -93,10 +98,14 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     senders = {e.counterparty for e in received if src.senders.get(e.counterparty, cutoff) >= cutoff}
     if len(senders) < p["min_senders"]:
         return None
+    known_days = max((cutoff - src.first_seen).total_seconds() / 86400, 1.0)
+    usual = (len(src.senders) - len(senders)) / known_days  # new senders on a typical day
+    if len(senders) < 2 * usual:
+        return None
     inflow = sum(e.amount for e in received)
     sent = [e for e in window(src.outgoing, txn.ts, span) if e.ts >= received[0].ts]
     ratio = sum(e.amount for e in sent) / inflow
-    if ratio < p["min_outflow_share"]:
+    if not p["min_outflow_share"] <= ratio <= 1.2:
         return None
     strength = 0.6 + 0.25 * _ramp(len(senders), p["min_senders"], p["min_senders"] + 5) + 0.15 * _ramp(ratio, p["min_outflow_share"], 1.0)
     return _reason(
@@ -120,43 +129,63 @@ def fan_out_burst(txn: Transaction, store: FeatureStore, src: AccountState, dst:
     payees = list(dict.fromkeys(e.counterparty for e in fresh))
     if len(payees) < p["min_new_payees"]:
         return None
+    if not window(src.incoming, txn.ts, timedelta(hours=72)) and src.first_seen >= cutoff:
+        return None  # an account with no history paying out money it was never seen receiving: nothing to judge against
     known_days = max((cutoff - src.first_seen).total_seconds() / 86400, 1.0)
     usual = (len(src.payees) - len(payees)) / known_days  # new payees on a typical day
     if len(payees) < 2 * usual:  # a business that adds this many payees most days, even in one batch, is normal
         return None
-    strength = 0.55 + 0.35 * _ramp(len(payees), p["min_new_payees"], p["min_new_payees"] + 5)
+    paid_out = sum(e.amount for e in fresh)
+    day = txn.ts - timedelta(hours=24)
+    fresh_in = [e for e in window(src.incoming, txn.ts, timedelta(hours=24)) if src.senders.get(e.counterparty, day) >= day]
+    funded = sum(e.amount for e in fresh_in) >= 0.7 * paid_out  # dispersing money a stranger sent within the day
+    strength = 0.55 + 0.35 * _ramp(len(payees), p["min_new_payees"], p["min_new_payees"] + 5) + 0.15 * funded
+    funding = f", mostly money that arrived from a new sender in the last day ({ids([e.txn_id for e in fresh_in])})" if funded else ""
     return _reason(
         "fan_out_burst",
-        f"{txn.src_account} paid {len(payees)} first-time payees {money(sum(e.amount for e in fresh), txn.currency)} "
-        f"in {duration(txn.ts - fresh[0].ts)}, against a usual {usual:.1f} new payees a day",
+        f"{txn.src_account} paid {len(payees)} first-time payees {money(paid_out, txn.currency)} "
+        f"in {duration(txn.ts - fresh[0].ts)}, against a usual {usual:.1f} new payees a day{funding}",
         strength,
-        [e.txn_id for e in fresh],
+        ([e.txn_id for e in fresh_in] if funded else []) + [e.txn_id for e in fresh],
         f"Not flagged if fewer than {p['min_new_payees']} new payees had been paid within {p['window_minutes']} minutes",
     )
 
 
 def scatter_gather(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
-    """Funds split across several intermediaries that recombine at one account."""
+    """Funds split across several intermediaries that recombine at one account.
+
+    Each intermediary must pass on at least `min_pass_share` of what it received from the origin; the gathering
+    account must not be a merchant taking payments from many people; and the origin must be an account that paid
+    the intermediaries itself (not cash banked over the counter) and paid no more than `max_origin_payees` people in
+    the window. Without these checks, an employer or gig platform paying people who later shop at the same store, or
+    shops banking cash and paying one supplier, look exactly like this pattern.
+    """
     if txn.rail == Rail.CASH:
         return None
     span = timedelta(hours=p["window_hours"])
     gathered = window(dst.incoming, txn.ts, span)
-    if len(gathered) > 200:  # a merchant with heavy inflow; too costly and too noisy to trace
-        return None
+    if len(gathered) > 200 or len({e.counterparty for e in gathered}) > p["max_gather_senders"]:
+        return None  # a merchant: many different people pay it
     legs: dict[str, list[tuple[Edge, Edge]]] = {}  # origin -> [(origin->intermediary, intermediary->dst)]
     for out_leg in gathered:
         mid = store.get(out_leg.counterparty)
         if mid is None or out_leg.counterparty == txn.dst_account:
             continue
         for in_leg in window(mid.incoming, out_leg.ts, span):
-            if in_leg.ts <= out_leg.ts and in_leg.counterparty not in (txn.dst_account, out_leg.counterparty):
+            if (in_leg.ts <= out_leg.ts and in_leg.counterparty not in (txn.dst_account, out_leg.counterparty)
+                    and out_leg.amount >= p["min_pass_share"] * in_leg.amount):
                 legs.setdefault(in_leg.counterparty, []).append((in_leg, out_leg))
     best = None
     for origin, pairs in legs.items():
         mids = {o.counterparty for _, o in pairs}
-        if len(mids) >= p["min_intermediaries"] and txn.src_account in mids:
-            if best is None or len(mids) > len(best[1]):
-                best = (origin, mids, pairs)
+        if len(mids) < p["min_intermediaries"] or txn.src_account not in mids:
+            continue
+        origin_state = store.get(origin)
+        paid = {e.counterparty for e in window(origin_state.outgoing, txn.ts, span)} if origin_state else set()
+        if not mids <= paid or len(paid) > p["max_origin_payees"]:
+            continue  # cash banked over the counter, or a payroll-like payer
+        if best is None or len(mids) > len(best[1]):
+            best = (origin, mids, pairs)
     if best is None:
         return None
     origin, mids, pairs = best

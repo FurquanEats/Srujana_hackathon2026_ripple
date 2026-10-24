@@ -5,8 +5,9 @@
 Each layer score is between 0 and 1. The starting weights come from the region pack and can be refitted on labelled
 data (`fit`) or nudged online by analyst feedback (`update`).
 
-Corroboration rule: when only the baseline layer has anything to say, p is capped below the Review tier, so an
-unusual but honest customer can reach Watch and no higher.
+Corroboration rule: without evidence from a detector or the model, p is capped below the Review tier. The baseline
+and graph layers describe context (unusual for this account, near other alerts), so on their own they can reach
+Watch and no higher; an unusual but honest customer, or a shopper at a store with a flagged account, stays there.
 """
 
 from __future__ import annotations
@@ -33,8 +34,8 @@ class Fusion:
     def probability(self, scores: dict[Layer, float]) -> float:
         x = self.bias + sum(self.weights[layer] * scores.get(layer, 0.0) for layer in LAYERS)
         p = _sigmoid(x)
-        others = max(scores.get(layer, 0.0) for layer in LAYERS if layer != Layer.BASELINE)
-        if others < QUIET:
+        evidence = max(scores.get(Layer.DETECTOR, 0.0), scores.get(Layer.MODEL, 0.0))
+        if evidence < QUIET:
             p = min(p, self.baseline_only_cap)
         return p
 
