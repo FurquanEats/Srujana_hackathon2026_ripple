@@ -15,8 +15,9 @@ accounts, so the engine judges them against real history:
                        sends them by RTGS to "safe accounts"; mules split the money onward, cash some out, buy crypto
                        and leave the rest sitting, which is what a freeze can still recover
 
-Every row carries is_laundering (0/1) and scenario (the injector name, empty for base traffic). Transaction ignores
-both, so the API can replay the file as is.
+Every row carries is_laundering (0/1), scenario (the injector name, empty for base traffic), and victim (1 on the
+first-hop payment where stolen money starts, with the victim's account in victim_account), so taint tracking knows
+where to start. Transaction ignores these columns, so the API can replay the file as is.
 """
 
 from __future__ import annotations
@@ -53,6 +54,7 @@ class Row:
     txn: Transaction
     is_laundering: int = 0
     scenario: str = ""
+    victim_account: str = ""  # set on the first-hop payment of stolen money
 
 
 class World:
@@ -81,14 +83,15 @@ class World:
         return f"{prefix}{self._fresh:04d}"
 
     def pay(self, ts: datetime, src: str, dst: str, amount: float, rail: Rail = Rail.UPI, *, device: str | None = None,
-            location: str | None = None, handle: str | None = None, label: int = 0, scenario: str = "") -> Transaction:
+            location: str | None = None, handle: str | None = None, label: int = 0, scenario: str = "",
+            victim: bool = False) -> Transaction:
         self._n += 1
         txn = Transaction(
             txn_id=f"S{self._n:07d}", ts=ts.replace(microsecond=0), src_account=src, dst_account=dst, amount=round(amount, 2), currency="INR",
             rail=rail, src_handle=handle, device_id=None if rail == Rail.CASH else device, location=location,
             channel="branch" if rail == Rail.CASH else ("netbanking" if rail in (Rail.NEFT, Rail.RTGS) else "mobile"),
         )
-        self.rows.append(Row(txn, label, scenario))
+        self.rows.append(Row(txn, label, scenario, src if victim else ""))
         return txn
 
     def by(self, p: Persona, ts: datetime, dst: str, amount: float, rail: Rail = Rail.UPI, **kw) -> Transaction:
@@ -162,7 +165,7 @@ class World:
             amount = r.choice([4999, 7800, 8300, 9500, 11200, 12000, 15000])
             total += amount
             self.by(v, t + timedelta(minutes=17 * i + r.randint(0, 5)), mule.account, amount,
-                    label=label, scenario=scenario)
+                    label=label, scenario=scenario, victim=True)
         out = t + timedelta(minutes=17 * len(victims) + 6)
         split = round(total * 0.9 * 0.55)
         self.by(mule, out, hop1.account, split, Rail.IMPS, label=label, scenario=scenario)
@@ -178,7 +181,7 @@ class World:
         scam = self.fresh_account("SCAM")
         amount = r.choice([180000, 250000, 320000])
         # The victim's own payment is genuine (they were tricked), so only the scam account's moves are laundering.
-        self.by(victim, t, scam, amount, self._rail_for(amount), scenario=scenario)
+        self.by(victim, t, scam, amount, self._rail_for(amount), scenario=scenario, victim=True)
         parts = [r.uniform(0.8, 1.2) for _ in range(7)]
         for i, w in enumerate(parts):
             self.pay(t + timedelta(minutes=6 + 7 * i), scam, self.fresh_account("NEW"), amount * 0.95 * w / sum(parts),
@@ -193,9 +196,9 @@ class World:
         self.by(p, t, r.choice(p.merchants), 1, device=device, location=city, label=label, scenario=scenario)
         payee = self.fresh_account("NEW")
         self.by(p, t + timedelta(minutes=18), payee, r.choice([95000, 98000]), Rail.IMPS, device=device,
-                location=city, label=label, scenario=scenario)
+                location=city, label=label, scenario=scenario, victim=True)
         self.by(p, t + timedelta(minutes=26), payee, r.choice([45000, 60000]), Rail.IMPS, device=device,
-                location=city, label=label, scenario=scenario)
+                location=city, label=label, scenario=scenario, victim=True)
 
     def _cash_structuring(self, t: datetime, label: int, scenario: str) -> None:
         r = self.rng
@@ -223,7 +226,7 @@ class World:
         tag = {"label": label, "scenario": scenario}
         # Day 1: a fixed deposit broken early (the victim's own money, so not labelled), then sent to a "safe account".
         self.pay(m(0), fd, v.account, 800000, Rail.NEFT, location=v.city, scenario=scenario)
-        self.by(v, m(42), mule1, 750000, Rail.RTGS, **tag)
+        self.by(v, m(42), mule1, 750000, Rail.RTGS, victim=True, **tag)
         # Mule 1 splits it within half an hour; one leg is cashed out, one buys crypto, one sits.
         for i, (dst, amount) in enumerate(zip(layer[:3], (260000, 250000, 228000))):
             self.pay(m(55 + 6 * i), mule1, dst, amount, Rail.IMPS, device="D-MULE-1", location="Kolkata", **tag)
@@ -232,7 +235,7 @@ class World:
         # Day 2: a second deposit broken and sent to a new "safe account", split onward within the hour.
         day2 = 24 * 60 - 25
         self.pay(m(day2), fd, v.account, 400000, Rail.NEFT, location=v.city, scenario=scenario)
-        self.by(v, m(day2 + 30), mule2, 390000, Rail.RTGS, **tag)
+        self.by(v, m(day2 + 30), mule2, 390000, Rail.RTGS, victim=True, **tag)
         self.pay(m(day2 + 48), mule2, layer[3], 200000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
         self.pay(m(day2 + 52), mule2, layer[4], 185000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
         self.pay(m(day2 + 70), layer[3], "P2P-USDT-07", 150000, Rail.IMPS, device="D-MULE-4", location="Jamtara", **tag)
@@ -259,7 +262,8 @@ def to_frame(rows: list[Row]):
     import pandas as pd
 
     return pd.DataFrame([{**row.txn.model_dump(mode="json"), "is_laundering": row.is_laundering,
-                          "scenario": row.scenario} for row in rows])
+                          "scenario": row.scenario, "victim": int(bool(row.victim_account)),
+                          "victim_account": row.victim_account} for row in rows])
 
 
 def main() -> None:

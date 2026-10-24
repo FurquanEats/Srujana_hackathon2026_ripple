@@ -48,3 +48,13 @@ def test_diwali_spike_mostly_stays_below_review(scored):
     diwali = [s for row, s in results.values() if row.scenario == "diwali_spike"]
     assert len(diwali) == 25
     assert sum(s.probability >= 0.70 for s in diwali) <= 2
+
+
+def test_victim_flag_marks_first_hop_of_stolen_money(scored):
+    world, _ = scored
+    flagged = {}
+    for row in world.rows:
+        if row.victim_account:
+            assert row.victim_account == row.txn.src_account
+            flagged[row.scenario] = flagged.get(row.scenario, 0) + 1
+    assert flagged == {"mule_ring": 7, "scam_fanout": 1, "sim_swap_takeover": 2, "digital_arrest": 2}
