@@ -31,6 +31,9 @@ from ripple.schema import (
     InjectResult,
     InterdictionPlan,
     Layer,
+    LearnedPattern,
+    LearnRequest,
+    MotifRule,
     ScoredTransaction,
     TraceRequest,
     Transaction,
@@ -183,6 +186,73 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         if result is None:
             raise HTTPException(status_code=404, detail=f"no payments from {report.account} after {from_ts}")
         return result
+
+    def pattern(motif) -> LearnedPattern:
+        return LearnedPattern(
+            motif_id=motif.motif_id, name=motif.name, learned_from=motif.learned_from, learned_at=motif.learned_at,
+            rules=[MotifRule(feature=c.feature, text=c.describe(), low=c.lo, high=c.hi, background_share=c.background_share)
+                   for c in motif.constraints],
+            steps=motif.steps, example_txn_ids=motif.example_txn_ids, background_events=motif.background_events,
+            background_days=motif.background_days, background_matches=motif.background_matches,
+            false_alarms_per_day=round(motif.false_alarms_per_day, 3), lead_hours=motif.lead_hours,
+            deployed=motif.deployed, hits=len(motif.hits), recent_hits=motif.hits[-10:],
+        )
+
+    def motif_or_404(motif_id: str):
+        if engine is None or motif_id not in engine.motifs.motifs:
+            raise HTTPException(status_code=404, detail=f"unknown pattern: {motif_id}")
+        return engine.motifs.motifs[motif_id]
+
+    @app.get("/motifs")
+    def list_motifs() -> list[LearnedPattern]:
+        """Patterns learned from confirmed trails, newest first."""
+        return [pattern(m) for m in reversed(engine.motifs.motifs.values())] if engine else []
+
+    @app.post("/motifs/learn")
+    def learn_motif(request: LearnRequest) -> LearnedPattern:
+        """Learns a pattern from one confirmed trail: a case's money trail, or the trace of a victim's report. The
+        pattern is checked against the bank's last 30 days of traffic and returned undeployed for the officer to read."""
+        if engine is None:
+            raise HTTPException(status_code=409, detail="learning needs RIPPLE_SOURCE=engine")
+        if request.case_id:
+            case = engine.detail(request.case_id)
+            if case is None:
+                raise HTTPException(status_code=404, detail=f"unknown case: {request.case_id}")
+            trail, source = interdiction.plan(case), f"case {request.case_id}"
+        elif request.account:
+            from_ts = request.from_ts or ((engine.store.now or datetime.now()) - timedelta(hours=24))
+            trail = trace.trace(engine, request.account, from_ts.replace(tzinfo=None), request.amount)
+            if trail is None:
+                raise HTTPException(status_code=404, detail=f"no payments from {request.account} after {from_ts}")
+            source = f"the trace of {request.account}'s report"
+        else:
+            raise HTTPException(status_code=422, detail="give a case_id, or the victim's account to trace")
+        try:
+            motif = engine.motifs.learn({e.txn_id for e in trail.edges}, source, request.name)
+        except ValueError as err:
+            raise HTTPException(status_code=422, detail=str(err)) from err
+        return pattern(motif)
+
+    @app.post("/motifs/{motif_id}/deploy")
+    def deploy_motif(motif_id: str) -> LearnedPattern:
+        """Puts a learned pattern live: from the next payment on, a match is detector evidence like any typology."""
+        motif = motif_or_404(motif_id)
+        motif.deployed = True
+        return pattern(motif)
+
+    @app.post("/motifs/{motif_id}/retire")
+    def retire_motif(motif_id: str) -> LearnedPattern:
+        motif = motif_or_404(motif_id)
+        motif.deployed = False
+        return pattern(motif)
+
+    @app.get("/oneshot")
+    def get_oneshot() -> dict:
+        """One-shot learning results from scripts/oneshot_eval.py, or 404 until it has been run."""
+        path = Path(__file__).resolve().parents[3] / "data" / "oneshot.json"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="run scripts/oneshot_eval.py first")
+        return json.loads(path.read_text(encoding="utf-8"))
 
     @app.get("/stats")
     def stats() -> dict[str, float]:

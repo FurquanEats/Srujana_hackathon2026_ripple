@@ -14,6 +14,9 @@ accounts, so the engine judges them against real history:
     digital_arrest     a pensioner, coached by fake police on a video call, breaks fixed deposits over two days and
                        sends them by RTGS to "safe accounts"; mules split the money onward, cash some out, buy crypto
                        and leave the rest sitting, which is what a freeze can still recover
+    patient_ring       several victims pay one new account, which waits most of a day, splits the money to new mules,
+                       and they wait just over a day before withdrawing it as cash: the red team's best plan for
+                       evading the built-in detectors, with its amounts, waits and split varied on every run
 
 Every row carries is_laundering (0/1), scenario (the injector name, empty for base traffic), and victim (1 on the
 first-hop payment where stolen money starts, with the victim's account in victim_account), so taint tracking knows
@@ -33,9 +36,10 @@ CITIES = ["Bengaluru", "Mumbai", "Delhi", "Chennai", "Hyderabad", "Pune", "Kolka
 START = datetime(2026, 10, 10)
 DAYS = 30
 DIWALI = datetime(2026, 11, 8)  # Diwali (Lakshmi Puja) 2026
-INJECTORS = ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "diwali_spike", "digital_arrest"]
+INJECTORS = ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "diwali_spike", "digital_arrest",
+             "patient_ring"]
 LABELS = {"mule_ring": 1, "scam_fanout": 1, "sim_swap_takeover": 1, "cash_structuring": 1, "diwali_spike": 0,
-          "digital_arrest": 1}
+          "digital_arrest": 1, "patient_ring": 1}
 
 
 @dataclass
@@ -239,6 +243,23 @@ class World:
         self.pay(m(day2 + 48), mule2, layer[3], 200000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
         self.pay(m(day2 + 52), mule2, layer[4], 185000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
         self.pay(m(day2 + 70), layer[3], "P2P-USDT-07", 150000, Rail.IMPS, device="D-MULE-4", location="Jamtara", **tag)
+
+    def _patient_ring(self, t: datetime, label: int, scenario: str) -> None:
+        r = self.rng
+        victims = r.sample([p for p in self.people if p.kind == "salaried"], r.randint(4, 6))
+        amount = r.choice([29_000, 35_000, 42_000, 49_000])
+        first = self.fresh_account("MULE")
+        for i, v in enumerate(victims):
+            self.by(v, t + timedelta(minutes=7 * i + r.randint(0, 4)), first, amount, Rail.UPI,
+                    label=label, scenario=scenario, victim=True)
+        held = amount * len(victims)
+        ready = t + timedelta(minutes=7 * len(victims) + r.randint(18, 26) * 60)
+        mules = [self.fresh_account("MULE") for _ in range(r.randint(3, 4))]
+        for i, mule in enumerate(mules):  # each mule waits just over a day, past the 24-hour cash-out check, then withdraws
+            sent = self.pay(ready + timedelta(minutes=3 * i), first, mule, held / len(mules), Rail.IMPS,
+                            device=f"D-{first}", location="Kolkata", label=label, scenario=scenario)
+            self.pay(sent.ts + timedelta(hours=r.randint(25, 30)), mule, f"ATM-{mule}", sent.amount * 0.98, Rail.CASH,
+                     location="Kolkata", label=label, scenario=scenario)
 
     def sorted_rows(self) -> list[Row]:
         return sorted(self.rows, key=lambda row: row.txn.ts)

@@ -23,6 +23,7 @@ from ripple.cases import Case, CaseEngine
 from ripple.features import FeatureStore, baseline, feature_vector
 from ripple.fusion import Fusion
 from ripple.graph import GraphLayer
+from ripple.motifs import MotifLayer
 from ripple.packs import load_pack
 from ripple.schema import (
     AccountProfile,
@@ -80,6 +81,7 @@ class Engine:
         self.on_features = on_features
         self.external: Callable[[Transaction], Reason | None] | None = None  # e.g. a consortium hub lookup
         self.store = FeatureStore()
+        self.motifs = MotifLayer()  # patterns learned from confirmed trails, see ripple.motifs
         self.graph = GraphLayer(self.pack["graph"]["recompute_every"], self.pack["graph"].get("window_days", 7))
         fusion_cfg = self.pack["fusion"]
         self.fusion = Fusion(fusion_cfg["weights"], fusion_cfg["baseline_only_cap"])
@@ -109,7 +111,7 @@ class Engine:
             ), None
         src, dst = self.store.update(txn)
 
-        hits = detectors.run(txn, self.store, src, dst, self.pack)
+        hits = detectors.run(txn, self.store, src, dst, self.pack) + self.motifs.observe(txn)
         detector_score = 1.0
         for r in hits:
             detector_score *= 1 - r.strength

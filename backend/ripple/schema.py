@@ -263,3 +263,43 @@ class InjectResult(BaseModel):
     txn_ids: list[str]
     victim_account: str | None = None  # whose money the scenario steals, for a "report a scam" trace
     victim_paid_at: datetime | None = None
+
+
+class MotifRule(BaseModel):
+    """One constraint of a learned pattern, with how common it is among ordinary relay payments on its own."""
+
+    feature: str
+    text: str
+    low: float
+    high: float
+    background_share: float = Field(ge=0, le=1)
+
+
+class LearnedPattern(BaseModel):
+    """A detector learned from one confirmed money trail (ripple.motifs)."""
+
+    motif_id: str
+    name: str
+    learned_from: str
+    learned_at: datetime
+    rules: list[MotifRule]
+    steps: list[str]  # how the description was generalised
+    example_txn_ids: list[str]
+    background_events: int  # ordinary relay payments it was checked against
+    background_days: float
+    background_matches: int  # of those, how many it matches: its expected false alarms
+    false_alarms_per_day: float
+    lead_hours: float | None = None  # how long before the example's last cash-out it would have fired
+    deployed: bool
+    hits: int  # live matches since deployment
+    recent_hits: list[str] = Field(default_factory=list)
+
+
+class LearnRequest(BaseModel):
+    """Learn from a case, or from the trace of a victim's report (account, from_ts, amount as in TraceRequest)."""
+
+    case_id: str | None = None
+    account: str | None = None
+    from_ts: datetime | None = None
+    amount: float | None = None
+    name: str | None = None
