@@ -13,8 +13,8 @@ from ripple.fmt import duration, ids, money, names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 Params = dict[str, Any]
-# Accounts receiving more than this many payments in a detector window behave like banks, payment processors or
-# large merchants, not mules. Pass-through and fan-in checks skip them: summing their windows on every payment is
+# Accounts receiving or sending more than this many payments in a detector window behave like banks, payment
+# processors, payroll or large merchants, not mules. Pass-through and fan-in checks skip them: summing their windows on every payment is
 # the costliest step at IBM AML scale, and they do not fit the mule pattern anyway.
 HUB_LIMIT = 1000
 
@@ -58,7 +58,9 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
     inflow = sum(e.amount for e in received)
     if inflow < p["min_inflow"]:  # an alerting floor only; an STR has no minimum amount
         return None
-    sent = [e for e in window(src.outgoing, txn.ts, lookback) if e.ts >= received[0].ts]
+    sent = window(src.outgoing, txn.ts, txn.ts - received[0].ts)  # binary search from the first receipt
+    if len(sent) > HUB_LIMIT:
+        return None  # a payer hub (payroll, platform): too costly to sum on every payment, and not a mule
     outflow = sum(e.amount for e in sent)
     ratio = outflow / inflow
     if not p["forward_share"] <= ratio <= 1.2:  # forwarding far more than received means the account had its own funds
@@ -108,7 +110,9 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     if len(senders) < 2 * usual:
         return None
     inflow = sum(e.amount for e in received)
-    sent = [e for e in window(src.outgoing, txn.ts, span) if e.ts >= received[0].ts]
+    sent = window(src.outgoing, txn.ts, txn.ts - received[0].ts)
+    if len(sent) > HUB_LIMIT:
+        return None
     ratio = sum(e.amount for e in sent) / inflow
     if not p["min_outflow_share"] <= ratio <= 1.2:
         return None
