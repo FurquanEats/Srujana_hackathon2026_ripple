@@ -1,0 +1,36 @@
+# India region pack. Thresholds are starting values; ripple.eval tunes them on IBM AML.
+# Sources for every legal number are in docs/domain.md.
+id: india
+name: India
+currency: INR
+rails: [UPI, IMPS, NEFT, RTGS, CASH]
+
+detectors:
+  pass_through: {forward_share: 0.8, within_minutes: 30}
+  fan_in_out: {min_senders: 5, window_hours: 24, min_outflow_share: 0.7}
+  fan_out_burst: {min_new_payees: 5, window_minutes: 60}
+  scatter_gather: {min_intermediaries: 3, window_hours: 48}
+  temporal_cycle: {max_hops: 5, window_hours: 72}
+  cash_structuring:
+    band_low: 45000              # just under the Rs 50,000 PAN-quote limit for cash deposits in a day
+    band_high: 50000
+    min_deposits: 3
+    window_days: 7
+    ctr_monthly_limit: 1000000   # Rs 10 lakh, integrally connected cash in a month
+  device_takeover: {window_minutes: 120}
+
+fusion:
+  initial_weights: {detector: 0.35, baseline: 0.15, graph: 0.25, model: 0.25}
+  baseline_only_cap: 0.69        # a lone baseline signal can reach Watch, never Review
+
+tiers:
+  alert: 0.60
+  review: 0.70
+  critical: 0.85
+  ring_size_critical: 4          # with probability >= review
+  case_window_hours: 24
+
+report:
+  type: STR
+  authority: FIU-IND
+  deadline_working_days: 7

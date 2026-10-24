@@ -1,0 +1,158 @@
+{
+  "dataset": "IBM AML HI-Small (sample)",
+  "split": "time split: tune on first 70% of days, test on last 30%",
+  "generated_at": "2026-10-24T14:00:00",
+  "overall": {
+    "name": "Ripple (full)",
+    "precision": 0.41,
+    "recall": 0.63,
+    "pr_auc": 0.47,
+    "precision_at_50": 0.58
+  },
+  "baseline": {
+    "name": "Single-transaction baseline",
+    "precision": 0.12,
+    "recall": 0.31,
+    "pr_auc": 0.14,
+    "precision_at_50": 0.18
+  },
+  "ablation": [
+    {
+      "name": "Single-transaction baseline",
+      "precision": 0.12,
+      "recall": 0.31,
+      "pr_auc": 0.14,
+      "precision_at_50": null
+    },
+    {
+      "name": "Detectors only",
+      "precision": 0.29,
+      "recall": 0.44,
+      "pr_auc": 0.3,
+      "precision_at_50": null
+    },
+    {
+      "name": "+ behavioural baseline",
+      "precision": 0.33,
+      "recall": 0.5,
+      "pr_auc": 0.36,
+      "precision_at_50": null
+    },
+    {
+      "name": "+ graph layer",
+      "precision": 0.37,
+      "recall": 0.58,
+      "pr_auc": 0.42,
+      "precision_at_50": null
+    },
+    {
+      "name": "+ calibrated LightGBM",
+      "precision": 0.41,
+      "recall": 0.63,
+      "pr_auc": 0.47,
+      "precision_at_50": null
+    }
+  ],
+  "per_typology": [
+    {
+      "name": "fan-in",
+      "precision": 0.52,
+      "recall": 0.77,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "fan-out",
+      "precision": 0.49,
+      "recall": 0.71,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "cycle",
+      "precision": 0.44,
+      "recall": 0.69,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "scatter-gather",
+      "precision": 0.38,
+      "recall": 0.58,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "gather-scatter",
+      "precision": 0.36,
+      "recall": 0.55,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "bipartite",
+      "precision": 0.27,
+      "recall": 0.41,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "stack",
+      "precision": 0.25,
+      "recall": 0.39,
+      "pr_auc": null,
+      "precision_at_50": null
+    },
+    {
+      "name": "random",
+      "precision": 0.14,
+      "recall": 0.22,
+      "pr_auc": null,
+      "precision_at_50": null
+    }
+  ],
+  "budget_curve": [
+    {
+      "alerts_per_day": 10,
+      "recall": 0.18,
+      "precision": 0.71,
+      "value_caught_share": 0.26
+    },
+    {
+      "alerts_per_day": 25,
+      "recall": 0.33,
+      "precision": 0.64,
+      "value_caught_share": 0.44
+    },
+    {
+      "alerts_per_day": 50,
+      "recall": 0.47,
+      "precision": 0.58,
+      "value_caught_share": 0.6
+    },
+    {
+      "alerts_per_day": 100,
+      "recall": 0.58,
+      "precision": 0.47,
+      "value_caught_share": 0.72
+    },
+    {
+      "alerts_per_day": 200,
+      "recall": 0.63,
+      "precision": 0.41,
+      "value_caught_share": 0.78
+    },
+    {
+      "alerts_per_day": 400,
+      "recall": 0.66,
+      "precision": 0.29,
+      "value_caught_share": 0.81
+    }
+  ],
+  "suggested_budget": 100,
+  "throughput_tps": 2400.0,
+  "p95_latency_ms": 18.0,
+  "notes": [
+    "Illustrative sample data, not measured results."
+  ]
+}

@@ -19,3 +19,8 @@ data/raw/
 Thumbs.db
 .vscode/
 .idea/
+
+# Local tool config
+AGENTS.md
+CLAUDE.md
+.claude/

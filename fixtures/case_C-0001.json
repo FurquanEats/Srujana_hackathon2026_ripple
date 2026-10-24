@@ -1,0 +1,629 @@
+{
+  "case_id": "C-0001",
+  "tier": "Critical",
+  "probability": 0.94,
+  "amount_at_risk": 62000.0,
+  "expected_loss": 58280.0,
+  "accounts": 11,
+  "transactions": 11,
+  "typologies": [
+    "fan_in_out",
+    "pass_through",
+    "community"
+  ],
+  "opened_at": "2026-10-24T15:48:00",
+  "updated_at": "2026-10-24T16:38:00",
+  "status": "open",
+  "reasons": [
+    {
+      "layer": "detector",
+      "code": "fan_in_out",
+      "text": "7 accounts paid A2217 within 2 hours (Rs 68,799), then A2217 moved 90% of it out",
+      "strength": 0.93,
+      "txn_ids": [
+        "T000100",
+        "T000101",
+        "T000102",
+        "T000103",
+        "T000104",
+        "T000105",
+        "T000106",
+        "T000110",
+        "T000111"
+      ],
+      "counterfactual": "Not flagged if fewer than 5 distinct senders had paid A2217 within 24 hours"
+    },
+    {
+      "layer": "detector",
+      "code": "pass_through",
+      "text": "A2217 forwarded Rs 36,000 to A5120 six minutes after the last incoming payment (T000106 -> T000110)",
+      "strength": 0.88,
+      "txn_ids": [
+        "T000106",
+        "T000110"
+      ],
+      "counterfactual": "Not flagged if the onward transfer had come more than 30 minutes later"
+    },
+    {
+      "layer": "graph",
+      "code": "community",
+      "text": "A2217, A5120, A5121 and A9001 form a dense community; A9001 has the highest PageRank in it",
+      "strength": 0.81,
+      "txn_ids": [
+        "T000110",
+        "T000111",
+        "T000112",
+        "T000113"
+      ],
+      "counterfactual": null
+    },
+    {
+      "layer": "baseline",
+      "code": "baseline_velocity",
+      "text": "A2217 usually receives 1 payment a day; it received 7 in 2 hours",
+      "strength": 0.74,
+      "txn_ids": [
+        "T000100",
+        "T000101",
+        "T000102",
+        "T000103",
+        "T000104",
+        "T000105",
+        "T000106"
+      ],
+      "counterfactual": null
+    }
+  ],
+  "shap": [
+    {
+      "feature": "distinct_senders_2h",
+      "value": 7.0,
+      "contribution": 1.42
+    },
+    {
+      "feature": "outflow_ratio_30m",
+      "value": 0.9,
+      "contribution": 1.18
+    },
+    {
+      "feature": "account_age_days",
+      "value": 21.0,
+      "contribution": 0.61
+    },
+    {
+      "feature": "pagerank_7d",
+      "value": 0.034,
+      "contribution": 0.44
+    },
+    {
+      "feature": "hour_of_day",
+      "value": 16.0,
+      "contribution": -0.08
+    }
+  ],
+  "nodes": [
+    {
+      "id": "A1001",
+      "label": "A1001",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1002",
+      "label": "A1002",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1003",
+      "label": "A1003",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1004",
+      "label": "A1004",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1005",
+      "label": "A1005",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1006",
+      "label": "A1006",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A1007",
+      "label": "A1007",
+      "role": "victim",
+      "risk": 0.1
+    },
+    {
+      "id": "A2217",
+      "label": "A2217",
+      "role": "mule",
+      "risk": 0.94
+    },
+    {
+      "id": "A5120",
+      "label": "A5120",
+      "role": "mule",
+      "risk": 0.89
+    },
+    {
+      "id": "A5121",
+      "label": "A5121",
+      "role": "mule",
+      "risk": 0.87
+    },
+    {
+      "id": "A9001",
+      "label": "A9001",
+      "role": "collector",
+      "risk": 0.9
+    }
+  ],
+  "edges": [
+    {
+      "txn_id": "T000100",
+      "source": "A1001",
+      "target": "A2217",
+      "amount": 9500.0,
+      "ts": "2026-10-24T14:00:00"
+    },
+    {
+      "txn_id": "T000101",
+      "source": "A1002",
+      "target": "A2217",
+      "amount": 12000.0,
+      "ts": "2026-10-24T14:18:00"
+    },
+    {
+      "txn_id": "T000102",
+      "source": "A1003",
+      "target": "A2217",
+      "amount": 4999.0,
+      "ts": "2026-10-24T14:36:00"
+    },
+    {
+      "txn_id": "T000103",
+      "source": "A1004",
+      "target": "A2217",
+      "amount": 15000.0,
+      "ts": "2026-10-24T14:54:00"
+    },
+    {
+      "txn_id": "T000104",
+      "source": "A1005",
+      "target": "A2217",
+      "amount": 7800.0,
+      "ts": "2026-10-24T15:12:00"
+    },
+    {
+      "txn_id": "T000105",
+      "source": "A1006",
+      "target": "A2217",
+      "amount": 11200.0,
+      "ts": "2026-10-24T15:30:00"
+    },
+    {
+      "txn_id": "T000106",
+      "source": "A1007",
+      "target": "A2217",
+      "amount": 8300.0,
+      "ts": "2026-10-24T15:48:00"
+    },
+    {
+      "txn_id": "T000110",
+      "source": "A2217",
+      "target": "A5120",
+      "amount": 36000.0,
+      "ts": "2026-10-24T15:54:00"
+    },
+    {
+      "txn_id": "T000111",
+      "source": "A2217",
+      "target": "A5121",
+      "amount": 26000.0,
+      "ts": "2026-10-24T15:56:00"
+    },
+    {
+      "txn_id": "T000112",
+      "source": "A5120",
+      "target": "A9001",
+      "amount": 35500.0,
+      "ts": "2026-10-24T16:30:00"
+    },
+    {
+      "txn_id": "T000113",
+      "source": "A5121",
+      "target": "A9001",
+      "amount": 25700.0,
+      "ts": "2026-10-24T16:38:00"
+    }
+  ],
+  "timeline": [
+    {
+      "txn_id": "T000100",
+      "ts": "2026-10-24T14:00:00",
+      "src_account": "A1001",
+      "dst_account": "A2217",
+      "amount": 9500.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1001@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000101",
+      "ts": "2026-10-24T14:18:00",
+      "src_account": "A1002",
+      "dst_account": "A2217",
+      "amount": 12000.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1002@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000102",
+      "ts": "2026-10-24T14:36:00",
+      "src_account": "A1003",
+      "dst_account": "A2217",
+      "amount": 4999.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1003@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000103",
+      "ts": "2026-10-24T14:54:00",
+      "src_account": "A1004",
+      "dst_account": "A2217",
+      "amount": 15000.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1004@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000104",
+      "ts": "2026-10-24T15:12:00",
+      "src_account": "A1005",
+      "dst_account": "A2217",
+      "amount": 7800.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1005@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000105",
+      "ts": "2026-10-24T15:30:00",
+      "src_account": "A1006",
+      "dst_account": "A2217",
+      "amount": 11200.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1006@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000106",
+      "ts": "2026-10-24T15:48:00",
+      "src_account": "A1007",
+      "dst_account": "A2217",
+      "amount": 8300.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a1007@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.55,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.55,
+        "baseline": 0.33,
+        "graph": 0.44000000000000006,
+        "model": 0.55
+      },
+      "reasons": [],
+      "is_alert": false,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000110",
+      "ts": "2026-10-24T15:54:00",
+      "src_account": "A2217",
+      "dst_account": "A5120",
+      "amount": 36000.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a2217@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.94,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.94,
+        "baseline": 0.564,
+        "graph": 0.752,
+        "model": 0.94
+      },
+      "reasons": [
+        {
+          "layer": "detector",
+          "code": "fan_in_out",
+          "text": "7 accounts paid A2217 within 2 hours (Rs 68,799), then A2217 moved 90% of it out",
+          "strength": 0.93,
+          "txn_ids": [
+            "T000100",
+            "T000101",
+            "T000102",
+            "T000103",
+            "T000104",
+            "T000105",
+            "T000106",
+            "T000110",
+            "T000111"
+          ],
+          "counterfactual": "Not flagged if fewer than 5 distinct senders had paid A2217 within 24 hours"
+        },
+        {
+          "layer": "detector",
+          "code": "pass_through",
+          "text": "A2217 forwarded Rs 36,000 to A5120 six minutes after the last incoming payment (T000106 -> T000110)",
+          "strength": 0.88,
+          "txn_ids": [
+            "T000106",
+            "T000110"
+          ],
+          "counterfactual": "Not flagged if the onward transfer had come more than 30 minutes later"
+        }
+      ],
+      "is_alert": true,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000111",
+      "ts": "2026-10-24T15:56:00",
+      "src_account": "A2217",
+      "dst_account": "A5121",
+      "amount": 26000.0,
+      "currency": "INR",
+      "rail": "UPI",
+      "src_handle": "a2217@okbank",
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.91,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.91,
+        "baseline": 0.546,
+        "graph": 0.7280000000000001,
+        "model": 0.91
+      },
+      "reasons": [
+        {
+          "layer": "detector",
+          "code": "fan_in_out",
+          "text": "7 accounts paid A2217 within 2 hours (Rs 68,799), then A2217 moved 90% of it out",
+          "strength": 0.93,
+          "txn_ids": [
+            "T000100",
+            "T000101",
+            "T000102",
+            "T000103",
+            "T000104",
+            "T000105",
+            "T000106",
+            "T000110",
+            "T000111"
+          ],
+          "counterfactual": "Not flagged if fewer than 5 distinct senders had paid A2217 within 24 hours"
+        },
+        {
+          "layer": "detector",
+          "code": "pass_through",
+          "text": "A2217 forwarded Rs 36,000 to A5120 six minutes after the last incoming payment (T000106 -> T000110)",
+          "strength": 0.88,
+          "txn_ids": [
+            "T000106",
+            "T000110"
+          ],
+          "counterfactual": "Not flagged if the onward transfer had come more than 30 minutes later"
+        }
+      ],
+      "is_alert": true,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000112",
+      "ts": "2026-10-24T16:30:00",
+      "src_account": "A5120",
+      "dst_account": "A9001",
+      "amount": 35500.0,
+      "currency": "INR",
+      "rail": "IMPS",
+      "src_handle": null,
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.89,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.89,
+        "baseline": 0.534,
+        "graph": 0.7120000000000001,
+        "model": 0.89
+      },
+      "reasons": [
+        {
+          "layer": "graph",
+          "code": "community",
+          "text": "A2217, A5120, A5121 and A9001 form a dense community; A9001 has the highest PageRank in it",
+          "strength": 0.81,
+          "txn_ids": [
+            "T000110",
+            "T000111",
+            "T000112",
+            "T000113"
+          ],
+          "counterfactual": null
+        }
+      ],
+      "is_alert": true,
+      "case_id": "C-0001"
+    },
+    {
+      "txn_id": "T000113",
+      "ts": "2026-10-24T16:38:00",
+      "src_account": "A5121",
+      "dst_account": "A9001",
+      "amount": 25700.0,
+      "currency": "INR",
+      "rail": "IMPS",
+      "src_handle": null,
+      "device_id": "D10",
+      "location": "Bengaluru",
+      "channel": "mobile",
+      "probability": 0.87,
+      "confidence": 1.0,
+      "layer_scores": {
+        "detector": 0.87,
+        "baseline": 0.522,
+        "graph": 0.6960000000000001,
+        "model": 0.87
+      },
+      "reasons": [
+        {
+          "layer": "graph",
+          "code": "community",
+          "text": "A2217, A5120, A5121 and A9001 form a dense community; A9001 has the highest PageRank in it",
+          "strength": 0.81,
+          "txn_ids": [
+            "T000110",
+            "T000111",
+            "T000112",
+            "T000113"
+          ],
+          "counterfactual": null
+        }
+      ],
+      "is_alert": true,
+      "case_id": "C-0001"
+    }
+  ],
+  "profiles": [
+    {
+      "account_id": "A2217",
+      "persona": "student",
+      "opened_days_ago": 21,
+      "median_amount_30d": 450.0,
+      "txns_30d": 31,
+      "devices": [
+        "D10"
+      ]
+    },
+    {
+      "account_id": "A9001",
+      "persona": "small_business",
+      "opened_days_ago": 40,
+      "median_amount_30d": 2100.0,
+      "txns_30d": 12,
+      "devices": [
+        "D44"
+      ]
+    }
+  ],
+  "narrative": "Between 14:00 and 15:48, seven unrelated accounts paid a total of Rs 68,799 into A2217 (T000100 to T000106). Within six minutes of the last payment, A2217 forwarded Rs 62,000 to A5120 and A5121 (T000110, T000111), which passed it on to A9001 over IMPS (T000112, T000113). A2217 is 21 days old and normally receives one small payment a day. The pattern matches a mule chain collecting scam proceeds.",
+  "str_due": null
+}
