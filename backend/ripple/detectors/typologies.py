@@ -8,7 +8,7 @@ from datetime import timedelta
 from typing import Any, Callable
 
 from ripple.features.store import AccountState, Edge, FeatureStore, baseline, window
-from ripple.fmt import duration, ids, inr, names
+from ripple.fmt import duration, ids, money, names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 Params = dict[str, Any]
@@ -61,7 +61,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
     strength = 0.6 + 0.2 * _ramp(ratio, p["forward_share"], 1.0) + 0.1 * (1 - gap / timedelta(minutes=p["within_minutes"])) + 0.1 * new_share
     return _reason(
         "pass_through",
-        f"{txn.src_account} received {inr(inflow)} from {len(senders)} sender{'s' if len(senders) > 1 else ''}, "
+        f"{txn.src_account} received {money(inflow, txn.currency)} from {len(senders)} sender{'s' if len(senders) > 1 else ''}, "
         f"{len(new_senders)} of them new "
         f"({ids([e.txn_id for e in received])}) and sent {min(ratio, 1.0):.0%} of it onward {duration(gap)} after "
         f"the last one arrived ({ids([e.txn_id for e in sent])})",
@@ -94,7 +94,7 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     strength = 0.6 + 0.25 * _ramp(len(senders), p["min_senders"], p["min_senders"] + 5) + 0.15 * _ramp(ratio, p["min_outflow_share"], 1.0)
     return _reason(
         "fan_in_out",
-        f"{len(senders)} first-time senders paid {txn.src_account}, {inr(inflow)} in total within {duration(received[-1].ts - received[0].ts)}, "
+        f"{len(senders)} first-time senders paid {txn.src_account}, {money(inflow, txn.currency)} in total within {duration(received[-1].ts - received[0].ts)}, "
         f"then {txn.src_account} moved {min(ratio, 1.0):.0%} of it out",
         strength,
         [e.txn_id for e in received] + [e.txn_id for e in sent],
@@ -115,7 +115,7 @@ def fan_out_burst(txn: Transaction, store: FeatureStore, src: AccountState, dst:
     strength = 0.55 + 0.35 * _ramp(len(payees), p["min_new_payees"], p["min_new_payees"] + 5)
     return _reason(
         "fan_out_burst",
-        f"{txn.src_account} paid {len(payees)} first-time payees {inr(sum(e.amount for e in fresh))} "
+        f"{txn.src_account} paid {len(payees)} first-time payees {money(sum(e.amount for e in fresh), txn.currency)} "
         f"in {duration(txn.ts - fresh[0].ts)}",
         strength,
         [e.txn_id for e in fresh],
@@ -153,7 +153,7 @@ def scatter_gather(txn: Transaction, store: FeatureStore, src: AccountState, dst
     strength = 0.65 + 0.25 * _ramp(len(mids), p["min_intermediaries"], p["min_intermediaries"] + 3)
     return _reason(
         "scatter_gather",
-        f"{inr(sent)} left {origin} through {len(mids)} accounts ({names(sorted(mids))}) and reached "
+        f"{money(sent, txn.currency)} left {origin} through {len(mids)} accounts ({names(sorted(mids))}) and reached "
         f"{txn.dst_account} within {duration(txn.ts - first)}",
         strength,
         [i.txn_id for i, _ in pairs] + [o.txn_id for _, o in pairs],
@@ -197,7 +197,7 @@ def temporal_cycle(txn: Transaction, store: FeatureStore, src: AccountState, dst
     via = [e.counterparty for e in found]
     return _reason(
         "temporal_cycle",
-        f"{inr(found[0].amount)} left {origin} and {inr(txn.amount)} came back via {names(via)} "
+        f"{money(found[0].amount, txn.currency)} left {origin} and {money(txn.amount, txn.currency)} came back via {names(via)} "
         f"within {duration(txn.ts - found[0].ts)}",
         strength,
         [e.txn_id for e in hops],
@@ -218,18 +218,18 @@ def cash_structuring(txn: Transaction, store: FeatureStore, src: AccountState, d
     low, high = min(e.amount for e in banded), max(e.amount for e in banded)
     return _reason(
         "cash_structuring",
-        f"{len(banded)} cash deposits of {inr(low)} to {inr(high)} into {txn.dst_account} in "
-        f"{duration(txn.ts - banded[0].ts)}, each just below the {inr(p['band_high'])} PAN-quote limit",
+        f"{len(banded)} cash deposits of {money(low, txn.currency)} to {money(high, txn.currency)} into {txn.dst_account} in "
+        f"{duration(txn.ts - banded[0].ts)}, each just below the {money(p['band_high'], txn.currency)} {p['limit_label']}",
         strength,
         [e.txn_id for e in banded],
-        f"Not flagged if fewer than {p['min_deposits']} deposits between {inr(p['band_low'])} and "
-        f"{inr(p['band_high'])} had been made within {p['window_days']} days",
+        f"Not flagged if fewer than {p['min_deposits']} deposits between {money(p['band_low'], txn.currency)} and "
+        f"{money(p['band_high'], txn.currency)} had been made within {p['window_days']} days",
     )
 
 
 def ctr_reportable(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """Cash this calendar month above the CTR limit. A reporting fact, not suspicion, so its strength is low."""
-    if txn.rail != Rail.CASH:
+    if txn.rail != Rail.CASH or p.get("ctr_monthly_limit") is None:
         return None
     month = [e for e in dst.cash_deposits if (e.ts.year, e.ts.month) == (txn.ts.year, txn.ts.month)]
     total = sum(e.amount for e in month)
@@ -237,8 +237,8 @@ def ctr_reportable(txn: Transaction, store: FeatureStore, src: AccountState, dst
         return None  # report once, on the deposit that crosses the limit
     return _reason(
         "ctr_reportable",
-        f"Cash into {txn.dst_account} this month reached {inr(total)} over {len(month)} deposits, above the "
-        f"{inr(p['ctr_monthly_limit'])} CTR limit for integrally connected cash transactions",
+        f"Cash into {txn.dst_account} this month reached {money(total, txn.currency)} over {len(month)} deposits, above the "
+        f"{money(p['ctr_monthly_limit'], txn.currency)} CTR limit for integrally connected cash transactions",
         0.3,
         [e.txn_id for e in month],
     )
@@ -259,7 +259,7 @@ def device_takeover(txn: Transaction, store: FeatureStore, src: AccountState, ds
     strength = 0.75 + 0.15 * new_payee + 0.1 * (1 - (txn.ts - first_use) / timedelta(minutes=p["window_minutes"]))
     return _reason(
         "device_takeover",
-        f"New device {txn.device_id} first used at {first_use:%H:%M}, then {inr(txn.amount)} to "
+        f"New device {txn.device_id} first used at {first_use:%H:%M}, then {money(txn.amount, txn.currency)} to "
         f"{'first-time payee ' if new_payee else ''}{txn.dst_account} at {txn.ts:%H:%M}, the largest payment "
         f"{txn.src_account} has made",
         strength,

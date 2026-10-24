@@ -1,0 +1,37 @@
+# Evaluation pack for IBM's "Transactions for Anti Money Laundering" dataset.
+# Amounts are expected in one currency (USD) after conversion by the loader. Indian legal thresholds do not apply:
+# cash structuring uses the US USD 10,000 currency transaction report line, and the Indian monthly CTR check is off.
+# Detector, fusion and tier values match the India pack so evaluation results describe the same engine.
+id: ibm_aml
+name: IBM AML (evaluation)
+currency: USD
+rails: [ACH, WIRE, CHEQUE, CARD, CASH, CRYPTO, REINVESTMENT]
+
+detectors:
+  pass_through: {forward_share: 0.8, within_minutes: 30, lookback_hours: 24, min_new_sender_share: 0.5}
+  fan_in_out: {min_senders: 5, window_hours: 24, min_outflow_share: 0.7}
+  fan_out_burst: {min_new_payees: 5, window_minutes: 60}
+  scatter_gather: {min_intermediaries: 3, window_hours: 48}
+  temporal_cycle: {max_hops: 5, window_hours: 72}
+  cash_structuring:
+    band_low: 9000
+    band_high: 10000
+    limit_label: currency transaction report line
+    min_deposits: 3
+    window_days: 7
+    ctr_monthly_limit: null
+  device_takeover: {window_minutes: 120}
+
+fusion:
+  weights: {bias: -4.0, detector: 6.5, baseline: 4.5, graph: 3.0, model: 5.0}
+  baseline_only_cap: 0.69
+  dismiss_days: 7
+graph:
+  recompute_every: 20000         # millions of rows: recompute communities less often
+
+tiers:
+  alert: 0.60
+  review: 0.70
+  critical: 0.85
+  ring_size_critical: 4
+  case_window_hours: 24

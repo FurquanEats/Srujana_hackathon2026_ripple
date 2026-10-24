@@ -12,11 +12,35 @@ from pydantic import BaseModel, Field
 
 
 class Rail(str, Enum):
+    """Payment rail. Indian rails first; the rest are the payment formats in IBM's AML dataset.
+
+    Only CASH changes detector behaviour (it is treated as a deposit into the destination account); every other
+    rail is an account-to-account transfer.
+    """
+
     UPI = "UPI"
     IMPS = "IMPS"
     NEFT = "NEFT"
     RTGS = "RTGS"
     CASH = "CASH"
+    ACH = "ACH"
+    WIRE = "WIRE"
+    CHEQUE = "CHEQUE"
+    CARD = "CARD"
+    CRYPTO = "CRYPTO"
+    REINVESTMENT = "REINVESTMENT"
+
+
+# IBM AML "Payment Format" values -> Rail
+IBM_PAYMENT_FORMATS: dict[str, Rail] = {
+    "ACH": Rail.ACH,
+    "Wire": Rail.WIRE,
+    "Cheque": Rail.CHEQUE,
+    "Credit Card": Rail.CARD,
+    "Cash": Rail.CASH,
+    "Bitcoin": Rail.CRYPTO,
+    "Reinvestment": Rail.REINVESTMENT,
+}
 
 
 class Tier(str, Enum):

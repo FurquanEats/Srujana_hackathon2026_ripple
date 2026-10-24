@@ -24,3 +24,12 @@ def test_tiers_are_ordered():
 def test_unknown_pack():
     with pytest.raises(KeyError):
         load_pack("mars")
+
+
+def test_ibm_pack_matches_india_engine_settings():
+    india, ibm = load_pack("india"), load_pack("ibm_aml")
+    assert ibm["currency"] == "USD"
+    assert ibm["fusion"]["weights"] == india["fusion"]["weights"]
+    assert ibm["tiers"] == india["tiers"]
+    assert set(ibm["detectors"]) == set(india["detectors"])
+    assert ibm["detectors"]["cash_structuring"]["ctr_monthly_limit"] is None

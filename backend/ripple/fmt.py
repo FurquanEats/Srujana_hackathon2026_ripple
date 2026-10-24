@@ -22,6 +22,13 @@ def inr(amount: float) -> str:
     return f"Rs {sign}{digits}"
 
 
+def money(amount: float, currency: str = "INR") -> str:
+    """Rupees in Indian grouping ('Rs 1,20,000'); any other currency as 'USD 120,000'."""
+    if currency == "INR":
+        return inr(amount)
+    return f"{currency} {amount:,.0f}"
+
+
 def duration(span: timedelta) -> str:
     minutes = int(span.total_seconds() // 60)
     if minutes < 60:

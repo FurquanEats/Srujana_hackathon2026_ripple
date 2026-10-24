@@ -14,6 +14,7 @@ detectors:
   cash_structuring:
     band_low: 45000              # just under the Rs 50,000 PAN-quote limit for cash deposits in a day
     band_high: 50000
+    limit_label: PAN-quote limit
     min_deposits: 3
     window_days: 7
     ctr_monthly_limit: 1000000   # Rs 10 lakh, integrally connected cash in a month

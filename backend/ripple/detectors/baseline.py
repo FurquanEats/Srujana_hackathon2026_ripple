@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 from ripple.features.store import AccountState, baseline, hour_share, window
-from ripple.fmt import inr
+from ripple.fmt import money
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 MIN_HISTORY = 5
@@ -31,8 +31,8 @@ def score(txn: Transaction, src: AccountState, dst: AccountState) -> tuple[float
             if z >= 4 and txn.amount >= 3 * b.median:
                 reasons.append(_reason(
                     "baseline_amount",
-                    f"{inr(txn.amount)} is {txn.amount / b.median:.0f} times {txn.src_account}'s usual payment "
-                    f"(median {inr(b.median)} over its last {b.n} payments)",
+                    f"{money(txn.amount, txn.currency)} is {txn.amount / b.median:.0f} times {txn.src_account}'s usual payment "
+                    f"(median {money(b.median, txn.currency)} over its last {b.n} payments)",
                     0.5 + 0.5 * min(1.0, (z - 4) / 12),
                     [txn.txn_id],
                 ))
