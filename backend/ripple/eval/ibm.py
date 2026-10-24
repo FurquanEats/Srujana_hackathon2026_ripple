@@ -6,8 +6,8 @@
    graph layer scores plus the exact feature row the engine built (via Engine.on_features).
 2. Split by day: the first 70% of days train, the rest test. LightGBM learns from the training days; its last 15%
    of days calibrate it (isotonic). The model is saved for the engine's model layer.
-3. On the test days, fuse layer scores the way the engine does and report precision and recall at the alert
-   threshold, PR-AUC, precision in the top 50, an ablation (one layer added at a time), results per IBM pattern,
+3. Refit the fusion weights (the engine's own logistic form) on a held-out day, then on the test days fuse layer
+   scores the way the engine does and report precision and recall at the alert threshold, PR-AUC, precision in the top 50, an ablation (one layer added at a time), results per IBM pattern,
    and the alert-budget curve (top-k alerts per day).
 
 Rows the engine never alerts on (warm-up and transfers to the same account) are left out of every metric.
@@ -81,13 +81,27 @@ def replay(df: pd.DataFrame, pack: str = "ibm_aml", log_every: int = 250_000) ->
             "p95_latency_ms": stats["p95_latency_ms"]}
 
 
-def fuse(fusion, det, base, graph, model) -> np.ndarray:
-    """Vectorised Fusion.probability, including the baseline-only cap."""
-    w = fusion.weights
-    x = fusion.bias + w[Layer.DETECTOR] * det + w[Layer.BASELINE] * base + w[Layer.GRAPH] * graph + w[Layer.MODEL] * model
+def fuse(fusion, det, base, graph, model, weights: dict | None = None, bias: float | None = None) -> np.ndarray:
+    """Vectorised Fusion.probability, including the baseline-only cap. weights and bias override the pack's."""
+    w = weights or fusion.weights
+    b = fusion.bias if bias is None else bias
+    x = b + w[Layer.DETECTOR] * det + w[Layer.BASELINE] * base + w[Layer.GRAPH] * graph + w[Layer.MODEL] * model
     p = 1 / (1 + np.exp(-x))
     others = np.maximum.reduce([det, graph, model])
     return np.where(others < QUIET, np.minimum(p, fusion.baseline_only_cap), p)
+
+
+def fit_fusion(layers: list[np.ndarray], y: np.ndarray) -> tuple[dict, float]:
+    """Fusion weights and bias refitted by logistic regression on held-out rows, in the engine's own form.
+
+    The pack's hand-set weights let a detector hit outweigh a confident model score, which on IBM ranks far worse
+    than the model alone. A layer left out of a variant is all zeros and gets no weight."""
+    from sklearn.linear_model import LogisticRegression
+
+    lr = LogisticRegression(C=1.0, max_iter=5000).fit(np.column_stack(layers), y)
+    w = lr.coef_[0]
+    return ({Layer.DETECTOR: float(w[0]), Layer.BASELINE: float(w[1]), Layer.GRAPH: float(w[2]),
+             Layer.MODEL: float(w[3])}, float(lr.intercept_[0]))
 
 
 def train_lgbm(X: np.ndarray, y: np.ndarray, fit_mask: np.ndarray, calib_mask: np.ndarray, names: list[str]):
@@ -258,17 +272,20 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
 
     fusion, alert_at = r["fusion"], r["alert_at"]
 
-    def variant_probs(mask):
-        det, base, graph, model_p = layer_scores(mask)
-        zero = np.zeros_like(det)
-        return {
-            "Detectors only": fuse(fusion, det, zero, zero, zero),
-            "+ behavioural baseline": fuse(fusion, det, base, zero, zero),
-            "+ graph layer": fuse(fusion, det, base, graph, zero),
-            "+ calibrated LightGBM": fuse(fusion, det, base, graph, model_p),
-        }
-
-    raw_test, raw_cal = variant_probs(test), variant_probs(fuse_cal)
+    # Each variant keeps some layers (the rest are zeroed) and gets its own fusion weights, fitted on the held-out
+    # fusion day. The full system is also scored with the pack's hand-set weights, and the model alone, for contrast.
+    keeps = {"Detectors only": 1, "+ behavioural baseline": 2, "+ graph layer": 3, "+ calibrated LightGBM": 4}
+    cal_layers, test_layers = layer_scores(fuse_cal), layer_scores(test)
+    raw_test, raw_cal, fitted = {}, {}, {}
+    for k, n in keeps.items():
+        lc = [v if i < n else np.zeros_like(v) for i, v in enumerate(cal_layers)]
+        lt = [v if i < n else np.zeros_like(v) for i, v in enumerate(test_layers)]
+        w, b = fit_fusion(lc, yc)
+        fitted[k] = {"weights": {layer.value: round(x, 3) for layer, x in w.items()}, "bias": round(b, 3)}
+        raw_cal[k], raw_test[k] = fuse(fusion, *lc, weights=w, bias=b), fuse(fusion, *lt, weights=w, bias=b)
+    pack_key, model_key = "Full system, pack's hand-set fusion weights", "LightGBM model alone"
+    raw_cal[pack_key], raw_test[pack_key] = fuse(fusion, *cal_layers), fuse(fusion, *test_layers)
+    raw_cal[model_key], raw_test[model_key] = cal_layers[3], test_layers[3]
     tuned = {k: calibrate_fused(raw_cal[k], yc, raw_test[k], alert_at) for k in raw_test}
     variants = {k: tuned[k]["p"] for k in tuned}
     thresholds = {k: tuned[k]["threshold"] for k in tuned}
@@ -319,8 +336,12 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
             f"Test set: {int(test.sum()):,} transactions, {int(yt.sum()):,} laundering. Warm-up rows and transfers "
             "to the same account are excluded because the engine never alerts on them.",
             f"Alert threshold {alert_at:.4f} is the F1-best threshold on a held-out training day, after Platt scaling of "
-            "the fused probability on that day. Fusion weights are the pack defaults, not refitted. The LightGBM model "
-            "is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
+            "the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; "
+            "the pack's hand-set weights, shown as their own ablation row, rank far worse on IBM because a detector "
+            "hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled "
+            "day, so legitimate-row subsampling does not inflate it.",
+            "The model's strongest feature is whether the payer has paid this payee before. It is computed from past "
+            "payments only, but IBM's synthetic laundering may favour new payees more than real laundering does.",
             "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the "
             "full system.",
             "Per-pattern precision compares that pattern's laundering rows against all legitimate rows, so it is "
@@ -342,7 +363,8 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
         "tuning": {
             "model_calibration_day": str(calib_days[0])[:10], "fusion_calibration_day": str(calib_days[-1])[:10],
             "variants": {k: {"threshold": round(thresholds[k], 5), "platt_a": round(tuned[k]["a"], 4),
-                             "platt_b": round(tuned[k]["b"], 4)} for k in tuned},
+                             "platt_b": round(tuned[k]["b"], 4)} | fitted.get(k, {}) for k in tuned},
+            "pack_fusion": {"weights": {layer.value: x for layer, x in fusion.weights.items()}, "bias": fusion.bias},
             "alert_rate_test": round(float((p_full >= alert_at).mean()), 5),
             "pack_alert_at": r["alert_at"],
         },
