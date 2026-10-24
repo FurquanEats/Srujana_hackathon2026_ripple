@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 
 from ripple.engine import Engine
+from ripple.eval.extra import calibration_table, case_level_report
 from ripple.fusion import QUIET
 from ripple.schema import EvalReport, Layer, Rail, Transaction
 
@@ -76,7 +77,7 @@ def replay(df: pd.DataFrame, pack: str = "ibm_aml", log_every: int = 250_000) ->
             print(f"  replayed {row + 1:,} rows in {elapsed:,.0f}s ({(row + 1) / elapsed:,.0f}/s)", flush=True)
     stats = engine.stats()
     return {"layers": layers, "scored": scored, "features": feats, "names": names, "fusion": engine.fusion,
-            "alert_at": engine.alert_at, "tps": n / (time.perf_counter() - started),
+            "alert_at": engine.alert_at, "tiers": engine.pack["tiers"], "tps": n / (time.perf_counter() - started),
             "p95_latency_ms": stats["p95_latency_ms"]}
 
 
@@ -156,13 +157,60 @@ def recoverable_at_first_alert(name: str, attempts: pd.DataFrame, alert: np.ndar
             "mean_recoverable": round(float(shares.mean()), 4) if len(shares) else 0.0}
 
 
-def run(data: Path, out: Path, model_out: Path | None, rows: int | None) -> dict:
+def save_replay(r: dict, cache: Path) -> None:
+    """Stores a replay so the evaluation can be rerun without the 40-minute engine pass. The fusion object is not
+    stored: replay never changes it, so a fresh Engine of the same pack has identical weights."""
+    cache.mkdir(parents=True, exist_ok=True)
+    np.savez(cache / "replay.npz", layers=r["layers"], scored=r["scored"], features=r["features"])
+    scalars = {k: r[k] for k in ("names", "alert_at", "tiers", "tps", "p95_latency_ms")}
+    (cache / "replay.json").write_text(json.dumps(scalars))
+
+
+def load_replay(cache: Path, rows: int | None, pack: str = "ibm_aml") -> dict | None:
+    if not (cache / "replay.npz").exists() or rows:
+        return None
+    z = np.load(cache / "replay.npz")
+    meta = json.loads((cache / "replay.json").read_text())
+    return {"layers": z["layers"], "scored": z["scored"], "features": z["features"], "fusion": Engine(pack).fusion,
+            **meta}
+
+
+def calibrate_fused(p_cal: np.ndarray, y_cal: np.ndarray, p_test: np.ndarray, fallback: float) -> dict:
+    """Platt scaling of a fused probability, fitted on held-out unsampled rows, plus the F1-best alert threshold.
+
+    Logistic calibration keeps the ranking (it is monotone and strictly increasing), unlike isotonic steps which tie.
+    The threshold is chosen on the same held-out rows, never on the test days."""
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.metrics import precision_recall_curve
+
+    def logit(p):
+        p = np.clip(p, 1e-6, 1 - 1e-6)
+        return np.log(p / (1 - p))
+
+    if y_cal.sum() == 0 or y_cal.sum() == len(y_cal):
+        return {"p": p_test, "threshold": fallback, "a": 1.0, "b": 0.0}
+    lr = LogisticRegression(C=1e6, max_iter=1000).fit(logit(p_cal)[:, None], y_cal)
+    a, b = float(lr.coef_[0, 0]), float(lr.intercept_[0])
+    p_c = lr.predict_proba(logit(p_cal)[:, None])[:, 1]
+    precision, recall, thr = precision_recall_curve(y_cal, p_c)
+    f1 = 2 * precision[:-1] * recall[:-1] / np.maximum(precision[:-1] + recall[:-1], 1e-12)
+    return {"p": lr.predict_proba(logit(p_test)[:, None])[:, 1], "threshold": float(thr[int(np.argmax(f1))]),
+            "a": a, "b": b}
+
+
+def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: Path | None = None) -> dict:
     t0 = time.perf_counter()
     df = pd.read_parquet(data)
     if rows:
         df = df.iloc[:rows]
-    print(f"{len(df):,} rows loaded in {time.perf_counter() - t0:.0f}s; replaying...", flush=True)
-    r = replay(df)
+    r = load_replay(cache, rows) if cache else None
+    if r is None:
+        print(f"{len(df):,} rows loaded in {time.perf_counter() - t0:.0f}s; replaying...", flush=True)
+        r = replay(df)
+        if cache and not rows:
+            save_replay(r, cache)
+    else:
+        print(f"{len(df):,} rows loaded; replay taken from cache {cache}", flush=True)
     y = df["is_laundering"].to_numpy(dtype=np.int8)
     day = df["ts"].dt.floor("D").to_numpy()
     days, per_day = np.unique(day, return_counts=True)
@@ -183,36 +231,55 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None) -> dict
     # only a seeded share of negatives. Testing always uses every row.
     warm = df["ts"].to_numpy() >= df["ts"].iloc[0] + pd.Timedelta(hours=COLD_HOURS)
     keep = (y == 1) | (np.random.default_rng(7).random(len(y)) < NEG_SAMPLE)
-    in_train &= warm & keep
-    in_calib &= warm & keep
+    # Calibration rows are NOT negative-sampled. The model was fitted on 10% of legitimate rows, so any calibrator
+    # fitted on the same thinned rows learns a base rate about 10 times too high. The last two training days are held
+    # out of fitting: the first calibrates the model (isotonic), the second calibrates the fused probability and
+    # picks the alert threshold, so no step is tuned on rows it also learned from.
+    calib_days = train_days[-n_calib:]
+    in_model_cal = np.isin(day, calib_days[:1]) & warm
+    in_fuse_cal = np.isin(day, calib_days[-1:]) & warm
+    in_fit = in_train & warm & keep & ~np.isin(day, calib_days)
 
-    print(f"training on {len(train_days)} days ({(in_train & scored).sum():,} rows), "
-          f"testing on {len(test_days)} days ({(in_test & scored).sum():,} rows)", flush=True)
-    full = train_lgbm(X, y, in_train & ~in_calib & scored, in_calib & scored, names)
+    print(f"training on {len(train_days) - len(calib_days)} days ({(in_fit & scored).sum():,} rows), calibrating on "
+          f"{len(calib_days)} held-out day(s), testing on {len(test_days)} days ({(in_test & scored).sum():,} rows)",
+          flush=True)
+    full = train_lgbm(X, y, in_fit & scored, in_model_cal & scored, names)
     single_idx = [names.index(f) for f in SINGLE_TXN]
-    single = train_lgbm(X[:, single_idx], y, in_train & ~in_calib & scored, in_calib & scored, SINGLE_TXN)
+    single = train_lgbm(X[:, single_idx], y, in_fit & scored, in_model_cal & scored, SINGLE_TXN)
     if model_out:
         full.save(model_out, {"trained_on": str(data), "train_days": [str(d)[:10] for d in train_days]})
 
-    test = in_test & scored
-    yt = y[test]
-    det, base, graph = (r["layers"][test, i].astype(float) for i in range(3))
-    model_p = full.predict(X[test])
-    zero = np.zeros_like(det)
+    test, fuse_cal = in_test & scored, in_fuse_cal & scored
+    yt, yc = y[test], y[fuse_cal]
+
+    def layer_scores(mask):
+        det, base, graph = (r["layers"][mask, i].astype(float) for i in range(3))
+        return det, base, graph, full.predict(X[mask])
+
     fusion, alert_at = r["fusion"], r["alert_at"]
-    variants = {
-        "Detectors only": fuse(fusion, det, zero, zero, zero),
-        "+ behavioural baseline": fuse(fusion, det, base, zero, zero),
-        "+ graph layer": fuse(fusion, det, base, graph, zero),
-        "+ calibrated LightGBM": fuse(fusion, det, base, graph, model_p),
-    }
-    p_full = variants["+ calibrated LightGBM"]
-    n_alerts = int((p_full >= alert_at).sum())
+
+    def variant_probs(mask):
+        det, base, graph, model_p = layer_scores(mask)
+        zero = np.zeros_like(det)
+        return {
+            "Detectors only": fuse(fusion, det, zero, zero, zero),
+            "+ behavioural baseline": fuse(fusion, det, base, zero, zero),
+            "+ graph layer": fuse(fusion, det, base, graph, zero),
+            "+ calibrated LightGBM": fuse(fusion, det, base, graph, model_p),
+        }
+
+    raw_test, raw_cal = variant_probs(test), variant_probs(fuse_cal)
+    tuned = {k: calibrate_fused(raw_cal[k], yc, raw_test[k], alert_at) for k in raw_test}
+    variants = {k: tuned[k]["p"] for k in tuned}
+    thresholds = {k: tuned[k]["threshold"] for k in tuned}
+    p_full, alert_at_full = variants["+ calibrated LightGBM"], thresholds["+ calibrated LightGBM"]
+    n_alerts = int((p_full >= alert_at_full).sum())
     # The single-transaction baseline gets the same number of alerts as the full system, so the two compare fairly.
     p_single = single.predict(X[test][:, single_idx])
     baseline = metrics("Single-transaction baseline", p_single, yt, top_alerts=n_alerts)
-    ablation = [baseline] + [metrics(k, v, yt, alert_at) for k, v in variants.items()]
-    overall = metrics("Ripple (full)", p_full, yt, alert_at)
+    ablation = [baseline] + [metrics(k, v, yt, thresholds[k]) for k, v in variants.items()]
+    overall = metrics("Ripple (full)", p_full, yt, alert_at_full)
+    alert_at = alert_at_full
 
     patterns = df.loc[test, "pattern"].to_numpy()
     alert = p_full >= alert_at
@@ -251,7 +318,9 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None) -> dict
         "notes": [
             f"Test set: {int(test.sum()):,} transactions, {int(yt.sum()):,} laundering. Warm-up rows and transfers "
             "to the same account are excluded because the engine never alerts on them.",
-            f"Alert threshold {alert_at} as in the ibm_aml pack; fusion weights are the pack defaults, not refitted.",
+            f"Alert threshold {alert_at:.4f} is the F1-best threshold on a held-out training day, after Platt scaling of "
+            "the fused probability on that day. Fusion weights are the pack defaults, not refitted. The LightGBM model "
+            "is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
             "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the "
             "full system.",
             "Per-pattern precision compares that pattern's laundering rows against all legitimate rows, so it is "
@@ -264,6 +333,32 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None) -> dict
     EvalReport.model_validate(report)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2))
+
+    # Calibration and case-level precision go to a sidecar file; EvalReport (schema.py) is the shared API contract.
+    test_df = df.loc[test, ["txn_id", "ts", "src_account", "dst_account", "amount", "rail", "is_laundering",
+                            "attempt_id", "pattern"]].reset_index(drop=True)
+    test_df.assign(p_full=p_full, p_single=p_single).to_parquet(out.with_name("ibm_test_scores.parquet"))
+    extra = {
+        "tuning": {
+            "model_calibration_day": str(calib_days[0])[:10], "fusion_calibration_day": str(calib_days[-1])[:10],
+            "variants": {k: {"threshold": round(thresholds[k], 5), "platt_a": round(tuned[k]["a"], 4),
+                             "platt_b": round(tuned[k]["b"], 4)} for k in tuned},
+            "alert_rate_test": round(float((p_full >= alert_at).mean()), 5),
+            "pack_alert_at": r["alert_at"],
+        },
+        "calibration": calibration_table(p_full, yt.astype(float)),
+        "calibration_single_transaction": calibration_table(p_single, yt.astype(float)),
+        "case_level": [
+            case_level_report("Ripple (full)", test_df, alert, p_full, r["tiers"]),
+            case_level_report("Single-transaction baseline", test_df, single_alert, p_single, r["tiers"]),
+        ],
+        "notes": [
+            "A case is a hit if it holds at least one laundering transaction. Cases are formed by the live CaseEngine "
+            "and ranked by tier then expected loss; the top 50 cases opened each full test day are reviewed.",
+            "Days with fewer than 50 cases are skipped.",
+        ],
+    }
+    out.with_name("eval_extra.json").write_text(json.dumps(extra, indent=2, default=str))
     print(json.dumps({k: report[k] for k in ("overall", "baseline", "suggested_budget", "throughput_tps")}, indent=1))
     print(f"done in {time.perf_counter() - t0:,.0f}s -> {out}")
     return report
@@ -275,8 +370,14 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("../data/eval.json"))
     parser.add_argument("--model-out", type=Path, default=Path("../data/models/ibm_lgbm.txt"))
     parser.add_argument("--rows", type=int, default=None, help="only the first N rows (for a quick check)")
+    parser.add_argument("--cache", type=Path, default=Path("../data/replay_cache"),
+                        help="folder for the saved engine replay; reused if present, so reruns skip the replay")
+    parser.add_argument("--refresh", action="store_true", help="ignore the cache and replay again")
     args = parser.parse_args()
-    run(args.data, args.out, args.model_out, args.rows)
+    if args.refresh:
+        for f in ("replay.npz", "replay.json"):
+            (args.cache / f).unlink(missing_ok=True)
+    run(args.data, args.out, args.model_out, args.rows, args.cache)
 
 
 if __name__ == "__main__":
