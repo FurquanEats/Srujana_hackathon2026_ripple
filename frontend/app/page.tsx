@@ -69,16 +69,19 @@ function LiveFeed({ feed, connected }: { feed: ScoredTransaction[]; connected: b
   );
 }
 
-function DemoControls({ onError }: { onError: (e: string) => void }) {
+function DemoControls() {
   const [busy, setBusy] = useState<string | null>(null);
   const [injected, setInjected] = useState<InjectResult | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
 
   const inject = async (kind: string) => {
     setBusy(kind);
+    setFailed(null);
     try {
       setInjected(await api.inject(kind));
     } catch (e) {
-      onError((e as Error).message);
+      setInjected(null);
+      setFailed((e as Error).message);
     } finally {
       setBusy(null);
     }
@@ -105,6 +108,7 @@ function DemoControls({ onError }: { onError: (e: string) => void }) {
           </button>
         ))}
       </div>
+      {failed && <div className="mt-4"><ErrorNote title="Scenario not injected" error={failed} /></div>}
       {injected && (
         <Notice tone="success" className="mt-4" title={`Injected ${injected.txn_ids.length} synthetic payments (${injected.kind.replace(/_/g, " ")}) at ${time(injected.at)}.`}>
           {injected.victim_account ? (
@@ -181,7 +185,7 @@ export default function CommandCentre() {
         <LiveFeed feed={feed} connected={connected} />
       </div>
 
-      <DemoControls onError={setError} />
+      <DemoControls />
 
     </div>
   );

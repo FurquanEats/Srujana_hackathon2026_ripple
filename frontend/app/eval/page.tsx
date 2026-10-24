@@ -12,7 +12,8 @@ const tooltip = { contentStyle: { background: "#fff", border: "1px solid #d6e0eb
 const C = { precision: "#1d3b63", recall: "#087e8b", value: "#a35f00" };
 
 // Notes that say the figures are not final measured results. Matched, never invented: the note text is shown verbatim.
-const WIP = /illustrative|sample|not measured|preliminary|work in progress|placeholder/i;
+const WIP = /\b(illustrative|sample data|not measured|preliminary|work in progress|placeholder)\b/i;
+const SAMPLE_DATASET = /\(sample\)/i;
 
 const points = (a: number, b: number) => {
   const d = Math.round((a - b) * 100);
@@ -97,7 +98,7 @@ export default function Evaluation() {
   const o = report.overall;
   const b = report.baseline;
   const wipNotes = report.notes.filter((n) => WIP.test(n));
-  const isWip = wipNotes.length > 0 || WIP.test(report.dataset);
+  const isWip = wipNotes.length > 0 || SAMPLE_DATASET.test(report.dataset);
 
   return (
     <article className="space-y-6">

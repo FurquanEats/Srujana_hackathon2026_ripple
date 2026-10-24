@@ -18,13 +18,16 @@ type Item = { kind: "txn"; ts: string; txn: ScoredTransaction } | { kind: "event
 
 const PREVIEW = 8;
 
+// Compare as instants: engine timestamps have no zone (stream-local) while in-session events carry one.
+const toMs = (ts: string) => new Date(ts).getTime();
+
 /** Payments in the case and the audit-relevant events around them (opened, first alert, decisions), in time order. */
 export function Timeline({ transactions, events = [] }: { transactions: ScoredTransaction[]; events?: CaseEvent[] }) {
   const [all, setAll] = useState(false);
   const items: Item[] = [
     ...transactions.map((t) => ({ kind: "txn" as const, ts: t.ts, txn: t })),
     ...events.map((e) => ({ kind: "event" as const, ts: e.ts, event: e })),
-  ].sort((a, b) => a.ts.localeCompare(b.ts) || (a.kind === "event" ? 1 : -1));
+  ].sort((a, b) => toMs(a.ts) - toMs(b.ts) || (a.kind === "event" ? 1 : -1));
 
   if (items.length === 0) return <p className="text-sm text-muted">No events recorded.</p>;
   const shown = all ? items : items.slice(0, PREVIEW);

@@ -78,9 +78,10 @@ export function Workbench() {
 
   const events = useMemo<CaseEvent[]>(() => {
     if (!detail) return [];
+    const cur = detail.timeline[0]?.currency ?? "INR";
     const out: CaseEvent[] = [{ ts: detail.opened_at, title: "Case opened", icon: "shield", detail: `${detail.tier} · probability ${prob(detail.probability)}` }];
     if (plan?.first_alert_at) out.push({ ts: plan.first_alert_at, title: "First alert on the money trail", icon: "critical",
-      detail: plan.recoverable_at_first_alert != null ? `${money(plan.recoverable_at_first_alert)} was still recoverable` : undefined });
+      detail: plan.recoverable_at_first_alert != null ? `${money(plan.recoverable_at_first_alert, cur)} was still recoverable` : undefined });
     if (detail.updated_at !== detail.opened_at) out.push({ ts: detail.updated_at, title: "Case last updated", icon: "clock" });
     if (detail.str_due) out.push({ ts: detail.str_due, title: "Suspicious transaction report due", icon: "draft" });
     if (decision) out.push({ ts: decision.at, title: decision.verdict === "confirmed" ? "Officer confirmed as fraud" : "Officer dismissed", icon: "check", detail: "Recorded in this session" });

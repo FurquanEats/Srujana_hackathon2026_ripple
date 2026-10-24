@@ -193,7 +193,7 @@ function ReportForm() {
           ) : (
             <>
               <Notice tone="success" title="Trace complete">
-                Traced {plan.edges.length} payments from <span className="font-mono">{plan.victims.join(", ")}</span>, as of {time(plan.as_of)}.
+                Traced {plan.edges.length} payment{plan.edges.length === 1 ? "" : "s"} from <span className="font-mono">{plan.victims.join(", ")}</span>, as of {time(plan.as_of)}.
               </Notice>
               <RecoveryMetrics plan={plan} />
               <Card title="Where the money went" description="Left to right by hop. Accounts with a teal ring are recommended for a hold.">
