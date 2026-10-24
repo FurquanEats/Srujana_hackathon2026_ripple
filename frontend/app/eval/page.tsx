@@ -77,7 +77,7 @@ export default function Evaluation() {
             <ResponsiveContainer>
               <LineChart data={report.budget_curve}>
                 <CartesianGrid stroke="#1e293b" />
-                <XAxis dataKey="alerts_per_day" stroke="#64748b" fontSize={11} label={{ value: "alerts per day", position: "insideBottom", offset: -2, fill: "#64748b", fontSize: 11 }} />
+                <XAxis dataKey="alerts_per_day" type="number" domain={["dataMin", "dataMax"]} stroke="#64748b" fontSize={11} label={{ value: "alerts per day", position: "insideBottom", offset: -2, fill: "#64748b", fontSize: 11 }} />
                 <YAxis domain={[0, 1]} tickFormatter={(v) => pct(v)} stroke="#64748b" fontSize={11} />
                 <Tooltip formatter={(v) => pct(Number(v), 1)} {...tooltip} />
                 <Legend />
