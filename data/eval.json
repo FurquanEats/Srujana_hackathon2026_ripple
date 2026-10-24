@@ -1,7 +1,7 @@
 {
   "dataset": "IBM AML ibm_hi_small",
   "split": "time split: train on the first 7 of 10 days (2022-09-01 to 2022-09-07), test on the last 3",
-  "generated_at": "2026-10-25T00:15:16",
+  "generated_at": "2026-10-25T00:30:35",
   "overall": {
     "name": "Ripple (full)",
     "precision": 0.6228,
@@ -51,20 +51,6 @@
       "recall": 0.3737,
       "pr_auc": 0.3939,
       "precision_at_50": 0.98
-    },
-    {
-      "name": "Full system, pack's hand-set fusion weights",
-      "precision": 0.2308,
-      "recall": 0.1125,
-      "pr_auc": 0.0528,
-      "precision_at_50": 0.56
-    },
-    {
-      "name": "LightGBM model alone",
-      "precision": 0.5627,
-      "recall": 0.4206,
-      "pr_auc": 0.4173,
-      "precision_at_50": 1.0
     }
   ],
   "per_typology": [
@@ -203,7 +189,7 @@
   ],
   "notes": [
     "Test set: 1,317,508 transactions, 1,493 laundering. Warm-up rows and transfers to the same account are excluded because the engine never alerts on them.",
-    "Alert threshold 0.0174 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; the pack's hand-set weights, shown as their own ablation row, rank far worse on IBM because a detector hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
+    "Alert threshold 0.0174 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; the pack's hand-set weights rank far worse on IBM (see the contrast rows in eval_extra.json) because a detector hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
     "The model's strongest feature is whether the payer has paid this payee before. It is computed from past payments only, but IBM's synthetic laundering may favour new payees more than real laundering does.",
     "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the full system.",
     "Per-pattern precision compares that pattern's laundering rows against all legitimate rows, so it is lower than overall precision.",
