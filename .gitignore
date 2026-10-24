@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+
+# Secrets and local data
+.env
+.env.local
+data/raw/
+*.duckdb
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
