@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-import time
 import heapq
+import time
 from collections.abc import Iterable
+from datetime import datetime
 from pathlib import Path
 
 from ripple.engine import Engine
@@ -77,8 +78,11 @@ class Feed:
         return len(self._items)
 
 
-async def replay_feed(engine: Engine, bus: EventBus, feed: Feed, speed: float = 60.0, idle: float = 0.25) -> None:
-    """Replays the feed and then keeps waiting for injected transactions, so the stream stays live for the demo."""
+async def replay_feed(engine: Engine, bus: EventBus, feed: Feed, speed: float = 60.0, idle: float = 0.25,
+                      fast_until: datetime | None = None) -> None:
+    """Replays the feed and then keeps waiting for injected transactions, so the stream stays live for the demo.
+    Transactions before `fast_until` are scored as fast as possible, so the engine starts with the account history a
+    real bank would already hold, and only the rest plays at `speed`."""
     previous = None
     last_stats = time.monotonic()
     while True:
@@ -86,13 +90,19 @@ async def replay_feed(engine: Engine, bus: EventBus, feed: Feed, speed: float = 
         if txn is None:
             await asyncio.sleep(idle)
         else:
-            if previous is not None and speed > 0:
+            fast = fast_until is not None and txn.ts < fast_until
+            if previous is not None and speed > 0 and not fast:
                 gap = (txn.ts - previous).total_seconds() / speed
                 if gap > 0:
                     await asyncio.sleep(min(gap, MAX_SLEEP))
             previous = max(previous, txn.ts) if previous else txn.ts
-            ingest(engine, bus, txn)
-            await asyncio.sleep(0)
+            if fast:
+                engine.process(txn)  # history: scored and stored, not pushed to screens
+                if len(feed) % 500 == 0:
+                    await asyncio.sleep(0)
+            else:
+                ingest(engine, bus, txn)
+                await asyncio.sleep(0)
         if time.monotonic() - last_stats >= STATS_EVERY:
             stats = engine.stats() | {"queued": float(len(feed))}
             bus.publish(StreamEvent(type="stats", stats=stats).model_dump(mode="json", exclude_none=True))

@@ -22,6 +22,39 @@ from ripple.interdiction import plan_trail
 from ripple.schema import InterdictionPlan, ScoredTransaction
 
 MAX_TXNS = 400
+MERCHANT_SENDERS = 20  # an account paid by more distinct people than this is a merchant, not a scam account
+
+
+def _merchant(engine: Engine, account: str) -> bool:
+    state = engine.store.get(account)
+    return state is not None and len(state.senders) > MERCHANT_SENDERS
+
+
+def onward(engine: Engine, trail: list[ScoredTransaction], max_hops: int = 3) -> list[ScoredTransaction]:
+    """Payments that accounts on a trail made after receiving money on it: where the money went next, including
+    withdrawals and crypto purchases that happened after the last alert."""
+    received: dict[str, datetime] = {}
+    for t in trail:
+        if t.dst_account not in received or t.ts < received[t.dst_account]:
+            received[t.dst_account] = t.ts
+    seen = {t.txn_id for t in trail}
+    found: list[ScoredTransaction] = []
+    frontier = list(received.items())
+    for _ in range(max_hops):
+        nxt: list[tuple[str, datetime]] = []
+        for account, since in frontier:
+            state = engine.store.get(account)
+            if state is None or _merchant(engine, account):
+                continue
+            for edge in state.outgoing:
+                if edge.ts >= since and edge.txn_id not in seen and (txn := engine.lookup(edge.txn_id)) is not None:
+                    seen.add(edge.txn_id)
+                    found.append(txn)
+                    nxt.append((edge.counterparty, edge.ts))
+        frontier = nxt
+        if len(found) > MAX_TXNS:
+            break
+    return found
 
 
 def trace(engine: Engine, account: str, from_ts: datetime, amount: float | None = None, max_hops: int = 6,
@@ -32,8 +65,9 @@ def trace(engine: Engine, account: str, from_ts: datetime, amount: float | None 
     first_hop = [e for e in start.outgoing if e.ts >= from_ts]
     if amount is not None:  # the report names an amount: start from the payments closest to it
         first_hop = sorted(first_hop, key=lambda e: abs(e.amount - amount))[:3]
-    else:  # scam transfers go to payees the victim never paid before; ordinary spending at known shops is left out
-        first_hop = [e for e in first_hop if start.payees.get(e.counterparty, from_ts) >= from_ts]
+    else:  # scam transfers go to new payees who are not merchants; ordinary spending at shops is left out
+        first_hop = [e for e in first_hop if start.payees.get(e.counterparty, from_ts) >= from_ts
+                     and not _merchant(engine, e.counterparty)]
     trail: dict[str, ScoredTransaction] = {}
     queue = deque((e, 1) for e in sorted(first_hop, key=lambda e: e.ts))
     end = from_ts + window

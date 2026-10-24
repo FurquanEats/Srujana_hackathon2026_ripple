@@ -69,3 +69,27 @@ def test_fixture_case_plan_and_api_route():
     body = client.get("/cases/C-0001/interdiction").json()
     assert body["freeze"][0]["account_id"] == "A9001"
     assert client.get("/cases/C-9999/interdiction").status_code == 404
+
+
+def test_digital_arrest_case_treats_the_customer_as_victim_and_counts_cash_outs():
+    from datetime import timedelta
+
+    from ripple import trace
+    from ripple.sim.india import START, World
+
+    world = World(n_people=60, n_shops=10)
+    world.simulate(days=20)
+    world.inject("digital_arrest", START + timedelta(days=18))
+    engine = Engine("india")
+    for row in world.sorted_rows():
+        engine.process(row.txn)
+    victim = next(row.victim_account for row in world.rows if row.victim_account)
+    case = next(c for c in engine.cases.cases.values() if victim in c.accounts and "coerced_transfer" in c.typologies)
+    detail = engine.detail(case.case_id)
+    first = plan(detail)
+    holders = {h.account_id for h in first.holdings}
+    trail = [t for t in detail.timeline if t.dst_account in holders or t.src_account in holders]
+    p = plan(detail, onward=trace.onward(engine, trail))
+    assert p.victims == [victim] and victim not in {f.account_id for f in p.freeze}
+    assert p.stolen == 750000 + 390000
+    assert p.escaped == 95000 + 245000 + 150000  # ATM withdrawal and two crypto purchases

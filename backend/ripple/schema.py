@@ -245,6 +245,7 @@ class InterdictionPlan(BaseModel):
     recoverable_at_first_alert: float | None = None  # how much a freeze at Ripple's first alert would have held
     recoverable_share_at_first_alert: float | None = None  # that amount over the traced money that had entered by then
     timeline: list[RecoveryPoint]
+    edges: list[GraphEdge] = Field(default_factory=list)  # every payment on the traced trail, for drawing it
     method: str
 
 

@@ -315,7 +315,9 @@ def device_takeover(txn: Transaction, store: FeatureStore, src: AccountState, ds
 def coerced_transfer(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """A victim being coached by a scammer ("digital arrest", fake investment): a lump sum arrives, often a fixed
     deposit broken early, and most of it goes straight to a payee the customer has never paid, in the largest payment
-    they have ever made, often more than once over hours or days. This detector protects the payer, so its action is
+    they have ever made, often more than once over hours or days. The lump sum must be the customer's own money (one
+    of their deposit accounts, or a sender they have known for longer than the window); money from a stranger being
+    passed on is a mule, which the other detectors cover. This detector protects the payer, so its action is
     a cooling-off hold and a call to the customer or their trusted contact, not a block."""
     if is_cash_deposit(txn) or txn.amount < p["min_amount"] or src.payees.get(txn.dst_account) != txn.ts:
         return None  # too small, or not a first-time payee
@@ -329,9 +331,13 @@ def coerced_transfer(txn: Transaction, store: FeatureStore, src: AccountState, d
                if e.amount >= p["min_amount"] and src.payees.get(e.counterparty) == e.ts]
     if txn.amount <= src.max_out_amount and not earlier:
         return None  # not the largest payment this customer has made, and not a repeat of one
-    lump = [e for e in window(src.incoming, txn.ts, lookback) if e.amount >= p["drain_share"] * txn.amount]
+    since = txn.ts - lookback
+    own = tuple(p["own_deposit_prefixes"])
+    lump = [e for e in window(src.incoming, txn.ts, lookback)
+            if e.amount >= p["drain_share"] * txn.amount
+            and (e.counterparty.upper().startswith(own) or src.senders.get(e.counterparty, txn.ts) < since)]
     if not lump:
-        return None
+        return None  # the money came from a stranger: that is a mule forwarding funds, not a customer being coerced
     funding = lump[-1]  # the most recent lump sum big enough to fund this transfer
     strength = 0.65 + 0.2 * bool(earlier) + 0.1 * (txn.amount / funding.amount >= 0.9)
     repeat = f"; it is the {len(earlier) + 1}th such transfer in {p['lookback_hours']} hours" if earlier else ""

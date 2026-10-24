@@ -2,7 +2,7 @@
 
 RIPPLE_SOURCE=engine runs the live engine. RIPPLE_DATA is replayed at RIPPLE_SPEED seconds of data per real second:
 a CSV or Parquet file, or "sim:india" for a freshly simulated legitimate month whose scam scenarios are injected live
-with POST /inject/{kind}. POST /ingest accepts more transactions at any time, and POST /trace follows a victim's money.
+with POST /inject/{kind}; its first RIPPLE_HISTORY_DAYS (default 20) are scored at full speed as account history. POST /ingest accepts more transactions at any time, and POST /trace follows a victim's money.
 RIPPLE_SOURCE=fixtures (the default) serves the sample responses in /fixtures.
 """
 
@@ -47,19 +47,21 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
     bus = EventBus()
     feed = Feed()
     world = None
+    fast_until = None
     if engine is not None and data:
         if data.startswith("sim:"):
-            from ripple.sim.india import World
+            from ripple.sim.india import START, World
 
             world = World()
             world.simulate()
             feed.add(row.txn for row in world.sorted_rows())
+            fast_until = START + timedelta(days=float(os.environ.get("RIPPLE_HISTORY_DAYS", "20")))
         else:
             feed.add(load_transactions(data))
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        task = asyncio.create_task(replay_feed(engine, bus, feed, speed)) if engine is not None else None
+        task = asyncio.create_task(replay_feed(engine, bus, feed, speed, fast_until=fast_until)) if engine else None
         yield
         if task:
             task.cancel()
@@ -100,7 +102,12 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         case = engine.detail(case_id) if engine else fixtures.case_detail(case_id)
         if case is None:
             raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
-        return interdiction.plan(case)
+        if engine is None:
+            return interdiction.plan(case)
+        evidence = interdiction.plan(case)  # first pass: which accounts hold traced money
+        holders = {h.account_id for h in evidence.holdings}
+        trail = [t for t in case.timeline if t.dst_account in holders or t.src_account in holders]
+        return interdiction.plan(case, onward=trace.onward(engine, trail))
 
     @app.post("/cases/{case_id}/feedback")
     def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:

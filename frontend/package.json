@@ -9,12 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "cytoscape": "^3.34.4",
     "next": "16.4.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/cytoscape": "^3.21.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

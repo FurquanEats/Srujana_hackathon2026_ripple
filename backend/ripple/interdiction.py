@@ -33,6 +33,7 @@ from ripple.schema import (
     AccountProfile,
     CaseDetail,
     FreezeAction,
+    GraphEdge,
     InterdictionPlan,
     Layer,
     RecoveryPoint,
@@ -53,14 +54,25 @@ class _Account:
     tainted: float = 0.0
 
 
-def plan(detail: CaseDetail, as_of: datetime | None = None) -> InterdictionPlan:
-    """Freeze plan for a case, tracing only its evidence: alerts and the transactions their detector reasons cite."""
+def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredTransaction] = ()) -> InterdictionPlan:
+    """Freeze plan for a case, tracing its evidence (alerts and the transactions their detector reasons cite) plus any
+    `onward` payments its holders made later, such as a cash withdrawal after the last alert.
+
+    A coerced customer is the victim, not a holder: the lump sum that funded their transfer (a broken fixed deposit,
+    say) is their own money, so it is left out and their transfers to the scammers become where stolen money starts.
+    """
     evidence = {t.txn_id for t in detail.timeline if t.is_alert}
+    coerced = set()
     for t in detail.timeline:
         if t.is_alert:
             evidence.update(i for r in t.reasons if r.layer == Layer.DETECTOR for i in r.txn_ids)
-    trail = [t for t in detail.timeline if t.txn_id in evidence]
-    return plan_trail(detail.case_id, trail, detail.profiles, as_of or (max(t.ts for t in trail) if trail else detail.updated_at))
+            if any(r.code == "coerced_transfer" for r in t.reasons):
+                coerced.add(t.src_account)
+    trail = [t for t in detail.timeline if t.txn_id in evidence and t.dst_account not in coerced]
+    seen = {t.txn_id for t in trail}
+    trail += [t for t in onward if t.txn_id not in seen and t.dst_account not in coerced]
+    end = as_of or (max(t.ts for t in trail) if trail else detail.updated_at)
+    return plan_trail(detail.case_id, trail, detail.profiles, end)
 
 
 def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[AccountProfile],
@@ -157,6 +169,8 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
         recoverable_share_at_first_alert=round(recoverable_at_first_alert / entered_at_alert, 4)
         if recoverable_at_first_alert is not None and entered_at_alert else None,
         timeline=timeline,
+        edges=[GraphEdge(txn_id=t.txn_id, source=t.src_account, target=t.dst_account, amount=t.amount, ts=t.ts)
+               for t in txns],
         method="haircut taint tracking over the case's money trail; freeze set = minimum vertex cut weighted by "
         "collateral cost, plus any holder with at least 5% of the traced money",
     )
