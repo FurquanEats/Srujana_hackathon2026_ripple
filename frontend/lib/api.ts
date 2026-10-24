@@ -163,6 +163,24 @@ export interface EvalReport {
   notes: string[];
 }
 
+export interface ConsortiumResult {
+  mode: string;
+  laundering_payments: number;
+  caught: number;
+  recall: number | null;
+  alerts: number;
+  precision: number | null;
+  false_alerts: number;
+}
+
+export interface ConsortiumReport {
+  dataset: string;
+  rows: number;
+  member_banks: string[];
+  results: ConsortiumResult[];
+  note: string;
+}
+
 export interface InjectResult {
   kind: string;
   at: string;
@@ -204,6 +222,7 @@ export const api = {
       post({ verdict }),
     ),
   eval: () => request<EvalReport>("/eval"),
+  consortium: () => request<ConsortiumReport>("/consortium"),
   inject: (kind: string) => request<InjectResult>(`/inject/${kind}`, post()),
   trace: (account: string, from_ts?: string, amount?: number) =>
     request<InterdictionPlan>("/trace", post({ account, from_ts: from_ts || null, amount: amount ?? null })),

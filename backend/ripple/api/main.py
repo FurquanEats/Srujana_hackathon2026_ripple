@@ -128,6 +128,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
             return EvalReport.model_validate(json.loads(path.read_text(encoding="utf-8")))
         return fixtures.eval_report()
 
+    @app.get("/consortium")
+    def get_consortium() -> dict:
+        """Consortium uplift on IBM AML from scripts/consortium_eval.py, or 404 until it has been run."""
+        path = Path(os.environ.get("RIPPLE_CONSORTIUM", Path(__file__).resolve().parents[3] / "data" / "consortium.json"))
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="run scripts/consortium_eval.py first")
+        return json.loads(path.read_text(encoding="utf-8"))
+
     @app.post("/ingest")
     def post_ingest(txns: list[Transaction]) -> list[ScoredTransaction]:
         """Scores transactions in the order given (for example from the simulator's inject buttons)."""

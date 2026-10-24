@@ -4,15 +4,19 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, ErrorNote, Stat } from "@/components/ui";
-import { api, pct, type EvalReport } from "@/lib/api";
+import { api, pct, type ConsortiumReport, type EvalReport } from "@/lib/api";
 
 const tooltip = { contentStyle: { background: "#0f172a", border: "1px solid #334155" } };
 
 export default function Evaluation() {
   const [report, setReport] = useState<EvalReport | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consortium, setConsortium] = useState<ConsortiumReport | null>(null);
 
-  useEffect(() => { api.eval().then(setReport).catch((e) => setError(e.message)); }, []);
+  useEffect(() => {
+    api.eval().then(setReport).catch((e) => setError(e.message));
+    api.consortium().then(setConsortium).catch(() => setConsortium(null));
+  }, []);
 
   if (error) return <ErrorNote error={error} />;
   if (!report) return <p className="text-slate-400">Loading evaluation…</p>;
@@ -89,6 +93,29 @@ export default function Evaluation() {
           </div>
         </Card>
       </div>
+
+      {consortium && (
+        <Card title={`Bank consortium: ${consortium.member_banks.length} banks sharing only keyed hashes`}>
+          <table className="w-full text-left text-sm">
+            <thead className="text-xs uppercase text-slate-500">
+              <tr><th className="py-2">Mode</th><th className="text-right">Laundering payments</th><th className="text-right">Caught</th><th className="text-right">Recall</th><th className="text-right">Alerts</th><th className="text-right">Precision</th></tr>
+            </thead>
+            <tbody>
+              {consortium.results.map((r) => (
+                <tr key={r.mode} className="border-t border-slate-800">
+                  <td className="py-2">{r.mode}</td>
+                  <td className="text-right tabular-nums">{r.laundering_payments}</td>
+                  <td className="text-right tabular-nums">{r.caught}</td>
+                  <td className="text-right tabular-nums">{r.recall != null ? pct(r.recall, 1) : "n/a"}</td>
+                  <td className="text-right tabular-nums">{r.alerts}</td>
+                  <td className="text-right tabular-nums">{r.precision != null ? pct(r.precision, 1) : "n/a"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-slate-500">{consortium.dataset}, {consortium.rows.toLocaleString("en-IN")} payments. {consortium.note}</p>
+        </Card>
+      )}
 
       <Card title="By laundering pattern">
         <table className="w-full text-left text-sm">
