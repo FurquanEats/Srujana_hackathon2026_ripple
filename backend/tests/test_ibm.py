@@ -40,7 +40,7 @@ def test_ibm_cash_does_not_raise_indian_ctr_flag():
 RAW_CSV = """Timestamp,From Bank,Account,To Bank,Account,Amount Received,Receiving Currency,Amount Paid,Payment Currency,Payment Format,Is Laundering
 2022/09/01 00:20,010,8000EBD30,010,8000EBD30,3697.34,US Dollar,3697.34,US Dollar,Reinvestment,0
 2022/09/01 00:05,021174,800737690,012,80011F990,2848.96,Euro,2848.96,Euro,ACH,1
-2022/09/01 01:00,001,A1,002,B1,200.00,Euro,100.00,UK Pound,Wire,0
+2022/09/01 01:00,001,A1,002,B1,110.00,US Dollar,100.00,Euro,Wire,0
 2022/09/01 02:00,001,A1,003,C1,100.00,US Dollar,50.00,UK Pound,Wire,0
 2022/09/01 03:00,001,A1,003,C1,0.00,US Dollar,0.00,US Dollar,Cash,0
 """
@@ -59,15 +59,15 @@ def test_ibm_loader_maps_rows_converts_to_usd_and_tags_patterns(tmp_path):
     (tmp_path / "p.txt").write_text(PATTERNS)
     raw = ibm.read_raw(tmp_path / "t.csv")
     rates = ibm.usd_rates(raw)
-    assert rates["UK Pound"] == 2.0 and rates["Euro"] == 1.0  # GBP from the USD row, EUR chained through GBP
+    assert rates["UK Pound"] == 2.0 and rates["Euro"] == 1.1  # median of received USD over paid
 
     out = ibm.transform(raw, ibm.read_patterns(tmp_path / "p.txt"), rates)
     assert len(out) == 4  # zero amount dropped
     assert list(out["txn_id"]) == ["ibm-1", "ibm-0", "ibm-2", "ibm-3"]  # sorted by time, IDs keep CSV row order
     first = out.iloc[0]
-    assert first["src_account"] == "021174_800737690" and first["rail"] == "ACH"
+    assert first["src_account"] == "021174:800737690" and first["rail"] == "ACH"
     assert first["pattern"] == "fan_out" and first["is_laundering"] == 1
-    assert out.iloc[2]["amount"] == 200.0 and out.iloc[2]["orig_currency"] == "UK Pound"
+    assert out.iloc[3]["amount"] == 100.0 and out.iloc[3]["orig_currency"] == "UK Pound"
 
     out.to_csv(tmp_path / "out.csv", index=False)
     txns = load_transactions(tmp_path / "out.csv")  # label columns are ignored by Transaction

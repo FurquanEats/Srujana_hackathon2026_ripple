@@ -6,7 +6,7 @@ Each row keeps the ripple.schema.Transaction columns plus labels for training an
 is_laundering (0/1), pattern (fan_in, cycle, ... or empty), orig_amount and orig_currency. Transaction ignores
 the extra columns, so replay.load_transactions reads the file as is.
 
-Bank and account are joined into one account ID ("<bank>_<account>"), because IBM account numbers repeat across
+Bank and account are joined into one account ID ("<bank>:<account>"), because IBM account numbers repeat across
 banks. Amounts are converted to USD with rates taken from the dataset's own cross-currency rows, which is how IBM
 generated them. Zero amounts are dropped (Transaction needs amount > 0). Device and location stay empty: IBM has
 neither.
@@ -40,25 +40,16 @@ def read_raw(path) -> pd.DataFrame:
 
 
 def usd_rates(df: pd.DataFrame) -> dict[str, float]:
-    """USD value of one unit of each currency, as the median ratio over rows paid in one currency and received in
-    another. Rows touching USD give a direct rate; the rest are chained through currencies already known."""
-    cross = df[df["receiving_currency"] != df["payment_currency"]]
-    cross = cross[(cross["amount_paid"] > 0) & (cross["amount_received"] > 0)]
-    ratio = (cross["amount_received"] / cross["amount_paid"]).rename("ratio")  # receiving units per paying unit
-    pairs = pd.concat([cross[["payment_currency", "receiving_currency"]], ratio], axis=1)
-    pairs = pairs.groupby(["payment_currency", "receiving_currency"])["ratio"].median()
-
+    """USD per unit of each currency: the median of received over paid on rows paid in that currency and received in
+    US dollars, or failing that the reverse. The same rule as scripts/benchmark.py, so both give identical amounts."""
+    df = df[(df["amount_paid"] > 0) & (df["amount_received"] > 0)]
     rates = {"US Dollar": 1.0}
-    changed = True
-    while changed:
-        changed = False
-        for (pay, recv), r in pairs.items():
-            if recv in rates and pay not in rates:  # 1 pay = r recv
-                rates[pay] = r * rates[recv]
-                changed = True
-            elif pay in rates and recv not in rates:
-                rates[recv] = rates[pay] / r
-                changed = True
+    to_usd = df[(df["receiving_currency"] == "US Dollar") & (df["payment_currency"] != "US Dollar")]
+    for cur, g in to_usd.groupby("payment_currency"):
+        rates[cur] = float((g["amount_received"] / g["amount_paid"]).median())
+    from_usd = df[(df["payment_currency"] == "US Dollar") & (df["receiving_currency"] != "US Dollar")]
+    for cur, g in from_usd.groupby("receiving_currency"):
+        rates.setdefault(cur, float((g["amount_paid"] / g["amount_received"]).median()))
     missing = set(df["payment_currency"]) - set(rates)
     if missing:
         raise ValueError(f"no conversion path to USD for {sorted(missing)}")
@@ -95,8 +86,8 @@ def transform(df: pd.DataFrame, patterns: pd.DataFrame | None = None,
     out = pd.DataFrame({
         "txn_id": "ibm-" + df.index.astype(str),
         "ts": df["ts"],
-        "src_account": df["from_bank"] + "_" + df["from_account"],
-        "dst_account": df["to_bank"] + "_" + df["to_account"],
+        "src_account": df["from_bank"] + ":" + df["from_account"],
+        "dst_account": df["to_bank"] + ":" + df["to_account"],
         "amount": (df["amount_paid"] * df["payment_currency"].map(rates)).round(2),
         "currency": "USD",
         "rail": df["payment_format"].map(lambda f: IBM_PAYMENT_FORMATS[f].value),
