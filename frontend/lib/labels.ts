@@ -14,6 +14,7 @@ const LABELS: Record<string, string> = {
   cash_structuring: "Cash structuring",
   device_takeover: "Device takeover",
   coerced_transfer: "Coerced transfer",
+  rapid_cash_out: "Rapid cash-out",
   baseline_amount: "Unusual amount",
   baseline_hour: "Unusual hour",
   baseline_velocity_in: "Unusual inflow pace",
@@ -30,7 +31,8 @@ const LABELS: Record<string, string> = {
 const CONTEXT = new Set(["baseline_amount", "baseline_hour", "baseline_velocity_in", "baseline_velocity_out", "community", "proximity", "consortium"]);
 
 export const reasonLabel = (code: string) =>
-  LABELS[code] ?? code.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  code.startsWith("motif:") ? `Learned pattern ${code.slice(6)}`
+    : LABELS[code] ?? code.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 
 export const isContextSignal = (code: string) => CONTEXT.has(code) || code.startsWith("baseline");
 

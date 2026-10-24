@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { CaseQueue, TierCounts } from "@/components/CaseQueue";
+import { LearnedPatterns } from "@/components/LearnPattern";
 import { Button, Card, ConnectionStatus, DemoBadge, EmptyState, ErrorNote, Icon, Notice, PageHeader, RiskDot, Spinner, Stat } from "@/components/ui";
 import { api, money, time, type CaseSummary, type InjectResult, type ScoredTransaction } from "@/lib/api";
 import { reasonLabel } from "@/lib/labels";
@@ -16,6 +17,7 @@ const SCENARIOS: { kind: string; label: string; note: string }[] = [
   { kind: "sim_swap_takeover", label: "SIM-swap takeover", note: "New device drains an account" },
   { kind: "cash_structuring", label: "Cash structuring", note: "Deposits kept under ₹50,000" },
   { kind: "diwali_spike", label: "Diwali shopping", note: "Legitimate spike; should stay quiet" },
+  { kind: "patient_ring", label: "Patient mule ring", note: "Waits a day per hop; no built-in detector acts" },
 ];
 
 const fmtInt = (n: number) => Math.round(n).toLocaleString("en-IN");
@@ -96,7 +98,7 @@ function DemoControls() {
       <p className="mt-1 text-sm text-muted">
         Adds synthetic payments from the India simulator to the stream, at the stream&apos;s current time. Not available on real data.
       </p>
-      <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
         {SCENARIOS.map((s) => (
           <button key={s.kind} type="button" onClick={() => inject(s.kind)} disabled={busy !== null}
                   className="flex min-h-11 flex-col items-start rounded-md border border-line-strong bg-surface px-3 py-2 text-left hover:border-teal hover:bg-teal-soft disabled:cursor-not-allowed disabled:opacity-55">
@@ -184,6 +186,8 @@ export default function CommandCentre() {
 
         <LiveFeed feed={feed} connected={connected} />
       </div>
+
+      <LearnedPatterns />
 
       <DemoControls />
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T00:09:58",
+  "generated_at": "2026-10-25T00:21:09",
   "example": {
     "plan": "6 victims x Rs 49,000, 2 hops, split 4 ways, wait 1440 min, pass on 100%, cash out via atm",
     "peak_probability": 0.6225,
@@ -119,7 +119,7 @@
         "sim_swap_takeover": true,
         "cash_structuring": true,
         "digital_arrest": true,
-        "patient_ring": true
+        "patient_ring": false
       }
     },
     "with": {
@@ -135,7 +135,7 @@
       }
     }
   },
-  "seconds": 60.4,
+  "seconds": 61.3,
   "notes": [
     "Everything here is on simulated Indian bank traffic; the red team's plans are synthetic.",
     "Caught means some payment of the plan reached the Review tier (probability 0.70 or more).",

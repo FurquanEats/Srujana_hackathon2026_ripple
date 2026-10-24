@@ -195,6 +195,64 @@ export interface RedTeamRun {
   note: string;
 }
 
+export interface MotifRule {
+  feature: string;
+  text: string;
+  low: number;
+  high: number;
+  background_share: number;
+}
+
+export interface LearnedPattern {
+  motif_id: string;
+  name: string;
+  learned_from: string;
+  learned_at: string;
+  rules: MotifRule[];
+  steps: string[];
+  example_txn_ids: string[];
+  background_events: number;
+  background_days: number;
+  background_matches: number;
+  false_alarms_per_day: number;
+  lead_hours?: number | null;
+  deployed: boolean;
+  hits: number;
+  recent_hits: string[];
+}
+
+export interface LearnRequest {
+  case_id?: string;
+  account?: string;
+  from_ts?: string | null;
+  amount?: number | null;
+  name?: string;
+}
+
+export interface OneShotReport {
+  generated_at: string;
+  example: { plan: string; peak_probability: number; transactions: number };
+  motif: {
+    name: string;
+    constraints: { feature: string; text: string; background_share: number }[];
+    steps: string[];
+    background_events: number;
+    background_days: number;
+    false_alarms_per_day: number;
+    lead_hours: number | null;
+  };
+  generalisation: { plans: number; caught_without: number; caught_with: number; missed_without: number; of_missed_caught_with: number };
+  adaptive_red_team: Record<"without" | "with", { plans_tried: number; evading_plans: number; caught_share: number }>;
+  unseen_bank: {
+    seed: number;
+    days: number;
+    transactions: number;
+    without: { legit_alerts: number; motif_alerts_on_legit: number };
+    with: { legit_alerts: number; motif_alerts_on_legit: number };
+  };
+  notes: string[];
+}
+
 export interface InjectResult {
   kind: string;
   at: string;
@@ -241,6 +299,11 @@ export const api = {
   inject: (kind: string) => request<InjectResult>(`/inject/${kind}`, post()),
   trace: (account: string, from_ts?: string, amount?: number) =>
     request<InterdictionPlan>("/trace", post({ account, from_ts: from_ts || null, amount: amount ?? null })),
+  motifs: () => request<LearnedPattern[]>("/motifs"),
+  learn: (body: LearnRequest) => request<LearnedPattern>("/motifs/learn", post(body)),
+  deploy: (id: string) => request<LearnedPattern>(`/motifs/${encodeURIComponent(id)}/deploy`, post()),
+  retire: (id: string) => request<LearnedPattern>(`/motifs/${encodeURIComponent(id)}/retire`, post()),
+  oneshot: () => request<OneShotReport>("/oneshot"),
 };
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });

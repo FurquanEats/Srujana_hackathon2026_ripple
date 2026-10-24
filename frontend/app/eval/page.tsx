@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Button, Card, EmptyState, ErrorNote, Icon, LoadingPanel, Notice, PageHeader, Stat } from "@/components/ui";
-import { api, money, pct, time, type ConsortiumReport, type EvalReport, type MetricRow, type RedTeamRun } from "@/lib/api";
+import { api, money, pct, time, type ConsortiumReport, type EvalReport, type MetricRow, type OneShotReport, type RedTeamRun } from "@/lib/api";
 
 const AXIS = { stroke: "#5d6d84", fontSize: 11 };
 const GRID = "#e3eaf2";
@@ -78,16 +78,52 @@ function RedTeam({ redteam }: { redteam: { latest: RedTeamRun; before: RedTeamRu
   );
 }
 
+function OneShot({ r }: { r: OneShotReport }) {
+  const g = r.generalisation;
+  const a = r.adaptive_red_team;
+  const u = r.unseen_bank;
+  return (
+    <Card title="One-shot learning: a new detector from one missed scam"
+          description={`One trail the engine let through (${r.example.plan}; top score ${r.example.peak_probability.toFixed(2)}, below Review) was the only example. Run ${time(r.generated_at)}.`}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Stat label="Missed plans now caught" value={`${g.of_missed_caught_with} of ${g.missed_without}`} tone="good"
+              hint={`random laundering plans the engine missed, out of ${g.plans} tried`} />
+        <Stat label="Adaptive red team: evading plans" value={`${a.without.evading_plans} → ${a.with.evading_plans}`} tone="good"
+              hint={`of ${a.with.plans_tried} plans an adaptive attacker tried`} />
+        <Stat label="False alarms on an unseen bank" value={u.with.motif_alerts_on_legit}
+              hint={`legitimate payments it flagged in ${u.days} days of a bank it never saw (${u.transactions.toLocaleString("en-IN")} payments)`} />
+      </div>
+      <h3 className="mt-5 text-sm font-semibold text-ink">What Ripple learned: &ldquo;{r.motif.name}&rdquo;</h3>
+      <ul className="mt-2 divide-y divide-line rounded-lg border border-line">
+        {r.motif.constraints.map((c) => (
+          <li key={c.feature} className="flex flex-col gap-1 px-3 py-2.5 text-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+            <span className="text-ink">{c.text}</span>
+            <span className="whitespace-nowrap tabular-nums text-muted">{pct(c.background_share, 1)} of ordinary relay payments meet this alone</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-sm text-muted">
+        Ripple freed the amount, the waits, the split and the number of hops, because a criminal changes those between runs. What it kept
+        describes the accounts, which are much harder to change. It checked the result against {r.motif.background_events.toLocaleString("en-IN")} ordinary
+        payments over {r.motif.background_days} days before it could go live.
+      </p>
+      {r.notes.map((n) => <p key={n} className="mt-1 text-xs text-subtle">{n}</p>)}
+    </Card>
+  );
+}
+
 export default function Evaluation() {
   const [report, setReport] = useState<EvalReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consortium, setConsortium] = useState<ConsortiumReport | null>(null);
   const [redteam, setRedteam] = useState<{ latest: RedTeamRun; before: RedTeamRun | null } | null>(null);
+  const [oneshot, setOneshot] = useState<OneShotReport | null>(null);
 
   const load = useCallback(() => {
     api.eval().then(setReport).catch((e) => setError(e.message));
     api.consortium().then(setConsortium).catch(() => setConsortium(null));
     api.redteam().then(setRedteam).catch(() => setRedteam(null));
+    api.oneshot().then(setOneshot).catch(() => setOneshot(null));
   }, []);
 
   useEffect(load, [load]);
@@ -188,6 +224,8 @@ export default function Evaluation() {
       </div>
 
       {redteam && <RedTeam redteam={redteam} />}
+
+      {oneshot && <OneShot r={oneshot} />}
 
       {consortium && (
         <Card title={`Bank consortium: ${consortium.member_banks.length} banks sharing only keyed hashes`}

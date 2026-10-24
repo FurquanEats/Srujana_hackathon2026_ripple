@@ -14,7 +14,7 @@ accounts, so the engine judges them against real history:
     digital_arrest     a pensioner, coached by fake police on a video call, breaks fixed deposits over two days and
                        sends them by RTGS to "safe accounts"; mules split the money onward, cash some out, buy crypto
                        and leave the rest sitting, which is what a freeze can still recover
-    patient_ring       several victims pay one new account, which waits most of a day, splits the money to new mules,
+    patient_ring       a few victims pay one new account, which waits seven to ten hours, splits the money to new mules,
                        and they wait just over a day before withdrawing it as cash: the red team's best plan for
                        evading the built-in detectors, with its amounts, waits and split varied on every run
 
@@ -246,14 +246,14 @@ class World:
 
     def _patient_ring(self, t: datetime, label: int, scenario: str) -> None:
         r = self.rng
-        victims = r.sample([p for p in self.people if p.kind == "salaried"], r.randint(4, 6))
-        amount = r.choice([29_000, 35_000, 42_000, 49_000])
+        victims = r.sample([p for p in self.people if p.kind == "salaried"], r.randint(3, 4))  # under fan-in's five senders
+        amount = r.choice([35_000, 42_000, 49_000])
         first = self.fresh_account("MULE")
         for i, v in enumerate(victims):
             self.by(v, t + timedelta(minutes=7 * i + r.randint(0, 4)), first, amount, Rail.UPI,
                     label=label, scenario=scenario, victim=True)
         held = amount * len(victims)
-        ready = t + timedelta(minutes=7 * len(victims) + r.randint(18, 26) * 60)
+        ready = t + timedelta(minutes=7 * len(victims) + r.randint(7, 10) * 60)  # past pass-through's six hours
         mules = [self.fresh_account("MULE") for _ in range(r.randint(3, 4))]
         for i, mule in enumerate(mules):  # each mule waits just over a day, past the 24-hour cash-out check, then withdraws
             sent = self.pay(ready + timedelta(minutes=3 * i), first, mule, held / len(mules), Rail.IMPS,

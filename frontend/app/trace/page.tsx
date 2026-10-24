@@ -4,9 +4,10 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { FreezeList, RecoveryChart, RecoveryMetrics } from "@/components/FreezePlan";
+import { LearnFromTrail } from "@/components/LearnPattern";
 import { MoneyGraph } from "@/components/MoneyGraph";
 import { Button, Card, EmptyState, ErrorNote, Field, Icon, inputClass, LoadingPanel, Notice, PageHeader, Spinner } from "@/components/ui";
-import { api, money, time, type InterdictionPlan } from "@/lib/api";
+import { api, money, time, type InterdictionPlan, type LearnRequest } from "@/lib/api";
 
 type Errors = Partial<Record<"account" | "date" | "time" | "amount", string>>;
 
@@ -66,6 +67,7 @@ function ReportForm() {
   const [amount, setAmount] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [plan, setPlan] = useState<InterdictionPlan | null>(null);
+  const [traced, setTraced] = useState<LearnRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -76,7 +78,9 @@ function ReportForm() {
     setError(null);
     try {
       const n = amt.trim() ? parseAmount(amt) : undefined;
-      setPlan(await api.trace(acc.trim(), d && c ? `${d}T${withSeconds(c)}` : undefined, n));
+      const from = d && c ? `${d}T${withSeconds(c)}` : undefined;
+      setPlan(await api.trace(acc.trim(), from, n));
+      setTraced({ account: acc.trim(), from_ts: from ?? null, amount: n ?? null });
       requestAnimationFrame(() => resultRef.current?.focus());
     } catch (e) {
       setPlan(null);
@@ -201,6 +205,7 @@ function ReportForm() {
               </Card>
               <FreezeList plan={plan} />
               <RecoveryChart plan={plan} />
+              {traced && <LearnFromTrail key={`${traced.account}-${traced.from_ts}`} request={traced} what="this scam" />}
             </>
           )}
         </div>
