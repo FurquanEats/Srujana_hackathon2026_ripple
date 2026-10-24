@@ -160,6 +160,17 @@ class MetricRow(BaseModel):
     precision_at_50: float | None = None
 
 
+class RecoverableRow(BaseModel):
+    """Money recoverable at first alert, over laundering attempts: the share of an attempt's money in transactions at
+    or after the first alert on any of them, i.e. money that had not moved yet when the system first noticed."""
+
+    name: str  # system variant
+    attempts: int
+    alerted_share: float  # attempts with at least one alert
+    median_recoverable: float  # never-alerted attempts count as 0
+    mean_recoverable: float
+
+
 class EvalReport(BaseModel):
     dataset: str
     split: str
@@ -172,6 +183,7 @@ class EvalReport(BaseModel):
     suggested_budget: int
     throughput_tps: float | None = None
     p95_latency_ms: float | None = None
+    money_recoverable: list[RecoverableRow] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
 
