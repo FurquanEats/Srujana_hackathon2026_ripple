@@ -44,6 +44,8 @@ class GraphLayer:
         self.community_of: dict[str, int] = {}
         self.communities: list[set[str]] = []
         self.pagerank: dict[str, float] = {}
+        self.in_weight: dict[str, float] = {}  # kept incrementally; networkx sums every neighbour on each call
+        self.out_weight: dict[str, float] = {}
         self._since_recompute = 0
 
     def add(self, txn: Transaction) -> None:
@@ -51,6 +53,8 @@ class GraphLayer:
             return
         edge = _Edge(txn.txn_id, txn.ts, txn.src_account, txn.dst_account, txn.amount)
         self.edges.append(edge)
+        self.out_weight[edge.src] = self.out_weight.get(edge.src, 0.0) + edge.amount
+        self.in_weight[edge.dst] = self.in_weight.get(edge.dst, 0.0) + edge.amount
         data = self.graph.get_edge_data(edge.src, edge.dst)
         if data is None:
             self.graph.add_edge(edge.src, edge.dst, weight=edge.amount, txns=[edge.txn_id])
@@ -67,6 +71,8 @@ class GraphLayer:
         data = self.graph.get_edge_data(edge.src, edge.dst)
         if data is None:
             return
+        self.out_weight[edge.src] -= edge.amount
+        self.in_weight[edge.dst] -= edge.amount
         data["weight"] -= edge.amount
         data["txns"].remove(edge.txn_id)
         if not data["txns"]:
@@ -74,6 +80,8 @@ class GraphLayer:
             for node in (edge.src, edge.dst):
                 if self.graph.degree(node) == 0:
                     self.graph.remove_node(node)
+                    self.in_weight.pop(node, None)
+                    self.out_weight.pop(node, None)
 
     def recompute(self) -> None:
         self._since_recompute = 0
@@ -156,6 +164,6 @@ class GraphLayer:
         return {
             "in_degree": float(self.graph.in_degree(account)),
             "out_degree": float(self.graph.out_degree(account)),
-            "in_weight": float(self.graph.in_degree(account, weight="weight")),
-            "out_weight": float(self.graph.out_degree(account, weight="weight")),
+            "in_weight": self.in_weight.get(account, 0.0),
+            "out_weight": self.out_weight.get(account, 0.0),
         }

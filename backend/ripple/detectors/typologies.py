@@ -12,6 +12,10 @@ from ripple.fmt import duration, ids, money, names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
 Params = dict[str, Any]
+# Accounts receiving more than this many payments in a detector window behave like banks, payment processors or
+# large merchants, not mules. Pass-through and fan-in checks skip them: summing their windows on every payment is
+# the costliest step at IBM AML scale, and they do not fit the mule pattern anyway.
+HUB_LIMIT = 1000
 
 
 def _reason(code: str, text: str, strength: float, txn_ids: list[str], counterfactual: str | None = None) -> Reason:
@@ -41,7 +45,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
         return None
     lookback = timedelta(hours=p["lookback_hours"])
     received = window(src.incoming, txn.ts, lookback)
-    if not received:
+    if not received or len(received) > HUB_LIMIT:
         return None
     gap = txn.ts - received[-1].ts
     if gap > timedelta(minutes=p["within_minutes"]):
@@ -83,6 +87,8 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     span = timedelta(hours=p["window_hours"])
     cutoff = txn.ts - span
     received = window(src.incoming, txn.ts, span)
+    if len(received) > HUB_LIMIT:
+        return None
     senders = {e.counterparty for e in received if src.senders.get(e.counterparty, cutoff) >= cutoff}
     if len(senders) < p["min_senders"]:
         return None

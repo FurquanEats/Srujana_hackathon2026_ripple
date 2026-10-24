@@ -8,6 +8,7 @@ costs about ten times an empty list. Transactions must arrive in timestamp order
 from __future__ import annotations
 
 import math
+from bisect import bisect_left
 import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -36,6 +37,9 @@ class AccountState:
     outgoing: list[Edge] = field(default_factory=list)  # last 72 h, oldest first
     out_history: list[tuple[datetime, float]] = field(default_factory=list)  # last 30 days of outgoing amounts
     cash_deposits: list[Edge] = field(default_factory=list)  # last 31 days
+    out_hour_counts: list[int] = field(default_factory=lambda: [0] * 24)  # out_history entries per hour of day
+    baseline_cache: Baseline | None = None  # last baseline computed, reused until enough new payments arrive
+    appends_since_baseline: int = 0
     payees: dict[str, datetime] = field(default_factory=dict)  # first payment to each payee
     senders: dict[str, datetime] = field(default_factory=dict)  # first payment from each sender
     devices: dict[str, datetime] = field(default_factory=dict)  # first use of each device
@@ -76,7 +80,10 @@ class FeatureStore:
         else:
             src.outgoing.append(Edge(txn.txn_id, ts, txn.dst_account, txn.amount))
             src.out_history.append((ts, txn.amount))
+            src.out_hour_counts[ts.hour] += 1
+            src.appends_since_baseline += 1
             if len(src.out_history) > MAX_HISTORY:
+                src.out_hour_counts[src.out_history[0][0].hour] -= 1
                 del src.out_history[0]
             src.payees.setdefault(txn.dst_account, ts)
             if txn.device_id:
@@ -95,22 +102,27 @@ class FeatureStore:
 
 def _prune(state: AccountState, now: datetime) -> None:
     for span, edges in ((EDGE_WINDOW, state.incoming), (EDGE_WINDOW, state.outgoing), (CASH_WINDOW, state.cash_deposits)):
-        cutoff, k = now - span, 0
-        while k < len(edges) and edges[k].ts < cutoff:
-            k += 1
+        k = bisect_left(edges, now - span, key=_edge_ts)
         if k:
             del edges[:k]
-    cutoff, k = now - HISTORY_WINDOW, 0
-    while k < len(state.out_history) and state.out_history[k][0] < cutoff:
-        k += 1
+    k = bisect_left(state.out_history, now - HISTORY_WINDOW, key=_entry_ts)
     if k:
+        for ts, _ in state.out_history[:k]:
+            state.out_hour_counts[ts.hour] -= 1
         del state.out_history[:k]
 
 
+def _edge_ts(edge: Edge) -> datetime:
+    return edge.ts
+
+
+def _entry_ts(entry: tuple[datetime, float]) -> datetime:
+    return entry[0]
+
+
 def window(edges: list[Edge], now: datetime, span: timedelta) -> list[Edge]:
-    """Edges within `span` before `now`, oldest first."""
-    cutoff = now - span
-    return [e for e in edges if e.ts >= cutoff]
+    """Edges within `span` before `now`, oldest first. Edges are kept in time order, so this is a binary search."""
+    return edges[bisect_left(edges, now - span, key=_edge_ts):]
 
 
 @dataclass(frozen=True)
@@ -127,7 +139,21 @@ class Baseline:
 
 
 def baseline(state: AccountState, skip_last: bool = True) -> Baseline | None:
-    """`skip_last` drops the current transaction, which update() has already added for non-cash payments."""
+    """`skip_last` drops the current transaction, which update() has already added for non-cash payments.
+
+    The median and MAD of up to 500 payments are reused until the account has made 5% more payments, because a
+    busy account would otherwise recompute them on every payment and the values barely move.
+    """
+    n = len(state.out_history) - (1 if skip_last else 0)
+    if skip_last and state.baseline_cache is not None and state.appends_since_baseline < max(1, n // 20):
+        return state.baseline_cache
+    result = _baseline(state, skip_last)
+    if skip_last:
+        state.baseline_cache, state.appends_since_baseline = result, 1
+    return result
+
+
+def _baseline(state: AccountState, skip_last: bool) -> Baseline | None:
     amounts = [a for _, a in state.out_history]
     if skip_last:
         amounts = amounts[:-1]
@@ -140,13 +166,15 @@ def baseline(state: AccountState, skip_last: bool = True) -> Baseline | None:
 
 def hour_share(state: AccountState, hour: int, skip_last: bool = True) -> float | None:
     """Share of past outgoing payments made within one hour of `hour`, excluding the current one."""
-    hours = [ts.hour for ts, _ in state.out_history]
-    if skip_last:
-        hours = hours[:-1]
-    if len(hours) < 5:
+    counts = state.out_hour_counts
+    total = len(state.out_history)
+    near = counts[(hour - 1) % 24] + counts[hour] + counts[(hour + 1) % 24]
+    if skip_last and total:
+        total -= 1
+        near -= 1  # the current payment is in its own hour
+    if total < 5:
         return None
-    near = sum(1 for h in hours if min((h - hour) % 24, (hour - h) % 24) <= 1)
-    return near / len(hours)
+    return near / total
 
 
 def feature_vector(txn: Transaction, src: AccountState, dst: AccountState) -> dict[str, float]:
