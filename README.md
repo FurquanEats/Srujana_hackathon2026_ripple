@@ -1,112 +1,128 @@
 # Ripple
 
-Ripple detects fraud and money-mule activity in Indian payments that only shows up across many transactions and accounts. It scores every UPI, IMPS, NEFT, RTGS and cash transaction as it streams in, groups linked alerts into cases ranked by expected loss, and explains each flag with the transactions behind it.
+**Stop the scam, then follow the money.**
+
+Ripple protects people from payment scams in India at the two moments that matter. Before the money leaves, it spots a customer being coached into draining their savings (a "digital arrest" or fake-investment scam) and recommends a cooling-off hold. After the money leaves, it follows the stolen funds hop by hop through mule accounts while they are still moving, shows where the money sits right now, and gives the bank's nodal officer the smallest set of accounts to freeze to recover the most, with a drafted hold request for each.
 
 Built for Srujana Tech Fest 2026, Finance theme, problem statement F-01: Financial Fraud and Transaction Risk Detection.
 
-Ripple gives risk indicators for a human analyst to review. It does not decide that anyone committed fraud, it does not file reports, and it uses only synthetic and public data.
+Ripple gives risk indicators and drafts for a human officer to review. It does not decide that anyone committed fraud, does not freeze accounts or file reports itself, and uses only synthetic and public data.
 
-## How it works
+## Why this matters
 
-```
-replay / India simulator -> event bus -> per-account feature store
-        -> typology detectors | behavioural baseline | graph layer | calibrated ML model
-        -> fusion -> alerts -> incremental case engine -> REST + WebSocket -> Next.js UI
-```
+When a scam victim reports to the 1930 helpline or the cybercrime portal, the money has usually passed through two or three mule accounts within minutes, and some of it is already withdrawn or turned into crypto. Banks act on these reports by placing holds on receiving accounts, but tracing the money by hand across hops takes longer than the money takes to leave. Fraud scoring tools tell a bank which transaction looks risky; they do not tell an officer where the money is now and what to freeze first.
 
-- **Typology detectors** find pass-through, fan-in then out, fan-out bursts, scatter-gather, temporal cycles, cash structuring under the Rs 50,000 PAN limit, and device takeover. Each reason cites transaction IDs.
-- **Behavioural baseline** compares a transaction with the account's own history (robust z-scores, Isolation Forest).
-- **Graph layer** finds rings and collector accounts on a rolling 7-day payment and device graph.
-- **ML model** is LightGBM on behavioural and graph features, trained on IBM's public AML dataset with a time split, calibrated and explained with SHAP.
-- **Fusion** combines the four layers. A transaction backed only by the baseline layer cannot rise above Watch, so unusual but honest customers stay out of the top of the queue. Missing device or location data lowers confidence instead of raising risk.
-- **Cases** merge alerts that share accounts within 24 hours. They are tiered Critical, Review or Watch and queued by tier, then by expected loss (probability times amount at risk).
-- **Feedback** from an analyst moves the fusion weights online; a confirmed case raises risk for its neighbours, and a dismissed one stops the same account pair alerting for 7 days.
+## What Ripple does
 
-## Run it
+| Moment | Capability | How |
+| --- | --- | --- |
+| Before | Coerced-transfer detection | An established customer sends most of a lump sum that just arrived from their own fixed deposit or long-known source to a payee they have never paid, at five or more times their usual payment and at least Rs 1 lakh. Repeats within 72 hours score higher. The recommended action is a cooling-off hold and a call to the customer or a trusted contact. |
+| During | Streaming detection | Every payment is scored as it arrives by eight typology detectors (pass-through, fan-in then out, fan-out burst, scatter-gather, temporal cycle, cash structuring under the Rs 50,000 PAN-quote limit, device takeover, coerced transfer), a behavioural baseline, a graph layer and an optional ML model, fused into one probability. |
+| After | Golden-hour tracing | From a victim's report or an alerted case, Ripple follows the money forward through every hop it can see, using haircut taint tracking (the method used to trace mixed funds in crypto forensics). Money that reached an ATM withdrawal or a crypto off-ramp counts as escaped. |
+| After | Freeze plan | The freeze set is a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each freeze would be, plus any account holding a large share of the traced money. Each recommended freeze comes with the amount it recovers, the reason, and a drafted hold request. |
+
+Every flag carries reason sentences that cite the transactions behind it and a counterfactual ("not flagged if the money had left more than 30 minutes after arriving"). Context signals alone (unusual for this account, near other alerts) can never push a case above Watch, so an unusual but honest customer, such as someone buying Diwali jewellery, is never escalated.
+
+## Run the demo
 
 Backend (Python 3.12):
 
 ```bash
 cd backend
 python -m venv .venv
-.venv/Scripts/activate        # macOS/Linux: source .venv/bin/activate
+.venv/Scripts/activate              # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn ripple.api.main:app --reload    # serves the sample responses in fixtures/
-pytest -q
+RIPPLE_SOURCE=engine RIPPLE_DATA=sim:india RIPPLE_SPEED=1800 uvicorn ripple.api.main:app --port 8000
 ```
 
-To run the live engine instead, replaying a CSV or Parquet file of transactions:
-
-```bash
-RIPPLE_SOURCE=engine RIPPLE_DATA=path/to/transactions.csv RIPPLE_SPEED=600 uvicorn ripple.api.main:app
-```
-
-`RIPPLE_SPEED` is seconds of data per real second (0 replays as fast as possible). Columns follow `Transaction` in `backend/ripple/schema.py`.
+This simulates a legitimate month of Indian payments (salaries, rent, gig payouts, shops, UPI, IMPS, NEFT, RTGS and cash), scores the first 20 days at full speed as account history, then plays the rest live.
 
 Frontend (Node 22):
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:3000
+npm run dev                         # http://localhost:3000
 ```
 
-Copy `.env.example` to `.env` to change the API URL or CORS origins.
+1. **Command centre:** live payments, engine throughput and latency, and the case queue. Click **Digital arrest** to inject a scam into the stream.
+2. **Case workbench:** open the new Critical case. The freeze plan shows money already escaped to an ATM and crypto, money still recoverable in mule accounts, and the accounts to freeze. The replay slider shows the money moving hop by hop.
+3. **Report a scam:** enter the victim's account to trace the money forward from the report.
+4. **Evaluation:** results on IBM's public AML dataset.
+
+Run the tests with `cd backend && pytest -q`. Without `RIPPLE_SOURCE=engine`, the API serves the sample responses in `fixtures/`.
+
+## Architecture
+
+```
+simulator or file replay -> ordered feed -> per-account feature store
+    -> typology detectors | behavioural baseline | graph layer | ML model (optional)
+    -> fusion -> alerts -> incremental case engine
+    -> taint tracking + minimum-cut freeze plan
+    -> REST + WebSocket -> Next.js UI
+```
+
+| Choice | Why |
+| --- | --- |
+| Python engine, FastAPI, WebSockets | Same language as the ML stack, so live features are exactly the ones the model trains on; typed API contract in Pydantic |
+| Rolling per-account state with binary-searched time windows | Constant cost per payment even for busy accounts; about 0.1 to 1 ms per payment on a laptop |
+| NetworkX for communities, PageRank and the minimum cut | Recomputed only around alerted accounts, because whole-graph recomputes did not scale to IBM's 5 million transactions |
+| Logistic fusion with a corroboration rule | Each layer's contribution is visible and can be refitted on labelled data or nudged by analyst feedback |
+| Next.js, Cytoscape.js, Recharts | Live command centre, hop-by-hop money graph and evaluation charts |
 
 ## API
 
 | Route | Returns |
 | --- | --- |
 | `GET /cases?budget=N` | Top N open cases, by tier then expected loss |
-| `GET /cases/{id}` | Case detail: reasons, SHAP values, money-flow graph, timeline, account profiles |
+| `GET /cases/{id}` | Case detail: reasons, model contributions, money-flow graph, timeline, account profiles |
+| `GET /cases/{id}/interdiction` | Freeze plan: traced money, holdings, accounts to freeze, money escaped, recovery over time |
+| `POST /trace` | Freeze plan for a victim's report: `{account, from_ts?, amount?}` |
+| `POST /inject/{kind}` | Adds a simulated scenario to the live stream (`digital_arrest`, `mule_ring`, `scam_fanout`, `sim_swap_takeover`, `cash_structuring`, `diwali_spike`) |
 | `POST /cases/{id}/feedback` | Records an analyst verdict and returns the updated fusion weights |
-| `GET /eval` | Evaluation report: metrics, ablation, per-typology recall, alert-budget curve |
-| `POST /ingest` | Scores a list of transactions (live engine only) |
-| `GET /stats` | Transactions processed, alerts, open cases, throughput and p95 latency |
-| `WS /ws/stream` | Scored transactions, case updates and stats as they happen |
+| `GET /eval` | Evaluation report |
+| `POST /ingest`, `GET /stats`, `WS /ws/stream` | Push transactions, engine statistics, live stream of payments, cases and stats |
 
-Shapes are defined in `backend/ripple/schema.py`. `fixtures/` holds sample responses that validate against them.
+Shapes are defined in `backend/ripple/schema.py`.
 
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
+| `backend/ripple/engine.py` | Runs every layer for each payment and updates cases |
+| `backend/ripple/features` | Per-account rolling state and model features |
+| `backend/ripple/detectors` | Typology detectors and the behavioural baseline |
+| `backend/ripple/graph.py`, `fusion.py`, `cases.py`, `feedback.py` | Graph layer, fusion, case engine, feedback learning |
+| `backend/ripple/interdiction.py`, `trace.py`, `cash.py` | Taint tracking, freeze plans, victim-report tracing, cash-in and cash-out rules |
+| `backend/ripple/sim` | India payment simulator and scam scenarios |
+| `backend/ripple/data`, `eval`, `models` | IBM AML loader, evaluation, LightGBM model |
+| `backend/ripple/packs` | Thresholds per region as YAML (India; IBM AML evaluation in USD) |
 | `backend/ripple/api` | FastAPI routes and WebSocket |
-| `backend/ripple/stream`, `features` | Event bus, replay and per-account feature store |
-| `backend/ripple/engine.py` | Runs every layer for each transaction and updates cases |
-| `backend/ripple/detectors`, `graph.py`, `fusion.py`, `cases.py`, `feedback.py` | Typology detectors and baseline, graph layer, fusion, case engine and feedback learning |
-| `backend/ripple/models`, `eval` | ML models and evaluation |
-| `backend/ripple/sim`, `data` | India transaction simulator and IBM AML loader |
-| `backend/ripple/copilot`, `india` | Case narratives, STR drafts and Indian compliance rules |
-| `backend/ripple/packs` | Region thresholds as YAML |
-| `fixtures/` | Sample API responses |
+| `backend/scripts/benchmark.py` | Speed, memory and alert-quality benchmark on IBM AML |
 | `frontend/` | Next.js app |
-
-## Status
-
-| Part | State |
-| --- | --- |
-| API contract, routes, WebSocket and tests | Working, with the live engine or the sample data in `fixtures/` |
-| Feature store, 7 typology detectors, behavioural baseline, graph layer, fusion, case engine, feedback learning, replay | Working and tested |
-| India pack thresholds | Working |
-| Case queue page | Working against the API |
-| ML model | In progress |
-| Simulator, IBM AML loader, evaluation | In progress |
-| Workbench, budget optimiser, evaluation page, copilot | In progress |
-
-The numbers in `fixtures/eval.json` are illustrative sample data, not measured results.
+| `data/demo/` | Simulated India demo month |
 
 ## Data
 
-- [IBM Transactions for Anti Money Laundering](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml) (public, synthetic) for training and evaluation. Not committed; place it in `data/raw/`.
-- Ripple's own India simulator for demo scenarios. Labels are hidden from the engine.
+- [IBM Transactions for Anti Money Laundering](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml), HI-Small (public, synthetic, labelled), for evaluation. Not committed; place the files in `data/raw/` and run `python -m ripple.data.ibm` from `backend/`.
+- Ripple's India simulator for demo scenarios, with labels and victim flags kept out of the engine's view.
+
+## Evaluation and validation
+
+- Model and metrics on IBM AML use a time split: train on 3 to 7 September (after a 48-hour warm-up), test on 8 to 10 September. The sparse 11 to 18 September tail is replayed for state but not scored, because most of its rows are laundering and would inflate precision.
+- The headline comparison is money still recoverable at the first alert, against a single-transaction rule.
+- On the simulated India month, false alarms were cut from 1,699 to 92 (84 of them Watch-level unusual amounts) while every scam scenario still reaches Review or Critical; `tests/test_false_alarms.py` keeps it that way.
+- Each detector has a test for a hit, a near-miss just past its threshold, and missing data.
+
+## Known limitations
+
+- Tracing sees only payments inside the engine's 72-hour window and inside one bank's view; money that leaves the bank is counted as escaped.
+- Taint uses the haircut rule; an account's own funds from before the trail are unknown, so traced holdings are an estimate.
+- Cash-out accounts are recognised by name prefixes in the simulator; a bank would use its own list of ATMs and virtual-asset exchange accounts.
+- Thresholds are set by hand for India and tuned on IBM AML, which is synthetic and US-dollar based; no real Indian bank data was used.
+- A legitimate large purchase funded by a broken fixed deposit (a house down payment, say) looks like coercion, which is why the action is a hold and a call, not a block.
+- Hold-request drafts and reason texts are not legal determinations.
 
 ## AI usage
 
 The team used AI coding assistants (Claude Code) to plan the architecture and to draft code, tests and documentation. Every change is reviewed and integrated by the team, and the team can explain each module.
-
-
-
-
-
-
