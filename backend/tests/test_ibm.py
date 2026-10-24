@@ -66,7 +66,8 @@ def test_ibm_loader_maps_rows_converts_to_usd_and_tags_patterns(tmp_path):
     assert list(out["txn_id"]) == ["ibm-1", "ibm-0", "ibm-2", "ibm-3"]  # sorted by time, IDs keep CSV row order
     first = out.iloc[0]
     assert first["src_account"] == "021174:800737690" and first["rail"] == "ACH"
-    assert first["pattern"] == "fan_out" and first["is_laundering"] == 1
+    assert first["pattern"] == "fan_out" and first["is_laundering"] == 1 and first["attempt_id"] == 0
+    assert (out["attempt_id"] == -1).sum() == 3
     assert out.iloc[3]["amount"] == 100.0 and out.iloc[3]["orig_currency"] == "UK Pound"
 
     out.to_csv(tmp_path / "out.csv", index=False)

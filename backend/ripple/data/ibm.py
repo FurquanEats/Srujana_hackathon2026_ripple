@@ -3,7 +3,8 @@
     python -m ripple.data.ibm --raw ../data/raw --out ../data/processed/ibm_hi_small.parquet
 
 Each row keeps the ripple.schema.Transaction columns plus labels for training and evaluation:
-is_laundering (0/1), pattern (fan_in, cycle, ... or empty), orig_amount and orig_currency. Transaction ignores
+is_laundering (0/1), pattern (fan_in, cycle, ... or empty), attempt_id (the laundering attempt's number in the
+patterns file, -1 if none), orig_amount and orig_currency. Transaction ignores
 the extra columns, so replay.load_transactions reads the file as is.
 
 Bank and account are joined into one account ID ("<bank>:<account>"), because IBM account numbers repeat across
@@ -57,21 +58,25 @@ def usd_rates(df: pd.DataFrame) -> dict[str, float]:
 
 
 def read_patterns(path: str | Path) -> pd.DataFrame:
-    """Parses HI-Small_Patterns.txt into one row per laundering transaction with its pattern name."""
-    lines, names, pattern = [], [], None
+    """Parses HI-Small_Patterns.txt into one row per laundering transaction with its pattern name and attempt number
+    (one attempt per BEGIN/END block)."""
+    lines, names, attempts, pattern, attempt = [], [], [], None, -1
     for line in Path(path).read_text().splitlines():
         line = line.strip()
         if begin := _BEGIN.match(line):
             pattern = begin.group(1).lower().replace("-", "_")
+            attempt += 1
         elif line.startswith("END LAUNDERING"):
             pattern = None
         elif line and pattern:
             lines.append(line)
             names.append(pattern)
+            attempts.append(attempt)
     # Parsed with the same reader as the transactions, so float amounts match exactly in the join.
     df = read_raw(io.StringIO("header\n" + "\n".join(lines)))
     df["pattern"] = names
-    return df[KEY + ["pattern"]].drop_duplicates(KEY)
+    df["attempt_id"] = attempts
+    return df[KEY + ["pattern", "attempt_id"]].drop_duplicates(KEY)
 
 
 def transform(df: pd.DataFrame, patterns: pd.DataFrame | None = None,
@@ -83,6 +88,7 @@ def transform(df: pd.DataFrame, patterns: pd.DataFrame | None = None,
         df = df.merge(patterns, on=KEY, how="left", validate="many_to_one")
     else:
         df["pattern"] = None
+        df["attempt_id"] = -1
     out = pd.DataFrame({
         "txn_id": "ibm-" + df.index.astype(str),
         "ts": df["ts"],
@@ -97,6 +103,7 @@ def transform(df: pd.DataFrame, patterns: pd.DataFrame | None = None,
         "channel": None,
         "is_laundering": df["is_laundering"].astype("int8"),
         "pattern": df["pattern"].fillna(""),
+        "attempt_id": df["attempt_id"].fillna(-1).astype("int32"),
         "orig_amount": df["amount_paid"],
         "orig_currency": df["payment_currency"],
     })
