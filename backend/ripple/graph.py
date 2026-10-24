@@ -1,8 +1,11 @@
-"""Graph layer: a rolling 7-day payment graph with Louvain communities and PageRank.
+"""Graph layer: a rolling payment graph with Louvain communities and PageRank around alerted accounts.
 
-Communities and PageRank are recomputed every `recompute_every` transactions rather than on every event, because
-they are global. Scores between recomputes use the last result. An account scores high when its community holds
-several alerted accounts, or when it sits within two hops of an account in a confirmed case.
+Communities and PageRank are recomputed every `recompute_every` transactions, and only on the neighbourhood of
+accounts that have alerts (each alerted account plus its direct counterparties, capped at MAX_NEIGHBOURHOOD nodes).
+That is the only place they are used, and computing them on the whole graph does not scale: on IBM AML's 5 million
+transactions a full recompute took longer than the 20,000 transactions between recomputes. Scores between recomputes
+use the last result. An account scores high when its community holds several alerted accounts, or when it sits
+within two hops of an account in a confirmed case.
 """
 
 from __future__ import annotations
@@ -16,11 +19,11 @@ import networkx as nx
 from ripple.fmt import names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
-WINDOW = timedelta(days=7)
 MIN_COMMUNITY, MAX_COMMUNITY = 3, 60
+MAX_NEIGHBOURHOOD = 20_000
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class _Edge:
     txn_id: str
     ts: datetime
@@ -30,8 +33,9 @@ class _Edge:
 
 
 class GraphLayer:
-    def __init__(self, recompute_every: int = 500, seed: int = 7) -> None:
+    def __init__(self, recompute_every: int = 500, window_days: float = 7, seed: int = 7) -> None:
         self.recompute_every = recompute_every
+        self.window = timedelta(days=window_days)
         self.seed = seed
         self.graph = nx.DiGraph()
         self.edges: deque[_Edge] = deque()
@@ -53,7 +57,7 @@ class GraphLayer:
         else:
             data["weight"] += edge.amount
             data["txns"].append(edge.txn_id)
-        while self.edges and txn.ts - self.edges[0].ts > WINDOW:
+        while self.edges and txn.ts - self.edges[0].ts > self.window:
             self._remove(self.edges.popleft())
         self._since_recompute += 1
         if self._since_recompute >= self.recompute_every:
@@ -73,12 +77,21 @@ class GraphLayer:
 
     def recompute(self) -> None:
         self._since_recompute = 0
-        if self.graph.number_of_edges() == 0:
+        self.alerted &= set(self.graph)  # forget alerted accounts whose edges have aged out of the window
+        nodes: set[str] = set()
+        for account in sorted(self.alerted):
+            nodes.add(account)
+            nodes.update(self.graph.successors(account))
+            nodes.update(self.graph.predecessors(account))
+            if len(nodes) >= MAX_NEIGHBOURHOOD:
+                break
+        sub = self.graph.subgraph(nodes)
+        if sub.number_of_edges() == 0:
+            self.communities, self.community_of, self.pagerank = [], {}, {}
             return
-        undirected = self.graph.to_undirected()
-        self.communities = [set(c) for c in nx.community.louvain_communities(undirected, weight="weight", seed=self.seed)]
+        self.communities = [set(c) for c in nx.community.louvain_communities(sub.to_undirected(), weight="weight", seed=self.seed)]
         self.community_of = {a: i for i, c in enumerate(self.communities) for a in c}
-        self.pagerank = nx.pagerank(self.graph, weight="weight")
+        self.pagerank = nx.pagerank(sub, weight="weight")
 
     def mark_alert(self, *accounts: str) -> None:
         self.alerted.update(accounts)
@@ -107,7 +120,7 @@ class GraphLayer:
         share = len(flagged) / len(members)
         strength = min(1.0, 0.4 + share)
         hub = max(members, key=lambda a: self.pagerank.get(a, 0.0))
-        txn_ids = [t for u, v, d in self.graph.edges(data=True) if u in flagged and v in flagged for t in d["txns"]][:12]
+        txn_ids = [t for u in flagged for v, d in self.graph.adj.get(u, {}).items() if v in flagged for t in d["txns"]][:12]
         return strength, Reason(
             layer=Layer.GRAPH,
             code="community",
@@ -136,9 +149,13 @@ class GraphLayer:
         )
 
     def features(self, account: str) -> dict[str, float]:
-        idx = self.community_of.get(account)
+        """Raw graph features for the ML model. Communities and PageRank are left out on purpose: they are computed
+        only around alerts, so they would feed the detectors' own output back into the model."""
+        if account not in self.graph:
+            return {"in_degree": 0.0, "out_degree": 0.0, "in_weight": 0.0, "out_weight": 0.0}
         return {
-            "pagerank": self.pagerank.get(account, 0.0) * max(1, len(self.pagerank)),  # 1.0 = average account
-            "community_size": float(len(self.communities[idx])) if idx is not None else 0.0,
-            "degree": float(self.graph.degree(account)) if account in self.graph else 0.0,
+            "in_degree": float(self.graph.in_degree(account)),
+            "out_degree": float(self.graph.out_degree(account)),
+            "in_weight": float(self.graph.in_degree(account, weight="weight")),
+            "out_weight": float(self.graph.out_degree(account, weight="weight")),
         }

@@ -78,7 +78,7 @@ class Engine:
         self.model = model
         self.on_features = on_features
         self.store = FeatureStore()
-        self.graph = GraphLayer(recompute_every=self.pack["graph"]["recompute_every"])
+        self.graph = GraphLayer(self.pack["graph"]["recompute_every"], self.pack["graph"].get("window_days", 7))
         fusion_cfg = self.pack["fusion"]
         self.fusion = Fusion(fusion_cfg["weights"], fusion_cfg["baseline_only_cap"])
         self.dismiss_for = timedelta(days=fusion_cfg["dismiss_days"])

@@ -32,6 +32,7 @@ fusion:
   dismiss_days: 7                # a dismissed account pair cannot alert again for this long
 graph:
   recompute_every: 500           # transactions between community and PageRank recomputes
+  window_days: 7               # days of payments kept in the graph
 
 tiers:
   alert: 0.60

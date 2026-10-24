@@ -174,11 +174,13 @@ def temporal_cycle(txn: Transaction, store: FeatureStore, src: AccountState, dst
     start = txn.ts - timedelta(hours=p["window_hours"])
     max_edges = p["max_hops"] - 1  # the current transaction is the last hop
     found: list[Edge] | None = None
+    budget = [500]  # accounts the search may visit for one transaction, so busy hubs stay cheap
 
     def walk(account: str, after, path: list[Edge], seen: set[str]) -> None:
         nonlocal found
-        if found is not None or len(path) >= max_edges:
+        if found is not None or len(path) >= max_edges or budget[0] <= 0:
             return
+        budget[0] -= 1
         state = store.get(account)
         if state is None:
             return

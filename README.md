@@ -104,3 +104,9 @@ The numbers in `fixtures/eval.json` are illustrative sample data, not measured r
 ## AI usage
 
 The team used AI coding assistants (Claude Code) to plan the architecture and to draft code, tests and documentation. Every change is reviewed and integrated by the team, and the team can explain each module.
+
+
+
+
+
+
