@@ -19,7 +19,8 @@ replay / India simulator -> event bus -> per-account feature store
 - **Graph layer** finds rings and collector accounts on a rolling 7-day payment and device graph.
 - **ML model** is LightGBM on behavioural and graph features, trained on IBM's public AML dataset with a time split, calibrated and explained with SHAP.
 - **Fusion** combines the four layers. A transaction backed only by the baseline layer cannot rise above Watch, so unusual but honest customers stay out of the top of the queue. Missing device or location data lowers confidence instead of raising risk.
-- **Cases** merge alerts that share accounts within 24 hours and are tiered Critical, Review or Watch, ranked by probability times amount at risk.
+- **Cases** merge alerts that share accounts within 24 hours. They are tiered Critical, Review or Watch and queued by tier, then by expected loss (probability times amount at risk).
+- **Feedback** from an analyst moves the fusion weights online; a confirmed case raises risk for its neighbours, and a dismissed one stops the same account pair alerting for 7 days.
 
 ## Run it
 
@@ -30,9 +31,17 @@ cd backend
 python -m venv .venv
 .venv/Scripts/activate        # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn ripple.api.main:app --reload
+uvicorn ripple.api.main:app --reload    # serves the sample responses in fixtures/
 pytest -q
 ```
+
+To run the live engine instead, replaying a CSV or Parquet file of transactions:
+
+```bash
+RIPPLE_SOURCE=engine RIPPLE_DATA=path/to/transactions.csv RIPPLE_SPEED=600 uvicorn ripple.api.main:app
+```
+
+`RIPPLE_SPEED` is seconds of data per real second (0 replays as fast as possible). Columns follow `Transaction` in `backend/ripple/schema.py`.
 
 Frontend (Node 22):
 
@@ -48,11 +57,13 @@ Copy `.env.example` to `.env` to change the API URL or CORS origins.
 
 | Route | Returns |
 | --- | --- |
-| `GET /cases?budget=N` | Top N open cases by expected loss |
+| `GET /cases?budget=N` | Top N open cases, by tier then expected loss |
 | `GET /cases/{id}` | Case detail: reasons, SHAP values, money-flow graph, timeline, account profiles |
 | `POST /cases/{id}/feedback` | Records an analyst verdict and returns the updated fusion weights |
 | `GET /eval` | Evaluation report: metrics, ablation, per-typology recall, alert-budget curve |
-| `WS /ws/stream` | Scored transactions and case updates as they happen |
+| `POST /ingest` | Scores a list of transactions (live engine only) |
+| `GET /stats` | Transactions processed, alerts, open cases, throughput and p95 latency |
+| `WS /ws/stream` | Scored transactions, case updates and stats as they happen |
 
 Shapes are defined in `backend/ripple/schema.py`. `fixtures/` holds sample responses that validate against them.
 
@@ -62,7 +73,8 @@ Shapes are defined in `backend/ripple/schema.py`. `fixtures/` holds sample respo
 | --- | --- |
 | `backend/ripple/api` | FastAPI routes and WebSocket |
 | `backend/ripple/stream`, `features` | Event bus, replay and per-account feature store |
-| `backend/ripple/detectors`, `fusion.py`, `cases.py`, `feedback.py` | Detection, scoring, case engine and feedback learning |
+| `backend/ripple/engine.py` | Runs every layer for each transaction and updates cases |
+| `backend/ripple/detectors`, `graph.py`, `fusion.py`, `cases.py`, `feedback.py` | Typology detectors and baseline, graph layer, fusion, case engine and feedback learning |
 | `backend/ripple/models`, `eval` | ML models and evaluation |
 | `backend/ripple/sim`, `data` | India transaction simulator and IBM AML loader |
 | `backend/ripple/copilot`, `india` | Case narratives, STR drafts and Indian compliance rules |
@@ -74,10 +86,11 @@ Shapes are defined in `backend/ripple/schema.py`. `fixtures/` holds sample respo
 
 | Part | State |
 | --- | --- |
-| API contract, routes, WebSocket and tests | Working, serving sample data from `fixtures/` |
+| API contract, routes, WebSocket and tests | Working, with the live engine or the sample data in `fixtures/` |
+| Feature store, 7 typology detectors, behavioural baseline, graph layer, fusion, case engine, feedback learning, replay | Working and tested |
 | India pack thresholds | Working |
 | Case queue page | Working against the API |
-| Detectors, feature store, graph layer, model, fusion, case engine | In progress |
+| ML model | In progress |
 | Simulator, IBM AML loader, evaluation | In progress |
 | Workbench, budget optimiser, evaluation page, copilot | In progress |
 

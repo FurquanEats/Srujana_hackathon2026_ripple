@@ -77,7 +77,7 @@ class CaseSummary(BaseModel):
     tier: Tier
     probability: float = Field(ge=0, le=1)  # highest in the case
     amount_at_risk: float
-    expected_loss: float  # probability x amount_at_risk; the queue sorts by this
+    expected_loss: float  # probability x amount_at_risk; the queue sorts by tier, then this
     accounts: int
     transactions: int
     typologies: list[str]

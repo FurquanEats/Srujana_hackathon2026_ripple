@@ -6,7 +6,7 @@ currency: INR
 rails: [UPI, IMPS, NEFT, RTGS, CASH]
 
 detectors:
-  pass_through: {forward_share: 0.8, within_minutes: 30}
+  pass_through: {forward_share: 0.8, within_minutes: 30, lookback_hours: 24, min_new_sender_share: 0.5}
   fan_in_out: {min_senders: 5, window_hours: 24, min_outflow_share: 0.7}
   fan_out_burst: {min_new_payees: 5, window_minutes: 60}
   scatter_gather: {min_intermediaries: 3, window_hours: 48}
@@ -20,8 +20,13 @@ detectors:
   device_takeover: {window_minutes: 120}
 
 fusion:
-  initial_weights: {detector: 0.35, baseline: 0.15, graph: 0.25, model: 0.25}
+  # p = sigmoid(bias + sum(weight * layer score)). A strong detector hit alone (0.9) gives about 0.86;
+  # a maximal baseline score alone gives about 0.62, which is Watch.
+  weights: {bias: -4.0, detector: 6.5, baseline: 4.5, graph: 3.0, model: 5.0}
   baseline_only_cap: 0.69        # a lone baseline signal can reach Watch, never Review
+  dismiss_days: 7                # a dismissed account pair cannot alert again for this long
+graph:
+  recompute_every: 500           # transactions between community and PageRank recomputes
 
 tiers:
   alert: 0.60

@@ -10,9 +10,10 @@ def test_india_pack_loads():
     assert pack["report"] == {"type": "STR", "authority": "FIU-IND", "deadline_working_days": 7}
 
 
-def test_fusion_weights_sum_to_one():
-    weights = load_pack("india")["fusion"]["initial_weights"]
-    assert sum(weights.values()) == pytest.approx(1.0)
+def test_fusion_weights_cover_every_layer():
+    weights = load_pack("india")["fusion"]["weights"]
+    assert set(weights) == {"bias", "detector", "baseline", "graph", "model"}
+    assert all(weights[k] > 0 for k in ("detector", "baseline", "graph", "model"))
 
 
 def test_tiers_are_ordered():

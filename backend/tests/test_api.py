@@ -9,11 +9,11 @@ def test_health():
     assert client.get("/health").json()["status"] == "ok"
 
 
-def test_cases_sorted_by_expected_loss_and_cut_to_budget():
+def test_cases_ordered_by_tier_then_expected_loss_and_cut_to_budget():
     cases = client.get("/cases", params={"budget": 3}).json()
     assert len(cases) == 3
-    losses = [c["expected_loss"] for c in cases]
-    assert losses == sorted(losses, reverse=True)
+    assert [c["tier"] for c in cases] == ["Critical", "Critical", "Review"]
+    assert cases[0]["expected_loss"] >= cases[1]["expected_loss"]
 
 
 def test_case_detail_and_unknown_case():
