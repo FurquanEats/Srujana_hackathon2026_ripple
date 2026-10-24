@@ -23,8 +23,10 @@ export interface ScoredTransaction {
   amount: number;
   currency: string;
   rail: string;
+  src_handle?: string | null;
   device_id?: string | null;
   location?: string | null;
+  channel?: string | null;
   probability: number;
   confidence: number;
   layer_scores: Record<Layer, number>;
@@ -64,6 +66,7 @@ export interface GraphEdge {
 
 export interface AccountProfile {
   account_id: string;
+  persona?: string | null;
   opened_days_ago?: number | null;
   median_amount_30d?: number | null;
   txns_30d?: number | null;
@@ -84,6 +87,7 @@ export interface CaseDetail extends CaseSummary {
   timeline: ScoredTransaction[];
   profiles: AccountProfile[];
   narrative?: string | null;
+  str_due?: string | null;
 }
 
 export interface TaintHolding {
@@ -242,7 +246,16 @@ export const api = {
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
+const inrCompact = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", notation: "compact", maximumFractionDigits: 1, minimumFractionDigits: 0 });
+const usdCompact = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1, minimumFractionDigits: 0 });
+
+/** Full amount. INR uses lakh grouping (₹11,40,000); USD is kept for IBM AML evaluation data. */
 export const money = (amount: number, currency = "INR") => (currency === "INR" ? inr : usd).format(amount);
+/** Short amount for chart axes and graph labels: ₹11.4L, ₹1.3Cr, $1.1M. */
+export const moneyShort = (amount: number, currency = "INR") => (currency === "INR" ? inrCompact : usdCompact).format(amount);
 export const pct = (x: number, digits = 0) => `${(x * 100).toFixed(digits)}%`;
+/** A model probability as a percentage that never rounds up to a certain-looking 100%. */
+export const prob = (p: number) => (p >= 0.995 && p < 1 ? ">99%" : pct(p));
 export const time = (ts: string) =>
   new Date(ts).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+export const clock = (ts: string) => new Date(ts).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });

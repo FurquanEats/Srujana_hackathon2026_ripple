@@ -2,12 +2,53 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { FreezePlan } from "@/components/FreezePlan";
-import { MoneyGraph } from "@/components/MoneyGraph";
-import { Card, ErrorNote, LayerTag, RiskDot, TierBadge } from "@/components/ui";
-import { api, money, pct, time, type CaseDetail, type InterdictionPlan } from "@/lib/api";
+import { AccountProfiles, EvidenceList, ModelContributions } from "@/components/Evidence";
+import { FreezeList, RecoveryChart, RecoveryMetrics } from "@/components/FreezePlan";
+import { MoneyGraph, ReplayControls } from "@/components/MoneyGraph";
+import { Timeline, type CaseEvent } from "@/components/Timeline";
+import { Button, Card, Dialog, ErrorNote, Icon, LoadingPanel, Notice, Spinner, TierBadge } from "@/components/ui";
+import { api, money, prob, time, type CaseDetail, type InterdictionPlan } from "@/lib/api";
+
+type Verdict = "confirmed" | "dismissed";
+
+const SECTIONS = [
+  ["evidence", "Evidence"],
+  ["money-flow", "Money flow"],
+  ["recovery", "Recovery over time"],
+  ["freeze-plan", "Freeze plan"],
+  ["timeline", "Timeline"],
+] as const;
+
+function DecisionDialog({ verdict, caseId, onCancel, onConfirm, busy }: {
+  verdict: Verdict | null;
+  caseId: string;
+  onCancel: () => void;
+  onConfirm: (v: Verdict) => void;
+  busy: boolean;
+}) {
+  const confirming = verdict === "confirmed";
+  return (
+    <Dialog open={verdict !== null} onClose={busy ? () => {} : onCancel}
+            title={confirming ? `Confirm ${caseId} as fraud?` : `Dismiss ${caseId}?`}
+            description={confirming
+              ? "Record that, after review, you judge this case to be fraud."
+              : "Record that, after review, you judge this case not to be fraud."}
+            footer={
+              <>
+                <Button variant="secondary" onClick={onCancel} disabled={busy}>Cancel</Button>
+                <Button variant="navy" onClick={() => verdict && onConfirm(verdict)} disabled={busy}>
+                  {busy && <Spinner />}{confirming ? "Record: confirmed fraud" : "Record: dismissed"}
+                </Button>
+              </>
+            }>
+      <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted">
+        <li>Your decision is used as feedback: Ripple re-weights its signal layers and re-ranks other open cases.</li>
+        <li>It does <strong className="text-ink">not</strong> freeze any account, send a hold request or file a report. Those remain separate steps for an officer.</li>      </ul>
+    </Dialog>
+  );
+}
 
 export function Workbench() {
   const { id } = useParams<{ id: string }>();
@@ -15,13 +56,18 @@ export function Workbench() {
   const [plan, setPlan] = useState<InterdictionPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<number | null>(null);
-  const [verdict, setVerdict] = useState<string | null>(null);
+  const [asking, setAsking] = useState<Verdict | null>(null);
+  const [deciding, setDeciding] = useState(false);
+  const [decision, setDecision] = useState<{ verdict: Verdict; message: string; at: string } | null>(null);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     Promise.all([api.case(id), api.interdiction(id)])
       .then(([d, p]) => { setDetail(d); setPlan(p); })
       .catch((e) => setError(e.message));
   }, [id]);
+
+  useEffect(load, [load]);
 
   const edges = useMemo(() => (detail ? [...detail.edges].sort((a, b) => a.ts.localeCompare(b.ts)) : []), [detail]);
   const accounts = useMemo(() => {
@@ -30,93 +76,145 @@ export function Workbench() {
     return detail.nodes.map((n) => ({ id: n.id, role: n.role === "other" ? "victim" : n.role, risk: n.risk, holding: held.get(n.id) }));
   }, [detail, plan]);
 
-  if (error) return <ErrorNote error={error} />;
-  if (!detail || !plan) return <p className="text-slate-400">Loading case {id}…</p>;
+  const events = useMemo<CaseEvent[]>(() => {
+    if (!detail) return [];
+    const out: CaseEvent[] = [{ ts: detail.opened_at, title: "Case opened", icon: "shield", detail: `${detail.tier} · probability ${prob(detail.probability)}` }];
+    if (plan?.first_alert_at) out.push({ ts: plan.first_alert_at, title: "First alert on the money trail", icon: "critical",
+      detail: plan.recoverable_at_first_alert != null ? `${money(plan.recoverable_at_first_alert)} was still recoverable` : undefined });
+    if (detail.updated_at !== detail.opened_at) out.push({ ts: detail.updated_at, title: "Case last updated", icon: "clock" });
+    if (detail.str_due) out.push({ ts: detail.str_due, title: "Suspicious transaction report due", icon: "draft" });
+    if (decision) out.push({ ts: decision.at, title: decision.verdict === "confirmed" ? "Officer confirmed as fraud" : "Officer dismissed", icon: "check", detail: "Recorded in this session" });
+    return out;
+  }, [detail, plan, decision]);
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <Link href="/" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-link hover:underline">
+          <Icon name="arrowLeft" className="h-4 w-4" /> Case queue
+        </Link>
+        <ErrorNote title={`Could not load case ${id}`} error={error} onRetry={() => { setError(null); load(); }} />
+      </div>
+    );
+  }
+  if (!detail || !plan) return <LoadingPanel label={`Loading case ${id}…`} />;
 
   const currency = detail.timeline[0]?.currency ?? "INR";
   const at = step === null ? undefined : edges[step]?.ts;
+  const status = decision?.verdict ?? detail.status;
 
-  const decide = async (v: "confirmed" | "dismissed") => {
+  const decide = async (v: Verdict) => {
+    setDeciding(true);
+    setDecisionError(null);
     try {
       const r = await api.feedback(id, v);
-      setVerdict(`${v === "confirmed" ? "Confirmed" : "Dismissed"}. Detector weight ${r.weights_before.detector.toFixed(2)} → ${r.weights_after.detector.toFixed(2)}; ${r.requeued} other cases re-ranked.`);
+      setDecision({
+        verdict: v,
+        at: new Date().toISOString(),
+        message: `${v === "confirmed" ? "Confirmed" : "Dismissed"}. Detector weight ${r.weights_before.detector.toFixed(2)} → ${r.weights_after.detector.toFixed(2)}; ${r.requeued} other cases re-ranked.`,
+      });
+      setAsking(null);
     } catch (e) {
-      setError((e as Error).message);
+      setDecisionError((e as Error).message);
+    } finally {
+      setDeciding(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link href="/" className="text-xs text-slate-500 hover:text-slate-300">← Case queue</Link>
-          <h1 className="mt-1 flex items-center gap-3 text-2xl font-semibold tracking-tight">
-            <span className="font-mono">{detail.case_id}</span> <TierBadge tier={detail.tier} />
-          </h1>
-          <p className="text-sm text-slate-400">
-            Probability {detail.probability.toFixed(2)} · {detail.accounts} accounts · {detail.transactions} alerts ·
-            opened {time(detail.opened_at)} · money at risk {money(detail.amount_at_risk, currency)}
-          </p>
+      {/* 1. Identity, severity and decision */}
+      <div>
+        <Link href="/" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-link hover:underline">
+          <Icon name="arrowLeft" className="h-4 w-4" /> Case queue
+        </Link>
+        <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="whitespace-nowrap font-mono text-2xl font-semibold tracking-tight text-navy sm:text-3xl">{detail.case_id}</h1>
+              <TierBadge tier={detail.tier} />
+              <span className={`rounded-md px-2 py-0.5 text-xs font-semibold capitalize ring-1 ring-inset ${status === "open" ? "bg-surface text-muted ring-line" : "bg-mist text-navy ring-line-strong"}`}>
+                Status: {status}
+              </span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:flex sm:flex-wrap">
+              <div><dt className="text-xs text-subtle">Probability</dt><dd className="font-semibold tabular-nums">{prob(detail.probability)}</dd></div>
+              <div><dt className="text-xs text-subtle">Money at risk</dt><dd className="font-semibold tabular-nums">{money(detail.amount_at_risk, currency)}</dd></div>
+              <div><dt className="text-xs text-subtle">Accounts</dt><dd className="font-semibold tabular-nums">{detail.accounts}</dd></div>
+              <div><dt className="text-xs text-subtle">Alerts</dt><dd className="font-semibold tabular-nums">{detail.transactions}</dd></div>
+              <div className="col-span-2"><dt className="text-xs text-subtle">Opened</dt><dd className="font-semibold">{time(detail.opened_at)}</dd></div>
+            </dl>
+          </div>
+          <div className="no-print flex w-full flex-col gap-2 sm:w-auto">
+            <span className="text-xs font-semibold text-muted">Review decision</span>
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <Button variant="secondary" onClick={() => setAsking("confirmed")} disabled={decision !== null}>
+                <Icon name="check" className="h-4 w-4" /> Confirm fraud
+              </Button>
+              <Button variant="secondary" onClick={() => setAsking("dismissed")} disabled={decision !== null}>
+                <Icon name="x" className="h-4 w-4" /> Dismiss
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => decide("confirmed")} className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-500">Confirm fraud</button>
-          <button onClick={() => decide("dismissed")} className="rounded-md border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800">Dismiss</button>
-        </div>
-      </div>
-      {verdict && <p className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm">{verdict}</p>}
+        {decision && <Notice tone="success" className="mt-4" title="Decision recorded">{decision.message} No account has been frozen and no report has been filed.</Notice>}
+        {decisionError && <div className="mt-4"><ErrorNote title="Decision not recorded" error={decisionError} /></div>}
 
-      <FreezePlan plan={plan} currency={currency} />
-
-      <Card title="Follow the money"
-            action={edges.length > 1 && (
-              <label className="flex items-center gap-2 text-xs text-slate-400">
-                Replay <input type="range" min={0} max={edges.length - 1} value={step ?? edges.length - 1}
-                              onChange={(e) => setStep(Number(e.target.value))} aria-label="Replay payments in time order" />
-                <span className="w-28 text-slate-300">{time(at ?? edges[edges.length - 1].ts)}</span>
-              </label>
-            )}>
-        <MoneyGraph edges={edges} accounts={accounts} frozen={plan.freeze.map((f) => f.account_id)} upTo={at} currency={currency} />
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Why Ripple flagged it">
-          <ul className="space-y-3">
-            {detail.reasons.map((r) => (
-              <li key={r.code} className="text-sm">
-                <div className="flex items-center gap-2"><LayerTag layer={r.layer} /><span className="text-xs text-slate-500">{r.code.replace(/_/g, " ")} · strength {pct(r.strength)}</span></div>
-                <p className="mt-1 text-slate-200">{r.text}</p>
-                {r.counterfactual && <p className="mt-0.5 text-xs text-slate-500">{r.counterfactual}</p>}
+        <nav aria-label="Case sections" className="no-print mt-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <ul className="flex gap-1 whitespace-nowrap border-b border-line">
+            {SECTIONS.map(([anchor, label]) => (
+              <li key={anchor}>
+                <a href={`#${anchor}`} className="inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-sm font-medium text-muted hover:border-line-strong hover:text-ink">{label}</a>
               </li>
             ))}
           </ul>
-          {detail.shap.length > 0 && (
-            <div className="mt-4 space-y-1">
-              <h3 className="text-xs uppercase text-slate-500">Model contributions</h3>
-              {detail.shap.map((s) => (
-                <div key={s.feature} className="flex items-center gap-2 text-xs">
-                  <span className="w-40 truncate text-slate-400">{s.feature}</span>
-                  <span className="h-2 rounded" style={{ width: `${Math.min(100, Math.abs(s.contribution) * 40)}px`, background: s.contribution > 0 ? "#f87171" : "#34d399" }} />
-                  <span className="tabular-nums text-slate-500">{s.contribution > 0 ? "+" : ""}{s.contribution.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <Card title="Timeline">
-          <ol className="max-h-96 space-y-1 overflow-y-auto pr-1 text-xs">
-            {detail.timeline.map((t) => (
-              <li key={t.txn_id} className={`flex items-center gap-2 rounded px-2 py-1 ${t.is_alert ? "bg-red-500/10" : ""}`}>
-                <RiskDot p={t.probability} />
-                <span className="w-28 shrink-0 text-slate-500">{time(t.ts)}</span>
-                <span className="truncate font-mono">{t.src_account} → {t.dst_account}</span>
-                <span className="ml-auto tabular-nums">{money(t.amount, t.currency)}</span>
-                <span className="w-12 text-right text-slate-500">{t.rail}</span>
-              </li>
-            ))}
-          </ol>
-        </Card>
+        </nav>
       </div>
+
+      {/* 2. Recovery metrics */}
+      <RecoveryMetrics plan={plan} currency={currency} />
+
+      {/* 3. Evidence */}
+      <Card id="evidence" title="Why Ripple flagged it" className="scroll-mt-20"
+            description="Each statement cites the payments behind it and what would have kept it from firing.">
+        {detail.narrative && (
+          <div className="mb-4 rounded-lg bg-mist p-3 sm:p-4">
+            <p className="text-xs font-semibold text-navy-700">Case summary · AI-drafted, checked against the case facts</p>
+            <p className="mt-1 text-[15px] leading-relaxed text-ink">{detail.narrative}</p>
+          </div>
+        )}
+        <EvidenceList reasons={detail.reasons} />
+        <div className="mt-4 space-y-2">
+          <AccountProfiles profiles={detail.profiles} currency={currency} />
+          <ModelContributions shap={detail.shap} />
+        </div>
+      </Card>
+
+      {/* 4. Money flow */}
+      <Card id="money-flow" title="Follow the money" className="scroll-mt-20"
+            description={`${edges.length} payments across ${detail.nodes.length} accounts, left to right by hop.`}>
+        <div className="space-y-3">
+          <ReplayControls edges={edges} step={step} onStep={setStep} />
+          <MoneyGraph edges={edges} accounts={accounts} frozen={plan.freeze.map((f) => f.account_id)} upTo={at} currency={currency} />
+        </div>
+      </Card>
+
+      {/* 5. Recovery over time */}
+      <div id="recovery" className="scroll-mt-20">
+        <RecoveryChart plan={plan} currency={currency} />
+      </div>
+
+      {/* 6. Freeze plan */}
+      <div id="freeze-plan" className="scroll-mt-20">
+        <FreezeList plan={plan} currency={currency} />
+      </div>
+
+      {/* 7. Timeline */}
+      <Card id="timeline" title="Case timeline" className="scroll-mt-20" description="Payments and audit-relevant events, oldest first.">
+        <Timeline transactions={detail.timeline} events={events} />
+      </Card>
+
+      <DecisionDialog verdict={asking} caseId={detail.case_id} busy={deciding} onCancel={() => setAsking(null)} onConfirm={decide} />
     </div>
   );
 }

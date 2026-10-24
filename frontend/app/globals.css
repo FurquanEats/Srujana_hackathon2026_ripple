@@ -1,18 +1,116 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/*
+ * Institutional Clarity: Ripple's design tokens.
+ * Every text/background pair below is checked for WCAG AA (4.5:1 for body text). Ratios against white unless noted.
+ */
+@theme {
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand */
+  --color-navy: #0b1f3a;          /* navigation, headings */
+  --color-navy-800: #132c4f;
+  --color-navy-700: #1d3b63;
+  --color-navy-300: #9fb3cc;      /* text on navy: 7.7:1 */
+  --color-mist: #eaf1f8;
+  --color-teal: #087e8b;          /* primary accent; white on teal 4.8:1 */
+  --color-teal-strong: #06646f;   /* hover, text on mist: 6.0:1 */
+  --color-teal-soft: #e3f3f4;
+  --color-link: #1f5fad;          /* 6.4:1 */
+
+  /* Workspace */
+  --color-canvas: #f5f8fb;
+  --color-surface: #ffffff;
+  --color-sunken: #f1f5f9;
+  --color-line: #d6e0eb;
+  --color-line-strong: #b7c6d8;
+  --color-ink: #13233d;           /* body text: 15.7:1 */
+  --color-muted: #4a5b73;         /* secondary text: 6.9:1, 6.5:1 on canvas */
+  --color-subtle: #5d6d84;        /* captions: 5.3:1, 4.9:1 on canvas */
+
+  /* Severity: red only for Critical and urgent warnings */
+  --color-critical: #b42332;      /* 6.5:1 */
+  --color-critical-soft: #fbeaec; /* critical text on it: 5.6:1 */
+  --color-critical-line: #e8a9b0;
+  --color-review: #8a4b00;        /* 6.2:1 on review-soft */
+  --color-review-soft: #fff3e0;
+  --color-review-line: #e7b46a;
+  --color-watch: #4a5b73;
+  --color-watch-soft: #eef2f6;
+
+  /* Outcomes */
+  --color-recover: #0f6b4f;       /* money still recoverable: 6.5:1 */
+  --color-recover-soft: #e5f4ee;
+
+  --radius-card: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(11 31 58 / 0.06), 0 1px 1px rgb(11 31 58 / 0.03);
+  --shadow-pop: 0 12px 32px rgb(11 31 58 / 0.18), 0 2px 6px rgb(11 31 58 / 0.08);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 0;
+}
+
+/* One focus treatment everywhere: a 2px teal ring offset from the control. */
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 input[type="range"] {
-  accent-color: #38bdf8;
+  accent-color: var(--color-teal);
+  min-height: 24px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print: a clean report. Navigation and interactive-only controls hide; panels don't split across pages. */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-break-avoid {
+    break-inside: avoid;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  section {
+    box-shadow: none !important;
+  }
 }

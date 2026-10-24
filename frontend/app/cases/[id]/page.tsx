@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 
+import { LoadingPanel } from "@/components/ui";
+
 import { Workbench } from "./Workbench";
 
 export default function CasePage() {
   return (
-    <Suspense fallback={<p className="text-slate-400">Loading case…</p>}>
+    <Suspense fallback={<LoadingPanel label="Loading case…" />}>
       <Workbench />
     </Suspense>
   );

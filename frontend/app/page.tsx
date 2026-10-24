@@ -3,26 +3,129 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { Card, ErrorNote, RiskDot, Stat, TierBadge } from "@/components/ui";
-import { api, money, time, type CaseSummary, type InjectResult } from "@/lib/api";
+import { CaseQueue, TierCounts } from "@/components/CaseQueue";
+import { Button, Card, ConnectionStatus, DemoBadge, EmptyState, ErrorNote, Icon, Notice, PageHeader, RiskDot, Spinner, Stat } from "@/components/ui";
+import { api, money, time, type CaseSummary, type InjectResult, type ScoredTransaction } from "@/lib/api";
+import { reasonLabel } from "@/lib/labels";
 import { useStream } from "@/lib/useStream";
 
-const SCENARIOS: [string, string][] = [
-  ["digital_arrest", "Digital arrest"],
-  ["mule_ring", "Mule ring"],
-  ["scam_fanout", "Scam fan-out"],
-  ["sim_swap_takeover", "SIM-swap takeover"],
-  ["cash_structuring", "Cash structuring"],
-  ["diwali_spike", "Diwali shopping (legit)"],
+const SCENARIOS: { kind: string; label: string; note: string }[] = [
+  { kind: "digital_arrest", label: "Digital arrest", note: "Coerced transfer, then a mule chain" },
+  { kind: "mule_ring", label: "Mule ring", note: "Many accounts funnelling to collectors" },
+  { kind: "scam_fanout", label: "Scam fan-out", note: "One payment split across mules" },
+  { kind: "sim_swap_takeover", label: "SIM-swap takeover", note: "New device drains an account" },
+  { kind: "cash_structuring", label: "Cash structuring", note: "Deposits kept under ₹50,000" },
+  { kind: "diwali_spike", label: "Diwali shopping", note: "Legitimate spike; should stay quiet" },
 ];
 
-export default function CommandCentre() {
-  const { feed, stats, lastCase, connected } = useStream();
-  const [budget, setBudget] = useState(20);
-  const [cases, setCases] = useState<CaseSummary[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [injected, setInjected] = useState<InjectResult | null>(null);
+const fmtInt = (n: number) => Math.round(n).toLocaleString("en-IN");
+
+function LiveFeed({ feed, connected }: { feed: ScoredTransaction[]; connected: boolean }) {
+  const [paused, setPaused] = useState<ScoredTransaction[] | null>(null);
+  const rows = paused ?? feed;
+  return (
+    <Card title="Live payments" description="Newest first. Alerts are marked; other payments stay quiet."
+          action={
+            <Button size="sm" variant="secondary" onClick={() => setPaused(paused ? null : feed)} aria-pressed={paused !== null} disabled={feed.length === 0}>
+              <Icon name={paused ? "play" : "pause"} className="h-4 w-4" />{paused ? "Resume" : "Pause"}
+            </Button>
+          }>
+      {rows.length === 0 ? (
+        <p className="flex items-center gap-2 text-sm text-muted">
+          {connected ? <><Spinner /> Waiting for payments…</> : "The live stream is disconnected. Payments will appear when it reconnects."}
+        </p>
+      ) : (
+        <ul className="-mx-1 max-h-[34rem] divide-y divide-line overflow-y-auto px-1" aria-label="Recent payments">
+          {rows.map((t) => (
+            <li key={t.txn_id} className={`py-2 ${t.is_alert ? "" : "text-muted"}`}>
+              <div className="flex items-center gap-2">
+                <RiskDot p={t.probability} />
+                <span className="min-w-0 flex-1 truncate font-mono text-xs" title={`${t.src_account} to ${t.dst_account}`}>
+                  {t.src_account} <span className="text-subtle">→</span> {t.dst_account}
+                </span>
+                <span className={`whitespace-nowrap text-sm tabular-nums ${t.is_alert ? "font-semibold text-ink" : ""}`}>{money(t.amount, t.currency)}</span>
+              </div>
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 pl-[18px] text-[11px] text-subtle">
+                <time dateTime={t.ts}>{time(t.ts)}</time>
+                <span>{t.rail}</span>
+                {t.location && <span>{t.location}</span>}
+                <span className="tabular-nums">score {t.probability.toFixed(2)}</span>
+                {t.is_alert && (
+                  <span className="inline-flex items-center gap-1 rounded bg-navy px-1.5 py-px font-semibold text-white">
+                    <Icon name="critical" className="h-3 w-3" />Alert
+                  </span>
+                )}
+                {t.is_alert && t.reasons[0] && <span className="text-muted">{reasonLabel(t.reasons[0].code)}</span>}
+                {t.case_id && t.is_alert && (
+                  <Link href={`/cases/${t.case_id}`} className="font-mono font-semibold text-link hover:underline">{t.case_id}</Link>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {paused && <p className="mt-2 text-xs text-subtle">Feed paused. New payments are still being scored; resume to see the latest.</p>}
+    </Card>
+  );
+}
+
+function DemoControls({ onError }: { onError: (e: string) => void }) {
   const [busy, setBusy] = useState<string | null>(null);
+  const [injected, setInjected] = useState<InjectResult | null>(null);
+
+  const inject = async (kind: string) => {
+    setBusy(kind);
+    try {
+      setInjected(await api.inject(kind));
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <section aria-labelledby="demo-heading" className="no-print rounded-card border-2 border-dashed border-line-strong bg-canvas p-4 sm:p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 id="demo-heading" className="text-base font-semibold text-navy">Scenario injection</h2>
+        <DemoBadge>Demo only</DemoBadge>
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        Adds synthetic payments from the India simulator to the stream, at the stream&apos;s current time. Not available on real data.
+      </p>
+      <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {SCENARIOS.map((s) => (
+          <button key={s.kind} type="button" onClick={() => inject(s.kind)} disabled={busy !== null}
+                  className="flex min-h-11 flex-col items-start rounded-md border border-line-strong bg-surface px-3 py-2 text-left hover:border-teal hover:bg-teal-soft disabled:cursor-not-allowed disabled:opacity-55">
+            <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+              {busy === s.kind && <Spinner className="h-3.5 w-3.5" />}
+              {busy === s.kind ? "Injecting…" : s.label}
+            </span>
+            <span className="text-xs text-muted">{s.note}</span>
+          </button>
+        ))}
+      </div>
+      {injected && (
+        <Notice tone="success" className="mt-4" title={`Injected ${injected.txn_ids.length} synthetic payments (${injected.kind.replace(/_/g, " ")}) at ${time(injected.at)}.`}>
+          {injected.victim_account ? (
+            <>
+              The simulated victim is <span className="font-mono font-semibold">{injected.victim_account}</span>.{" "}
+              <Link className="font-semibold text-link underline" href={`/trace?account=${injected.victim_account}&from=${encodeURIComponent(injected.victim_paid_at ?? injected.at)}`}>
+                Report it and trace the money
+              </Link>
+            </>
+          ) : "Watch the case queue for any case it raises."}
+        </Notice>
+      )}
+    </section>
+  );
+}
+
+export default function CommandCentre() {
+  const { feed, stats, lastCase, connected, updatedAt } = useStream();
+  const [budget, setBudget] = useState(20);
+  const [cases, setCases] = useState<CaseSummary[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     api.cases(budget).then((c) => { setCases(c); setError(null); }).catch((e) => setError(e.message));
@@ -30,111 +133,56 @@ export default function CommandCentre() {
 
   useEffect(load, [load, lastCase]);
 
-  const inject = async (kind: string) => {
-    setBusy(kind);
-    try {
-      setInjected(await api.inject(kind));
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(null);
-    }
-  };
+  const hasStats = Object.keys(stats).length > 0;
+  const kpi = (v: number | undefined, f: (n: number) => string) => (hasStats && v != null ? f(v) : "—");
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Command centre</h1>
-          <p className="text-sm text-slate-400">Every payment scored as it arrives; linked alerts become cases ranked by tier and money at risk.</p>
+      <PageHeader title="Command centre"
+                  description="Every payment is scored as it arrives. Linked alerts become cases, ranked by tier and money at risk."
+                  actions={<ConnectionStatus connected={connected} warmingUp={Boolean(stats.warming_up)} updatedAt={updatedAt} />} />
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        <Stat icon="activity" label="Payments scored" value={kpi(stats.processed, fmtInt)} hint="since the stream started" />
+        <Stat icon="activity" label="Throughput" value={kpi(stats.tps, (n) => `${fmtInt(n)}/s`)} hint="payments per second" />
+        <Stat icon="clock" label="p95 latency" value={kpi(stats.p95_latency_ms, (n) => `${n.toFixed(2)} ms`)} hint="per payment scored" />
+        <Stat icon="critical" label="Alerts" value={kpi(stats.alerts, fmtInt)} hint="payments at or above alert score" />
+        <div className="col-span-2 sm:col-span-1">
+          <Stat icon="shield" label="Open cases" value={hasStats && stats.open_cases != null ? fmtInt(stats.open_cases) : cases ? fmtInt(cases.length) : "—"}
+                hint="awaiting an officer's review" />
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs ${connected ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
-          {connected ? "Live" : "Disconnected"}{stats.warming_up ? " · warming up" : ""}
-        </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stat label="Payments scored" value={(stats.processed ?? 0).toLocaleString("en-IN")} />
-        <Stat label="Throughput" value={`${Math.round(stats.tps ?? 0).toLocaleString("en-IN")}/s`} />
-        <Stat label="p95 latency" value={`${(stats.p95_latency_ms ?? 0).toFixed(2)} ms`} />
-        <Stat label="Alerts" value={(stats.alerts ?? 0).toLocaleString("en-IN")} />
-        <Stat label="Open cases" value={(stats.open_cases ?? cases.length).toLocaleString("en-IN")} />
-      </div>
+      {error && <ErrorNote title="Could not reach the Ripple API" error={error} onRetry={load} />}
 
-      <Card title="Inject a scenario" action={<span className="text-xs text-slate-500">from the India simulator, at the stream&apos;s current time</span>}>
-        <div className="flex flex-wrap gap-2">
-          {SCENARIOS.map(([kind, label]) => (
-            <button key={kind} onClick={() => inject(kind)} disabled={busy !== null}
-                    className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
-              {busy === kind ? "Injecting…" : label}
-            </button>
-          ))}
-        </div>
-        {injected && (
-          <p className="mt-3 text-sm text-slate-300">
-            Injected {injected.txn_ids.length} payments ({injected.kind.replace(/_/g, " ")}) at {time(injected.at)}.
-            {injected.victim_account && (
-              <> The victim is <span className="font-mono">{injected.victim_account}</span>.{" "}
-                <Link className="text-sky-300 underline" href={`/trace?account=${injected.victim_account}&from=${encodeURIComponent(injected.victim_paid_at ?? injected.at)}`}>
-                  Report it and trace the money
-                </Link>
-              </>
-            )}
-          </p>
-        )}
-      </Card>
-
-      {error && <ErrorNote error={`Could not reach the Ripple API: ${error}`} />}
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        <Card title="Case queue" className="lg:col-span-3"
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Card title="Case queue" className="xl:col-span-2"
+              description={cases ? <TierCounts cases={cases} /> : undefined}
               action={
-                <label className="flex items-center gap-2 text-xs text-slate-400">
-                  Alert budget <input type="range" min={5} max={100} step={5} value={budget} onChange={(e) => setBudget(Number(e.target.value))} aria-label="Alert budget" />
-                  <span className="w-8 tabular-nums text-slate-200">{budget}</span>
-                </label>
+                <div className="w-full sm:w-auto">
+                  <label htmlFor="budget" className="flex items-center justify-between gap-3 text-sm font-semibold text-ink">
+                    Alert budget
+                    <output htmlFor="budget" className="min-w-12 rounded bg-sunken px-2 py-0.5 text-right tabular-nums">{budget}</output>
+                  </label>
+                  <input id="budget" type="range" min={5} max={100} step={5} value={budget} className="mt-1 w-full sm:w-56"
+                         onChange={(e) => setBudget(Number(e.target.value))} aria-describedby="budget-hint" />
+                  <p id="budget-hint" className="text-xs text-subtle">Top {budget} open cases shown</p>
+                </div>
               }>
-          {cases.length === 0 ? (
-            <p className="text-sm text-slate-400">No open cases yet. Inject a scenario to see one appear.</p>
+          {cases === null && !error ? (
+            <p className="flex items-center gap-2 text-sm text-muted" role="status"><Spinner /> Loading cases…</p>
+          ) : cases === null ? (
+            <EmptyState icon="wifiOff" title="Case queue unavailable">Cases will load once the Ripple API is reachable again.</EmptyState>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase text-slate-500">
-                  <tr><th className="py-2">Case</th><th>Tier</th><th className="text-right">Probability</th><th className="text-right">Money at risk</th><th className="text-right">Accounts</th><th className="pl-4">Why</th></tr>
-                </thead>
-                <tbody>
-                  {cases.map((c) => (
-                    <tr key={c.case_id} className="border-t border-slate-800 hover:bg-slate-800/40">
-                      <td className="py-2"><Link className="font-mono text-sky-300 hover:underline" href={`/cases/${c.case_id}`}>{c.case_id}</Link></td>
-                      <td><TierBadge tier={c.tier} /></td>
-                      <td className="text-right tabular-nums">{c.probability.toFixed(2)}</td>
-                      <td className="text-right tabular-nums">{money(c.amount_at_risk)}</td>
-                      <td className="text-right tabular-nums">{c.accounts}</td>
-                      <td className="pl-4 text-xs text-slate-400">{c.typologies.slice(0, 3).join(", ").replace(/_/g, " ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <CaseQueue cases={cases ?? []} />
           )}
         </Card>
 
-        <Card title="Live payments" className="lg:col-span-2">
-          <ul className="max-h-[28rem] space-y-1 overflow-y-auto pr-1 text-xs" aria-live="polite">
-            {feed.map((t) => (
-              <li key={t.txn_id} className={`flex items-center gap-2 rounded px-2 py-1 ${t.is_alert ? "bg-red-500/10" : ""}`}>
-                <RiskDot p={t.probability} />
-                <span className="w-24 shrink-0 truncate font-mono text-slate-400">{t.src_account}</span>
-                <span className="text-slate-600">→</span>
-                <span className="w-24 shrink-0 truncate font-mono text-slate-400">{t.dst_account}</span>
-                <span className="ml-auto tabular-nums">{money(t.amount, t.currency)}</span>
-                <span className="w-12 text-right text-slate-500">{t.rail}</span>
-              </li>
-            ))}
-            {feed.length === 0 && <li className="text-slate-500">Waiting for the stream…</li>}
-          </ul>
-        </Card>
+        <LiveFeed feed={feed} connected={connected} />
       </div>
+
+      <DemoControls onError={setError} />
+
     </div>
   );
 }

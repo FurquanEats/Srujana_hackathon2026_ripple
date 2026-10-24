@@ -12,6 +12,7 @@ export function useStream() {
   const [stats, setStats] = useState<Record<string, number>>({});
   const [lastCase, setLastCase] = useState<CaseSummary | null>(null);
   const [connected, setConnected] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const retry = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export function useStream() {
       };
       socket.onmessage = (message) => {
         const event: StreamEvent = JSON.parse(message.data);
+        setUpdatedAt(new Date());
         if (event.type === "txn" && event.txn) {
           const txn = event.txn;
           setFeed((prev) => [txn, ...prev].slice(0, FEED_SIZE));
@@ -45,5 +47,5 @@ export function useStream() {
     };
   }, []);
 
-  return { feed, stats, lastCase, connected };
+  return { feed, stats, lastCase, connected, updatedAt };
 }
