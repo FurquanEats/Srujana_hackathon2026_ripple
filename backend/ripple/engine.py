@@ -209,6 +209,11 @@ class Engine:
                     found = self.lookup(edge.txn_id)
                     if found is not None:
                         timeline[edge.txn_id] = found
+        for alert in case.alerts:  # evidence the reasons cite, even when it is older than the context window
+            for reason in alert.reasons:
+                for txn_id in reason.txn_ids:
+                    if txn_id not in timeline and (found := self.lookup(txn_id)) is not None:
+                        timeline[txn_id] = found
         ordered = sorted(timeline.values(), key=lambda t: t.ts)[:300]
 
         best: dict[str, Reason] = {}

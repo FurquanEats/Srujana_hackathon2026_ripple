@@ -62,6 +62,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
         return None
     senders = {e.counterparty for e in received}
     new_senders = {c for c in senders if src.senders.get(c, cutoff) >= cutoff}
+    from_new = [e for e in received if e.counterparty in new_senders]
     strength = 0.6 + 0.2 * _ramp(ratio, p["forward_share"], 1.0) + 0.1 * (1 - gap / timedelta(minutes=p["within_minutes"])) + 0.1 * new_share
     return _reason(
         "pass_through",
@@ -70,7 +71,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
         f"({ids([e.txn_id for e in received])}) and sent {min(ratio, 1.0):.0%} of it onward {duration(gap)} after "
         f"the last one arrived ({ids([e.txn_id for e in sent])})",
         strength,
-        [e.txn_id for e in received] + [e.txn_id for e in sent],
+        [e.txn_id for e in from_new] + [e.txn_id for e in sent],
         f"Not flagged if less than {p['forward_share']:.0%} had been sent on, or if it had left more than "
         f"{p['within_minutes']} minutes after arriving",
     )
@@ -103,7 +104,7 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
         f"{len(senders)} first-time senders paid {txn.src_account}, {money(inflow, txn.currency)} in total within {duration(received[-1].ts - received[0].ts)}, "
         f"then {txn.src_account} moved {min(ratio, 1.0):.0%} of it out",
         strength,
-        [e.txn_id for e in received] + [e.txn_id for e in sent],
+        [e.txn_id for e in received if e.counterparty in senders] + [e.txn_id for e in sent],
         f"Not flagged if fewer than {p['min_senders']} first-time senders had paid {txn.src_account} within {p['window_hours']} hours",
     )
 

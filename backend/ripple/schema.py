@@ -195,3 +195,42 @@ class StreamEvent(BaseModel):
     txn: ScoredTransaction | None = None
     case: CaseSummary | None = None
     stats: dict[str, float] | None = None
+
+
+class TaintHolding(BaseModel):
+    """Money an account in a case holds right now that traces back to the victims' payments."""
+
+    account_id: str
+    received: float  # total received within the case's money trail
+    sent: float
+    tainted: float  # still held, traceable to victims (haircut method)
+    tainted_share: float = Field(ge=0, le=1)  # tainted / funds held
+
+
+class FreezeAction(BaseModel):
+    account_id: str
+    recoverable: float  # tainted funds a freeze would hold now
+    collateral_cost: float  # how disruptive a freeze is: higher for accounts with more ordinary activity
+    reason: str
+
+
+class RecoveryPoint(BaseModel):
+    ts: datetime
+    recoverable: float  # tainted money still inside the case's accounts at this time
+    escaped: float  # tainted money that had left to accounts outside the trail
+
+
+class InterdictionPlan(BaseModel):
+    case_id: str
+    as_of: datetime
+    stolen: float  # money that entered the trail from outside (the victims' payments)
+    victims: list[str]
+    holdings: list[TaintHolding]
+    freeze: list[FreezeAction]  # the recommended freeze set, a minimum cut between victims and exits
+    recoverable_now: float  # tainted funds held by the freeze set
+    escaped: float  # tainted funds already outside the trail
+    first_alert_at: datetime | None = None
+    recoverable_at_first_alert: float | None = None  # how much a freeze at Ripple's first alert would have held
+    recoverable_share_at_first_alert: float | None = None  # that amount over the traced money that had entered by then
+    timeline: list[RecoveryPoint]
+    method: str

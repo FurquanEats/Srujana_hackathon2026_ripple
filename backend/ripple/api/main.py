@@ -17,10 +17,20 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from ripple import feedback, fixtures
+from ripple import feedback, fixtures, interdiction
 from ripple.cases import queue_order
 from ripple.engine import Engine
-from ripple.schema import CaseDetail, CaseSummary, EvalReport, Feedback, FeedbackResult, Layer, ScoredTransaction, Transaction
+from ripple.schema import (
+    CaseDetail,
+    CaseSummary,
+    EvalReport,
+    Feedback,
+    FeedbackResult,
+    InterdictionPlan,
+    Layer,
+    ScoredTransaction,
+    Transaction,
+)
 from ripple.stream import EventBus, ingest, load_transactions, replay
 
 
@@ -70,6 +80,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         if case is None:
             raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
         return case
+
+    @app.get("/cases/{case_id}/interdiction")
+    def get_interdiction(case_id: str) -> InterdictionPlan:
+        """Where the traced money sits now, and the freeze set that recovers the most of it."""
+        case = engine.detail(case_id) if engine else fixtures.case_detail(case_id)
+        if case is None:
+            raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
+        return interdiction.plan(case)
 
     @app.post("/cases/{case_id}/feedback")
     def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:
