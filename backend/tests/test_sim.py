@@ -34,7 +34,7 @@ def test_every_injector_returns_labelled_transactions_in_time_order():
         world.inject("bank_heist", START)
 
 
-@pytest.mark.parametrize("kind", ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring"])
+@pytest.mark.parametrize("kind", ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "digital_arrest"])
 def test_engine_alerts_on_each_fraud_scenario(scored, kind):
     _, results = scored
     alerts = [s for row, s in results.values() if row.scenario == kind and row.is_laundering and s.is_alert]

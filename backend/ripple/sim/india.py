@@ -11,6 +11,9 @@ accounts, so the engine judges them against real history:
     sim_swap_takeover  a new device in a new city drains a salaried account to a new payee
     cash_structuring   cash deposits just under the Rs 50,000 PAN-quote limit on consecutive days
     diwali_spike       legitimate festival shopping: many people pay jewellers and electronics shops more than usual
+    digital_arrest     a pensioner, coached by fake police on a video call, breaks fixed deposits over two days and
+                       sends them by RTGS to "safe accounts"; mules split the money onward, cash some out, buy crypto
+                       and leave the rest sitting, which is what a freeze can still recover
 
 Every row carries is_laundering (0/1) and scenario (the injector name, empty for base traffic). Transaction ignores
 both, so the API can replay the file as is.
@@ -29,14 +32,15 @@ CITIES = ["Bengaluru", "Mumbai", "Delhi", "Chennai", "Hyderabad", "Pune", "Kolka
 START = datetime(2026, 10, 10)
 DAYS = 30
 DIWALI = datetime(2026, 11, 8)  # Diwali (Lakshmi Puja) 2026
-INJECTORS = ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "diwali_spike"]
-LABELS = {"mule_ring": 1, "scam_fanout": 1, "sim_swap_takeover": 1, "cash_structuring": 1, "diwali_spike": 0}
+INJECTORS = ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "diwali_spike", "digital_arrest"]
+LABELS = {"mule_ring": 1, "scam_fanout": 1, "sim_swap_takeover": 1, "cash_structuring": 1, "diwali_spike": 0,
+          "digital_arrest": 1}
 
 
 @dataclass
 class Persona:
     account: str
-    kind: str  # salaried | student | shop | gig
+    kind: str  # salaried | student | gig | pensioner | shop
     city: str
     device: str
     handle: str
@@ -57,7 +61,7 @@ class World:
         self.rows: list[Row] = []
         self._n = 0
         self._fresh = 0
-        kinds = ["salaried"] * 6 + ["student"] * 2 + ["gig"] * 2
+        kinds = ["salaried"] * 6 + ["student"] * 2 + ["gig"] * 2 + ["pensioner"]
         self.shops = [self._persona(f"SHOP{i:03d}", "shop") for i in range(n_shops)]
         self.jewellers = [f"JEWEL{i:02d}" for i in range(4)]
         self.electronics = [f"ELEC{i:02d}" for i in range(4)]
@@ -107,7 +111,7 @@ class World:
         for d in range(days):
             day = start + timedelta(days=d)
             for p in self.people:
-                spend = {"salaried": (150, 3000), "student": (40, 600), "gig": (80, 1500)}[p.kind]
+                spend = {"salaried": (150, 3000), "student": (40, 600), "gig": (80, 1500), "pensioner": (100, 1500)}[p.kind]
                 for _ in range(r.choice([1, 2, 2, 3])):
                     t = day + timedelta(hours=r.uniform(7, 22))
                     self.by(p, t, r.choice(p.merchants), r.uniform(*spend))
@@ -119,7 +123,10 @@ class World:
                 if p.kind == "student" and d % 30 == 3:
                     self.pay(day + timedelta(hours=11), f"PARENT-{p.account}", p.account, r.uniform(5000, 12000),
                              Rail.UPI, location=p.city)
-            if day.day == 1:  # salary, then rent soon after
+            if day.day == 1:  # pension, salary, then rent soon after
+                for p in (x for x in self.people if x.kind == "pensioner"):
+                    self.pay(day + timedelta(hours=8, minutes=r.randint(0, 50)), "PENSION-TREASURY", p.account,
+                             r.choice([28000, 36000, 45000]), Rail.NEFT)
                 for i, p in enumerate(x for x in self.people if x.kind == "salaried"):
                     salary = r.choice([35000, 52000, 68000, 85000, 120000, 240000])
                     self.pay(day + timedelta(hours=9, minutes=r.randint(0, 50)), self.employers[i % len(self.employers)],
@@ -205,6 +212,31 @@ class World:
             amount = r.uniform(15000, 90000)
             self.by(p, t + timedelta(hours=r.uniform(0, 10)), shop, amount, self._rail_for(amount), scenario=scenario)
 
+    def _digital_arrest(self, t: datetime, label: int, scenario: str) -> None:
+        r = self.rng
+        victims = [p for p in self.people if p.kind == "pensioner"] or [p for p in self.people if p.kind == "salaried"]
+        v = r.choice(victims)
+        fd = f"FD-{v.account}"
+        m = lambda minutes: t + timedelta(minutes=minutes)  # noqa: E731
+        mule1, mule2 = self.fresh_account("MULE"), self.fresh_account("MULE")
+        layer = [self.fresh_account("MULE") for _ in range(5)]
+        tag = {"label": label, "scenario": scenario}
+        # Day 1: a fixed deposit broken early (the victim's own money, so not labelled), then sent to a "safe account".
+        self.pay(m(0), fd, v.account, 800000, Rail.NEFT, location=v.city, scenario=scenario)
+        self.by(v, m(42), mule1, 750000, Rail.RTGS, **tag)
+        # Mule 1 splits it within half an hour; one leg is cashed out, one buys crypto, one sits.
+        for i, (dst, amount) in enumerate(zip(layer[:3], (260000, 250000, 228000))):
+            self.pay(m(55 + 6 * i), mule1, dst, amount, Rail.IMPS, device="D-MULE-1", location="Kolkata", **tag)
+        self.pay(m(95), layer[0], "ATM-CASH", 95000, Rail.CASH, location="Kolkata", **tag)
+        self.pay(m(110), layer[1], "P2P-USDT-07", 245000, Rail.IMPS, device="D-MULE-2", location="Kolkata", **tag)
+        # Day 2: a second deposit broken and sent to a new "safe account", split onward within the hour.
+        day2 = 24 * 60 - 25
+        self.pay(m(day2), fd, v.account, 400000, Rail.NEFT, location=v.city, scenario=scenario)
+        self.by(v, m(day2 + 30), mule2, 390000, Rail.RTGS, **tag)
+        self.pay(m(day2 + 48), mule2, layer[3], 200000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
+        self.pay(m(day2 + 52), mule2, layer[4], 185000, Rail.IMPS, device="D-MULE-3", location="Jamtara", **tag)
+        self.pay(m(day2 + 70), layer[3], "P2P-USDT-07", 150000, Rail.IMPS, device="D-MULE-4", location="Jamtara", **tag)
+
     def sorted_rows(self) -> list[Row]:
         return sorted(self.rows, key=lambda row: row.txn.ts)
 
@@ -219,6 +251,7 @@ def demo_world(seed: int = 7) -> World:
     world.inject("sim_swap_takeover", end - timedelta(days=3, hours=-21, minutes=-40))
     world.inject("scam_fanout", end - timedelta(days=2, hours=-11))
     world.inject("diwali_spike", DIWALI + timedelta(hours=9))
+    world.inject("digital_arrest", end - timedelta(days=5, hours=-11))
     return world
 
 
