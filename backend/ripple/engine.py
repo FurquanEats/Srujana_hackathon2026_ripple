@@ -78,6 +78,7 @@ class Engine:
         self.pack = load_pack(pack_id)
         self.model = model
         self.on_features = on_features
+        self.external: Callable[[Transaction], Reason | None] | None = None  # e.g. a consortium hub lookup
         self.store = FeatureStore()
         self.graph = GraphLayer(self.pack["graph"]["recompute_every"], self.pack["graph"].get("window_days", 7))
         fusion_cfg = self.pack["fusion"]
@@ -117,6 +118,8 @@ class Engine:
 
         self.graph.add(txn)
         graph_score, graph_reason = self.graph.score(txn)
+        if self.external is not None and (shared := self.external(txn)) is not None and shared.strength > graph_score:
+            graph_score, graph_reason = shared.strength, shared
 
         features = feature_vector(txn, src, dst) | {f"src_{k}": v for k, v in self.graph.features(txn.src_account).items()} | {
             f"dst_{k}": v for k, v in self.graph.features(txn.dst_account).items()
