@@ -1,26 +1,26 @@
 {
   "dataset": "IBM AML ibm_hi_small",
   "split": "time split: train on the first 7 of 10 days (2022-09-01 to 2022-09-07), test on the last 3",
-  "generated_at": "2026-10-24T21:35:47",
+  "generated_at": "2026-10-25T00:15:16",
   "overall": {
     "name": "Ripple (full)",
-    "precision": 0.2308,
-    "recall": 0.1125,
-    "pr_auc": 0.0528,
-    "precision_at_50": 0.56
+    "precision": 0.6228,
+    "recall": 0.3737,
+    "pr_auc": 0.3939,
+    "precision_at_50": 0.98
   },
   "baseline": {
     "name": "Single-transaction baseline",
-    "precision": 0.022,
-    "recall": 0.0107,
+    "precision": 0.019,
+    "recall": 0.0114,
     "pr_auc": 0.0054,
     "precision_at_50": 0.02
   },
   "ablation": [
     {
       "name": "Single-transaction baseline",
-      "precision": 0.022,
-      "recall": 0.0107,
+      "precision": 0.019,
+      "recall": 0.0114,
       "pr_auc": 0.0054,
       "precision_at_50": 0.02
     },
@@ -33,139 +33,153 @@
     },
     {
       "name": "+ behavioural baseline",
-      "precision": 0.0944,
-      "recall": 0.0509,
-      "pr_auc": 0.0058,
-      "precision_at_50": 0.0
+      "precision": 0.0879,
+      "recall": 0.0248,
+      "pr_auc": 0.0025,
+      "precision_at_50": 0.02
     },
     {
       "name": "+ graph layer",
-      "precision": 0.0814,
-      "recall": 0.0328,
-      "pr_auc": 0.0064,
-      "precision_at_50": 0.08
+      "precision": 0.0841,
+      "recall": 0.0248,
+      "pr_auc": 0.0024,
+      "precision_at_50": 0.02
     },
     {
       "name": "+ calibrated LightGBM",
+      "precision": 0.6228,
+      "recall": 0.3737,
+      "pr_auc": 0.3939,
+      "precision_at_50": 0.98
+    },
+    {
+      "name": "Full system, pack's hand-set fusion weights",
       "precision": 0.2308,
       "recall": 0.1125,
       "pr_auc": 0.0528,
       "precision_at_50": 0.56
+    },
+    {
+      "name": "LightGBM model alone",
+      "precision": 0.5627,
+      "recall": 0.4206,
+      "pr_auc": 0.4173,
+      "precision_at_50": 1.0
     }
   ],
   "per_typology": [
     {
       "name": "untagged",
-      "precision": 0.0036,
-      "recall": 0.0034,
-      "pr_auc": 0.0009,
+      "precision": 0.0203,
+      "recall": 0.012,
+      "pr_auc": 0.0051,
       "precision_at_50": null
     },
     {
       "name": "bipartite (graph layer and model only)",
-      "precision": 0.0227,
-      "recall": 0.1912,
-      "pr_auc": 0.0203,
+      "precision": 0.0714,
+      "recall": 0.3824,
+      "pr_auc": 0.1621,
       "precision_at_50": null
     },
     {
       "name": "cycle (temporal_cycle)",
-      "precision": 0.0508,
-      "recall": 0.3261,
-      "pr_auc": 0.0866,
+      "precision": 0.1529,
+      "recall": 0.663,
+      "pr_auc": 0.3468,
       "precision_at_50": null
     },
     {
       "name": "fan-in (fan_in_out)",
-      "precision": 0.0227,
-      "recall": 0.1429,
-      "pr_auc": 0.0296,
+      "precision": 0.1486,
+      "recall": 0.6484,
+      "pr_auc": 0.3529,
       "precision_at_50": null
     },
     {
       "name": "fan-out (fan_out_burst)",
-      "precision": 0.0311,
-      "recall": 0.1915,
-      "pr_auc": 0.0694,
+      "precision": 0.155,
+      "recall": 0.6596,
+      "pr_auc": 0.4751,
       "precision_at_50": null
     },
     {
       "name": "gather-scatter (fan_in_out)",
-      "precision": 0.0295,
-      "recall": 0.095,
-      "pr_auc": 0.0111,
+      "precision": 0.2506,
+      "recall": 0.6313,
+      "pr_auc": 0.4373,
       "precision_at_50": null
     },
     {
       "name": "random (graph layer and model only)",
-      "precision": 0.0261,
-      "recall": 0.2679,
-      "pr_auc": 0.0132,
+      "precision": 0.0765,
+      "recall": 0.5,
+      "pr_auc": 0.184,
       "precision_at_50": null
     },
     {
       "name": "scatter-gather (scatter_gather)",
-      "precision": 0.0345,
-      "recall": 0.1176,
-      "pr_auc": 0.0196,
+      "precision": 0.2212,
+      "recall": 0.5647,
+      "pr_auc": 0.4268,
       "precision_at_50": null
     },
     {
       "name": "stack (graph layer and model only)",
-      "precision": 0.0667,
-      "recall": 0.2484,
-      "pr_auc": 0.0212,
+      "precision": 0.2387,
+      "recall": 0.6584,
+      "pr_auc": 0.4215,
       "precision_at_50": null
     }
   ],
   "budget_curve": [
     {
       "alerts_per_day": 10,
-      "recall": 0.0154,
-      "precision": 0.7667,
-      "value_caught_share": 0.0187
+      "recall": 0.0194,
+      "precision": 0.9667,
+      "value_caught_share": 0.0005
     },
     {
       "alerts_per_day": 25,
-      "recall": 0.0214,
-      "precision": 0.4267,
-      "value_caught_share": 0.0624
+      "recall": 0.0496,
+      "precision": 0.9867,
+      "value_caught_share": 0.0014
     },
     {
       "alerts_per_day": 50,
-      "recall": 0.0281,
-      "precision": 0.28,
-      "value_caught_share": 0.0626
+      "recall": 0.0991,
+      "precision": 0.9867,
+      "value_caught_share": 0.0213
     },
     {
       "alerts_per_day": 100,
-      "recall": 0.0489,
-      "precision": 0.2433,
-      "value_caught_share": 0.0631
+      "recall": 0.1862,
+      "precision": 0.9267,
+      "value_caught_share": 0.0237
     },
     {
       "alerts_per_day": 200,
-      "recall": 0.1072,
-      "precision": 0.2667,
-      "value_caught_share": 0.1003
+      "recall": 0.3041,
+      "precision": 0.7567,
+      "value_caught_share": 0.0904
     },
     {
       "alerts_per_day": 500,
-      "recall": 0.1293,
-      "precision": 0.1287,
-      "value_caught_share": 0.1009
+      "recall": 0.3999,
+      "precision": 0.398,
+      "value_caught_share": 0.2849
     },
     {
       "alerts_per_day": 1000,
-      "recall": 0.1574,
-      "precision": 0.0783,
-      "value_caught_share": 0.1017
+      "recall": 0.5251,
+      "precision": 0.2613,
+      "value_caught_share": 0.7664
     },
     {
       "alerts_per_day": 2000,
-      "recall": 0.1983,
-      "precision": 0.0493,
-      "value_caught_share": 0.1666
+      "recall": 0.5459,
+      "precision": 0.1358,
+      "value_caught_share": 0.8821
     }
   ],
   "suggested_budget": 2000,
@@ -175,21 +189,22 @@
     {
       "name": "Ripple (full)",
       "attempts": 207,
-      "alerted_share": 0.4058,
-      "median_recoverable": 0.0,
-      "mean_recoverable": 0.3059
+      "alerted_share": 0.7198,
+      "median_recoverable": 0.9356,
+      "mean_recoverable": 0.6414
     },
     {
       "name": "Single-transaction baseline",
       "attempts": 207,
-      "alerted_share": 0.0676,
+      "alerted_share": 0.0725,
       "median_recoverable": 0.0,
-      "mean_recoverable": 0.0404
+      "mean_recoverable": 0.0443
     }
   ],
   "notes": [
     "Test set: 1,317,508 transactions, 1,493 laundering. Warm-up rows and transfers to the same account are excluded because the engine never alerts on them.",
-    "Alert threshold 0.0182 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are the pack defaults, not refitted. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
+    "Alert threshold 0.0174 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; the pack's hand-set weights, shown as their own ablation row, rank far worse on IBM because a detector hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
+    "The model's strongest feature is whether the payer has paid this payee before. It is computed from past payments only, but IBM's synthetic laundering may favour new payees more than real laundering does.",
     "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the full system.",
     "Per-pattern precision compares that pattern's laundering rows against all legitimate rows, so it is lower than overall precision.",
     "Pattern tags come from HI-Small_Patterns.txt; laundering rows not listed there are 'untagged'.",
