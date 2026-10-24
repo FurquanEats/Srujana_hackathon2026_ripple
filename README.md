@@ -2,7 +2,7 @@
 
 **Stop the scam, then follow the money.**
 
-Ripple protects people from payment scams in India at the two moments that matter. Before the money leaves, it spots a customer being coached into draining their savings (a "digital arrest" or fake-investment scam) and recommends a cooling-off hold. After the money leaves, it follows the stolen funds hop by hop through mule accounts while they are still moving, shows where the money sits right now, and gives the bank's nodal officer the smallest set of accounts to freeze to recover the most, with a drafted hold request for each.
+Ripple protects people from payment scams in India at the two moments that matter. Before the money leaves, it spots a customer being coached into draining their savings (a "digital arrest" or fake-investment scam) and recommends a cooling-off hold. After the money leaves, it follows the stolen funds hop by hop through mule accounts while they are still moving, shows where the money sits right now, and gives the bank's nodal officer the smallest set of accounts to freeze to recover the most, with a drafted hold request for each. And when a scam gets past every detector, Ripple learns its shape from that one confirmed trail and catches the next run of it, after checking against the bank's own traffic that ordinary customers almost never match.
 
 Built for Srujana Tech Fest 2026, Finance theme, problem statement F-01: Financial Fraud and Transaction Risk Detection.
 
@@ -17,8 +17,9 @@ When a scam victim reports to the 1930 helpline or the cybercrime portal, the mo
 | Moment | Capability | How |
 | --- | --- | --- |
 | Before | Coerced-transfer detection | An established customer sends most of a lump sum that just arrived from their own fixed deposit or long-known source to a payee they have never paid, at five or more times their usual payment and at least Rs 1 lakh. Repeats within 72 hours score higher. The recommended action is a cooling-off hold and a call to the customer or a trusted contact. |
-| During | Streaming detection | Every payment is scored as it arrives by eight typology detectors (pass-through, fan-in then out, fan-out burst, scatter-gather, temporal cycle, cash structuring under the Rs 50,000 PAN-quote limit, device takeover, coerced transfer), a behavioural baseline, a graph layer and an optional ML model, fused into one probability. |
+| During | Streaming detection | Every payment is scored as it arrives by nine typology detectors (pass-through, fan-in then out, fan-out burst, scatter-gather, temporal cycle, cash structuring under the Rs 50,000 PAN-quote limit, device takeover, coerced transfer, rapid cash-out) and any patterns learned from confirmed trails, a behavioural baseline, a graph layer and an optional ML model, fused into one probability. |
 | After | Golden-hour tracing | From a victim's report or an alerted case, Ripple follows the money forward through every hop it can see, using haircut taint tracking (the method used to trace mixed funds in crypto forensics). Money that reached an ATM withdrawal or a crypto off-ramp counts as escaped. |
+| After | One-shot learning | When a victim reports a scam that no detector caught, the officer traces it and clicks "Learn this pattern". Ripple describes every account on the trail that received money and passed it on (how long the money sat, how much moved on, how many senders and payees, how old the account is, whether it has any spending of its own). It starts from the tightest description of those payments, frees the knobs a criminal changes cheaply between runs (amounts, waits, splits, hops), and stops before more than one ordinary payment every two days in the bank's last 30 days would match. The officer sees each rule with how rare it is, and the expected false alarms, before deploying it as a live detector. |
 | After | Freeze plan | The freeze set is a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each freeze would be, plus any account holding a large share of the traced money. Each recommended freeze comes with the amount it recovers, the reason, and a drafted hold request. |
 
 Every flag carries reason sentences that cite the transactions behind it and a counterfactual ("not flagged if the money had left more than 30 minutes after arriving"). Context signals alone (unusual for this account, near other alerts) can never push a case above Watch, so an unusual but honest customer, such as someone buying Diwali jewellery, is never escalated.
@@ -48,7 +49,8 @@ npm run dev                         # http://localhost:3000
 1. **Command centre:** live payments, engine throughput and latency, and the case queue. Click **Digital arrest** to inject a scam into the stream.
 2. **Case workbench:** open the new Critical case. The freeze plan shows money already escaped to an ATM and crypto, money still recoverable in mule accounts, and the accounts to freeze. The replay slider shows the money moving hop by hop.
 3. **Report a scam:** enter the victim's account to trace the money forward from the report.
-4. **Evaluation:** results on IBM's public AML dataset.
+4. **One-shot learning:** click **Patient mule ring**. Its mules wait just long enough that no built-in detector acts. About 20 seconds later, follow **Report it and trace the money**, then **Learn this pattern** and **Deploy as a live detector**. Click **Patient mule ring** again: the new ring becomes a Critical case citing the learned pattern, and the first ring's mules are flagged before they withdraw.
+5. **Evaluation:** results on IBM's public AML dataset, the red team and one-shot learning.
 
 Run the tests with `cd backend && pytest -q`. Without `RIPPLE_SOURCE=engine`, the API serves the sample responses in `fixtures/`.
 
@@ -78,9 +80,11 @@ simulator or file replay -> ordered feed -> per-account feature store
 | `GET /cases/{id}` | Case detail: reasons, model contributions, money-flow graph, timeline, account profiles |
 | `GET /cases/{id}/interdiction` | Freeze plan: traced money, holdings, accounts to freeze, money escaped, recovery over time |
 | `POST /trace` | Freeze plan for a victim's report: `{account, from_ts?, amount?}` |
-| `POST /inject/{kind}` | Adds a simulated scenario to the live stream (`digital_arrest`, `mule_ring`, `scam_fanout`, `sim_swap_takeover`, `cash_structuring`, `diwali_spike`) |
+| `POST /inject/{kind}` | Adds a simulated scenario to the live stream (`digital_arrest`, `mule_ring`, `scam_fanout`, `sim_swap_takeover`, `cash_structuring`, `diwali_spike`, `patient_ring`) |
+| `POST /motifs/learn` | Learns a pattern from one trail: `{case_id}` or a victim's report `{account, from_ts?, amount?}` |
+| `GET /motifs`, `POST /motifs/{id}/deploy`, `POST /motifs/{id}/retire` | Learned patterns with their live matches; put one live or take it down |
 | `POST /cases/{id}/feedback` | Records an analyst verdict and returns the updated fusion weights |
-| `GET /eval` | Evaluation report |
+| `GET /eval`, `GET /redteam`, `GET /oneshot`, `GET /consortium` | Evaluation on IBM AML, red-team runs, one-shot learning results, consortium results |
 | `POST /ingest`, `GET /stats`, `WS /ws/stream` | Push transactions, engine statistics, live stream of payments, cases and stats |
 
 Shapes are defined in `backend/ripple/schema.py`.
@@ -93,6 +97,7 @@ Shapes are defined in `backend/ripple/schema.py`.
 | `backend/ripple/features` | Per-account rolling state and model features |
 | `backend/ripple/detectors` | Typology detectors and the behavioural baseline |
 | `backend/ripple/graph.py`, `fusion.py`, `cases.py`, `feedback.py` | Graph layer, fusion, case engine, feedback learning |
+| `backend/ripple/motifs.py`, `redteam.py` | One-shot pattern learning; the adaptive red team |
 | `backend/ripple/interdiction.py`, `trace.py`, `cash.py` | Taint tracking, freeze plans, victim-report tracing, cash-in and cash-out rules |
 | `backend/ripple/sim` | India payment simulator and scam scenarios |
 | `backend/ripple/data`, `eval`, `models` | IBM AML loader, evaluation, LightGBM model |
@@ -110,7 +115,8 @@ Shapes are defined in `backend/ripple/schema.py`.
 ## Evaluation and validation
 
 - Model and metrics on IBM AML use a time split: train on 3 to 7 September (after a 48-hour warm-up), test on 8 to 10 September. The sparse 11 to 18 September tail is replayed for state but not scored, because most of its rows are laundering and would inflate precision.
-- The headline comparison is money still recoverable at the first alert, against a single-transaction rule.
+- The headline comparison is money still recoverable at the first alert, against a single-transaction rule. The fused probability is calibrated and the alert threshold chosen on held-out training days, never on the test days. On the test days Ripple reaches 23% precision at 11% recall, against 2.2% precision for a single-transaction LightGBM given the same number of alerts. Its precision in the top 50 alerts is 0.56, and it alerts on 41% of laundering attempts against 7%.
+- One-shot learning (`scripts/oneshot_eval.py`, simulated India traffic): one red-team trail that never reached Review was the only example. The learned pattern catches all 38 of 120 random laundering plans the engine had missed, cuts the adaptive red team's evading plans from 37 to 0, and adds no false alarms on a different simulated bank over 30 days.
 - On the simulated India month, false alarms were cut from 1,699 to 92 (84 of them Watch-level unusual amounts) while every scam scenario still reaches Review or Critical; `tests/test_false_alarms.py` keeps it that way.
 - Each detector has a test for a hit, a near-miss just past its threshold, and missing data.
 
@@ -122,6 +128,7 @@ Shapes are defined in `backend/ripple/schema.py`.
 - Thresholds are set by hand for India and tuned on IBM AML, which is synthetic and US-dollar based; no real Indian bank data was used.
 - A legitimate large purchase funded by a broken fixed deposit (a house down payment, say) looks like coercion, which is why the action is a hold and a call, not a block.
 - Hold-request drafts and reason texts are not legal determinations.
+- A learned pattern describes the relay accounts only, inside one bank's view, and its false-alarm estimate assumes the next 30 days look like the last 30. Accounts already active when monitoring began are treated as established, because their true age is unknown. One-shot results so far are on simulated traffic.
 
 ## AI usage
 
