@@ -343,6 +343,10 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
             "day, so legitimate-row subsampling does not inflate it.",
             "The model's strongest feature is whether the payer has paid this payee before. It is computed from past "
             "payments only, but IBM's synthetic laundering may favour new payees more than real laundering does.",
+            "On IBM the fused score ranks slightly below the LightGBM model alone, so fusion is not claimed to improve "
+            "accuracy here. Ripple fuses because the detectors and graph layer give each alert its reasons and "
+            "counterfactuals and cover behaviour the model has never seen; that second point is shown only on "
+            "simulated traffic (the red-team and one-shot results), not on IBM.",
             "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the "
             "full system.",
             "Per-pattern precision compares that pattern's laundering rows against all legitimate rows, so it is "
