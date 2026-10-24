@@ -312,6 +312,43 @@ def device_takeover(txn: Transaction, store: FeatureStore, src: AccountState, ds
     )
 
 
+def coerced_transfer(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
+    """A victim being coached by a scammer ("digital arrest", fake investment): a lump sum arrives, often a fixed
+    deposit broken early, and most of it goes straight to a payee the customer has never paid, in the largest payment
+    they have ever made, often more than once over hours or days. This detector protects the payer, so its action is
+    a cooling-off hold and a call to the customer or their trusted contact, not a block."""
+    if is_cash_deposit(txn) or txn.amount < p["min_amount"] or src.payees.get(txn.dst_account) != txn.ts:
+        return None  # too small, or not a first-time payee
+    if txn.ts - src.first_seen < timedelta(days=p["min_history_days"]):
+        return None  # only an established customer can act out of character; a fresh account forwarding money is a mule
+    b = baseline(src)
+    if b is None or b.n < 5 or txn.amount < p["median_multiple"] * b.median:
+        return None
+    lookback = timedelta(hours=p["lookback_hours"])
+    earlier = [e for e in window(src.outgoing, txn.ts, lookback)[:-1]
+               if e.amount >= p["min_amount"] and src.payees.get(e.counterparty) == e.ts]
+    if txn.amount <= src.max_out_amount and not earlier:
+        return None  # not the largest payment this customer has made, and not a repeat of one
+    lump = [e for e in window(src.incoming, txn.ts, lookback) if e.amount >= p["drain_share"] * txn.amount]
+    if not lump:
+        return None
+    funding = lump[-1]  # the most recent lump sum big enough to fund this transfer
+    strength = 0.65 + 0.2 * bool(earlier) + 0.1 * (txn.amount / funding.amount >= 0.9)
+    repeat = f"; it is the {len(earlier) + 1}th such transfer in {p['lookback_hours']} hours" if earlier else ""
+    repeat = repeat.replace("2th", "second").replace("3th", "third")
+    return _reason(
+        "coerced_transfer",
+        f"{txn.src_account} received {money(funding.amount, txn.currency)} from {funding.counterparty} "
+        f"{duration(txn.ts - funding.ts)} ago and is sending {money(txn.amount, txn.currency)} of it to "
+        f"{txn.dst_account}, a payee it has never paid{repeat}. Recommend a cooling-off "
+        f"hold and a call to the customer or their trusted contact",
+        strength,
+        [funding.txn_id] + [e.txn_id for e in earlier] + [txn.txn_id],
+        f"Not flagged if the payee had been paid before, or if the transfer had been under "
+        f"{money(p['min_amount'], txn.currency)}",
+    )
+
+
 Detector = Callable[[Transaction, FeatureStore, AccountState, AccountState, Params], Reason | None]
 
 DETECTORS: dict[str, Detector] = {
@@ -322,6 +359,7 @@ DETECTORS: dict[str, Detector] = {
     "temporal_cycle": temporal_cycle,
     "cash_structuring": cash_structuring,
     "device_takeover": device_takeover,
+    "coerced_transfer": coerced_transfer,
 }
 
 

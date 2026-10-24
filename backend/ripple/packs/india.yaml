@@ -21,6 +21,8 @@ detectors:
     window_days: 7
     ctr_monthly_limit: 1000000   # Rs 10 lakh, integrally connected cash in a month
   device_takeover: {window_minutes: 120}
+  coerced_transfer: {min_amount: 100000, median_multiple: 5, drain_share: 0.7, lookback_hours: 72,
+                     min_history_days: 14}
 
 # Hours of data the engine sees before it may alert, so empty baselines and "every payee is new" at the
 # start of a replay do not raise alerts. A live deployment would load this much history before going live.

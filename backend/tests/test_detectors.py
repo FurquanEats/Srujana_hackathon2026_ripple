@@ -168,3 +168,21 @@ def test_fan_out_burst_ignores_a_business_that_always_pays_new_payees():
             b.pay(s.T0 + d * s.DAY + timedelta(hours=10, minutes=5 * i), "PAYROLL", f"EMP{d}-{i}", 20000)
     last = [b.pay(s.RING_DAY + timedelta(hours=10, minutes=5 * i), "PAYROLL", f"NEWEMP{i}", 20000) for i in range(6)][-1]
     assert "fan_out_burst" not in codes(run(b)[last.txn_id])
+
+
+def test_coerced_transfer_flags_a_victim_draining_a_broken_deposit_twice_but_not_the_mules():
+    from ripple.sim.india import START, World
+
+    world = World(n_people=60, n_shops=10)
+    world.simulate(days=20)
+    before = len(world.rows)
+    world.inject("digital_arrest", START + timedelta(days=18))
+    engine = Engine("india")
+    scored = {row.txn.txn_id: engine.process(row.txn)[0] for row in world.sorted_rows()}
+    hits = [row for row in world.rows if "coerced_transfer" in codes(scored[row.txn.txn_id])]
+    victim_payments = [row for row in world.rows[before:] if row.victim_account]
+    assert {r.txn.txn_id for r in hits} == {r.txn.txn_id for r in victim_payments}
+    second = scored[victim_payments[-1].txn.txn_id]
+    reason = next(r for r in second.reasons if r.code == "coerced_transfer")
+    assert "second such transfer" in reason.text and "cooling-off hold" in reason.text
+    assert second.is_alert
