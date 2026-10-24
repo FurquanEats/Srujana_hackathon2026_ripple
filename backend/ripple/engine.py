@@ -2,6 +2,9 @@
 
     store.update -> detectors | baseline | graph | model -> fusion -> alert? -> case engine
 
+A transfer from an account to itself (IBM's "Reinvestment") is internal bookkeeping, not a payment between parties,
+so it is passed through unscored.
+
 The ML model is optional and plugs in through the `Model` protocol. `on_features` lets a training job capture the
 exact feature rows the live engine sees, so training and serving never drift apart.
 """
@@ -11,6 +14,7 @@ from __future__ import annotations
 import time
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Protocol
 
@@ -26,6 +30,7 @@ from ripple.schema import (
     GraphEdge,
     GraphNode,
     Layer,
+    Rail,
     Reason,
     ScoredTransaction,
     ShapValue,
@@ -34,6 +39,28 @@ from ripple.schema import (
 
 LOG_WINDOW = timedelta(days=8)  # covers the longest evidence window (7-day cash structuring)
 CONTEXT_WINDOW = timedelta(hours=24)
+
+
+@dataclass(frozen=True, slots=True)
+class _Recent:
+    """What the engine keeps about a non-alert transaction: enough to show it as case context, at a fraction of the
+    memory of a full ScoredTransaction."""
+
+    txn_id: str
+    ts: datetime
+    src: str
+    dst: str
+    amount: float
+    currency: str
+    rail: Rail
+    probability: float
+
+    def scored(self) -> ScoredTransaction:
+        return ScoredTransaction(
+            txn_id=self.txn_id, ts=self.ts, src_account=self.src, dst_account=self.dst, amount=self.amount,
+            currency=self.currency, rail=self.rail, probability=self.probability, confidence=1.0,
+            layer_scores={layer: 0.0 for layer in Layer},
+        )
 
 
 class Model(Protocol):
@@ -56,10 +83,13 @@ class Engine:
         self.fusion = Fusion(fusion_cfg["weights"], fusion_cfg["baseline_only_cap"])
         self.dismiss_for = timedelta(days=fusion_cfg["dismiss_days"])
         self.alert_at = self.pack["tiers"]["alert"]
+        self.warmup = timedelta(hours=self.pack.get("warmup_hours", 0))
+        self.stream_start: datetime | None = None
         self.dismissed: dict[tuple[str, str], datetime] = {}  # account pair -> suppressed until
-        self.log: dict[str, ScoredTransaction] = {}
-        self.cases = CaseEngine(self.pack["tiers"], amount_of=lambda i: self.log[i].amount if i in self.log else 0.0)
-        self._log_order: deque[tuple[datetime, str]] = deque()
+        self.log: dict[str, ScoredTransaction] = {}  # every alert, in full
+        self.recent: dict[str, _Recent] = {}  # every non-alert transaction within LOG_WINDOW, compact
+        self.cases = CaseEngine(self.pack["tiers"], amount_of=self._amount_of)
+        self._recent_order: deque[tuple[datetime, str]] = deque()
         self.shap: dict[str, list[ShapValue]] = {}
         self.processed = 0
         self.alerts = 0
@@ -68,6 +98,13 @@ class Engine:
 
     def process(self, txn: Transaction) -> tuple[ScoredTransaction, Case | None]:
         began = time.perf_counter()
+        if self.stream_start is None:
+            self.stream_start = txn.ts
+        if txn.src_account == txn.dst_account:
+            self.processed += 1
+            return ScoredTransaction(
+                **txn.model_dump(), probability=0.0, confidence=1.0, layer_scores={layer: 0.0 for layer in Layer}
+            ), None
         src, dst = self.store.update(txn)
 
         hits = detectors.run(txn, self.store, src, dst, self.pack)
@@ -100,7 +137,7 @@ class Engine:
             confidence=_confidence(txn, has_history),
             layer_scores={k: round(v, 4) for k, v in layers.items()},
             reasons=reasons,
-            is_alert=p >= self.alert_at,
+            is_alert=p >= self.alert_at and not self.warming_up(txn.ts),
         )
         self.store.after_score(txn)
         self._remember(scored)
@@ -116,12 +153,31 @@ class Engine:
         return scored, case
 
     def _remember(self, scored: ScoredTransaction) -> None:
-        self.log[scored.txn_id] = scored
-        self._log_order.append((scored.ts, scored.txn_id))
-        while self._log_order and scored.ts - self._log_order[0][0] > LOG_WINDOW:
-            _, old = self._log_order.popleft()
-            if self.log.get(old) is not None and not self.log[old].is_alert:
-                del self.log[old]
+        if scored.is_alert:
+            self.log[scored.txn_id] = scored
+        else:
+            self.recent[scored.txn_id] = _Recent(
+                scored.txn_id, scored.ts, scored.src_account, scored.dst_account, scored.amount, scored.currency,
+                scored.rail, scored.probability,
+            )
+            self._recent_order.append((scored.ts, scored.txn_id))
+        while self._recent_order and scored.ts - self._recent_order[0][0] > LOG_WINDOW:
+            self.recent.pop(self._recent_order.popleft()[1], None)
+
+    def _amount_of(self, txn_id: str) -> float:
+        hit = self.log.get(txn_id) or self.recent.get(txn_id)
+        return hit.amount if hit else 0.0
+
+    def lookup(self, txn_id: str) -> ScoredTransaction | None:
+        if txn_id in self.log:
+            return self.log[txn_id]
+        hit = self.recent.get(txn_id)
+        return hit.scored() if hit else None
+
+    def warming_up(self, ts: datetime) -> bool:
+        """While the engine has seen less than `warmup_hours` of data, every payee and sender looks new and every
+        baseline is empty, so it scores transactions but raises no alerts."""
+        return self.stream_start is not None and ts - self.stream_start < self.warmup
 
     def stats(self) -> dict[str, float]:
         elapsed = max(time.perf_counter() - self._started, 1e-9)
@@ -132,6 +188,7 @@ class Engine:
             "open_cases": float(sum(1 for c in self.cases.cases.values() if c.status == "open")),
             "tps": round(self.processed / elapsed, 1),
             "p95_latency_ms": round(lat[int(0.95 * (len(lat) - 1))], 2) if lat else 0.0,
+            "warming_up": float(self.store.now is not None and self.warming_up(self.store.now)),
         }
 
     def detail(self, case_id: str) -> CaseDetail | None:
@@ -147,9 +204,11 @@ class Engine:
             state = self.store.get(account)
             if state is None:
                 continue
-            for edge in list(state.incoming) + list(state.outgoing) + list(state.cash_deposits):
-                if first_alert - CONTEXT_WINDOW <= edge.ts <= case.alerts[-1].ts and edge.txn_id in self.log:
-                    timeline.setdefault(edge.txn_id, self.log[edge.txn_id])
+            for edge in state.incoming + state.outgoing + state.cash_deposits:
+                if first_alert - CONTEXT_WINDOW <= edge.ts <= case.alerts[-1].ts and edge.txn_id not in timeline:
+                    found = self.lookup(edge.txn_id)
+                    if found is not None:
+                        timeline[edge.txn_id] = found
         ordered = sorted(timeline.values(), key=lambda t: t.ts)[:300]
 
         best: dict[str, Reason] = {}

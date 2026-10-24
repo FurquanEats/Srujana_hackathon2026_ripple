@@ -1,14 +1,14 @@
 """Per-account rolling state, updated once per transaction in time order.
 
-Windows are pruned on every update, so memory per account stays bounded. Transactions must arrive in
-timestamp order; the replay sorts them.
+Windows are pruned on every update, so memory per account stays bounded. State uses slotted classes and plain
+lists rather than deques, because a dataset like IBM AML has hundreds of thousands of accounts and an empty deque
+costs about ten times an empty list. Transactions must arrive in timestamp order; the replay sorts them.
 """
 
 from __future__ import annotations
 
 import math
 import statistics
-from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -20,7 +20,7 @@ CASH_WINDOW = timedelta(days=31)
 MAX_HISTORY = 500  # cap per account so very busy accounts stay cheap
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Edge:
     txn_id: str
     ts: datetime
@@ -28,15 +28,14 @@ class Edge:
     amount: float
 
 
-@dataclass
+@dataclass(slots=True)
 class AccountState:
     account_id: str
     first_seen: datetime
-    incoming: deque[Edge] = field(default_factory=deque)  # last 72 h
-    outgoing: deque[Edge] = field(default_factory=deque)  # last 72 h
-    out_history: deque[tuple[datetime, float]] = field(default_factory=deque)  # last 30 days, outgoing amounts
-    out_hours: deque[int] = field(default_factory=deque)  # hour of day of each out_history entry
-    cash_deposits: deque[Edge] = field(default_factory=deque)  # last 31 days
+    incoming: list[Edge] = field(default_factory=list)  # last 72 h, oldest first
+    outgoing: list[Edge] = field(default_factory=list)  # last 72 h, oldest first
+    out_history: list[tuple[datetime, float]] = field(default_factory=list)  # last 30 days of outgoing amounts
+    cash_deposits: list[Edge] = field(default_factory=list)  # last 31 days
     payees: dict[str, datetime] = field(default_factory=dict)  # first payment to each payee
     senders: dict[str, datetime] = field(default_factory=dict)  # first payment from each sender
     devices: dict[str, datetime] = field(default_factory=dict)  # first use of each device
@@ -77,10 +76,8 @@ class FeatureStore:
         else:
             src.outgoing.append(Edge(txn.txn_id, ts, txn.dst_account, txn.amount))
             src.out_history.append((ts, txn.amount))
-            src.out_hours.append(ts.hour)
             if len(src.out_history) > MAX_HISTORY:
-                src.out_history.popleft()
-                src.out_hours.popleft()
+                del src.out_history[0]
             src.payees.setdefault(txn.dst_account, ts)
             if txn.device_id:
                 src.devices.setdefault(txn.device_id, ts)
@@ -97,15 +94,20 @@ class FeatureStore:
 
 
 def _prune(state: AccountState, now: datetime) -> None:
-    for window, edges in ((EDGE_WINDOW, state.incoming), (EDGE_WINDOW, state.outgoing), (CASH_WINDOW, state.cash_deposits)):
-        while edges and now - edges[0].ts > window:
-            edges.popleft()
-    while state.out_history and now - state.out_history[0][0] > HISTORY_WINDOW:
-        state.out_history.popleft()
-        state.out_hours.popleft()
+    for span, edges in ((EDGE_WINDOW, state.incoming), (EDGE_WINDOW, state.outgoing), (CASH_WINDOW, state.cash_deposits)):
+        cutoff, k = now - span, 0
+        while k < len(edges) and edges[k].ts < cutoff:
+            k += 1
+        if k:
+            del edges[:k]
+    cutoff, k = now - HISTORY_WINDOW, 0
+    while k < len(state.out_history) and state.out_history[k][0] < cutoff:
+        k += 1
+    if k:
+        del state.out_history[:k]
 
 
-def window(edges: deque[Edge], now: datetime, span: timedelta) -> list[Edge]:
+def window(edges: list[Edge], now: datetime, span: timedelta) -> list[Edge]:
     """Edges within `span` before `now`, oldest first."""
     cutoff = now - span
     return [e for e in edges if e.ts >= cutoff]
@@ -138,7 +140,7 @@ def baseline(state: AccountState, skip_last: bool = True) -> Baseline | None:
 
 def hour_share(state: AccountState, hour: int, skip_last: bool = True) -> float | None:
     """Share of past outgoing payments made within one hour of `hour`, excluding the current one."""
-    hours = list(state.out_hours)
+    hours = [ts.hour for ts, _ in state.out_history]
     if skip_last:
         hours = hours[:-1]
     if len(hours) < 5:

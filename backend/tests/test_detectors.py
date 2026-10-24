@@ -159,3 +159,12 @@ def test_legit_big_payment_stays_watch(amount):
     scored = run(b)[tid]
     assert scored.layer_scores["baseline"] > 0.9
     assert scored.probability < 0.70  # can reach Watch, never Review or Critical, without corroboration
+
+
+def test_fan_out_burst_ignores_a_business_that_always_pays_new_payees():
+    b = s.Builder()
+    for d in range(21):  # a payroll-like account paying 6 new people every day
+        for i in range(6):
+            b.pay(s.T0 + d * s.DAY + timedelta(hours=10, minutes=5 * i), "PAYROLL", f"EMP{d}-{i}", 20000)
+    last = [b.pay(s.RING_DAY + timedelta(hours=10, minutes=5 * i), "PAYROLL", f"NEWEMP{i}", 20000) for i in range(6)][-1]
+    assert "fan_out_burst" not in codes(run(b)[last.txn_id])

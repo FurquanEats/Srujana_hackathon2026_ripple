@@ -103,7 +103,8 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
 
 
 def fan_out_burst(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
-    """Many first-time payees in a short burst: typical of scam proceeds being dispersed, or a takeover."""
+    """Many first-time payees in a short burst, well above the account's own usual rate of new payees: typical of
+    scam proceeds being dispersed, or a takeover. A business that always pays new payees does not trigger it."""
     if txn.rail == Rail.CASH:
         return None
     span = timedelta(minutes=p["window_minutes"])
@@ -112,11 +113,15 @@ def fan_out_burst(txn: Transaction, store: FeatureStore, src: AccountState, dst:
     payees = list(dict.fromkeys(e.counterparty for e in fresh))
     if len(payees) < p["min_new_payees"]:
         return None
+    known_days = max((cutoff - src.first_seen).total_seconds() / 86400, 1.0)
+    usual = (len(src.payees) - len(payees)) / known_days  # new payees on a typical day
+    if len(payees) < 2 * usual:  # a business that adds this many payees most days, even in one batch, is normal
+        return None
     strength = 0.55 + 0.35 * _ramp(len(payees), p["min_new_payees"], p["min_new_payees"] + 5)
     return _reason(
         "fan_out_burst",
         f"{txn.src_account} paid {len(payees)} first-time payees {money(sum(e.amount for e in fresh), txn.currency)} "
-        f"in {duration(txn.ts - fresh[0].ts)}",
+        f"in {duration(txn.ts - fresh[0].ts)}, against a usual {usual:.1f} new payees a day",
         strength,
         [e.txn_id for e in fresh],
         f"Not flagged if fewer than {p['min_new_payees']} new payees had been paid within {p['window_minutes']} minutes",

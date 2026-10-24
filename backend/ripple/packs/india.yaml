@@ -20,6 +20,10 @@ detectors:
     ctr_monthly_limit: 1000000   # Rs 10 lakh, integrally connected cash in a month
   device_takeover: {window_minutes: 120}
 
+# Hours of data the engine sees before it may alert, so empty baselines and "every payee is new" at the
+# start of a replay do not raise alerts. A live deployment would load this much history before going live.
+warmup_hours: 24
+
 fusion:
   # p = sigmoid(bias + sum(weight * layer score)). A strong detector hit alone (0.9) gives about 0.86;
   # a maximal baseline score alone gives about 0.62, which is Watch.

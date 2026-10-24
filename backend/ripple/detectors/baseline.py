@@ -45,10 +45,14 @@ def score(txn: Transaction, src: AccountState, dst: AccountState) -> tuple[float
                     [txn.txn_id],
                 ))
         burst = window(src.outgoing, txn.ts, timedelta(hours=1))
-        if len(burst) >= 6:
+        earlier = len(src.out_history) - len(burst)
+        span_h = (txn.ts - src.out_history[0][0]).total_seconds() / 3600 - 1 if src.out_history else 0
+        usual_per_hour = earlier / span_h if span_h >= 24 else None  # needs a day of the account's own history
+        if usual_per_hour is not None and len(burst) >= 6 and len(burst) >= 5 * max(usual_per_hour, 0.2):
             reasons.append(_reason(
                 "baseline_velocity_out",
-                f"{txn.src_account} made {len(burst)} payments in the last hour",
+                f"{txn.src_account} made {len(burst)} payments in the last hour; it usually makes "
+                f"{usual_per_hour:.1f} an hour",
                 0.4 + 0.05 * min(len(burst) - 6, 8),
                 [e.txn_id for e in burst],
             ))

@@ -88,3 +88,25 @@ def test_feedback_confirm_and_dismiss():
 def test_scoring_is_fast():
     engine, _, _, _ = build()
     assert engine.stats()["p95_latency_ms"] < 50
+
+
+def test_transfer_to_self_is_never_scored():
+    engine, _, _, _ = build()
+    from datetime import datetime
+
+    from ripple.schema import Rail, Transaction
+
+    scored, case = engine.process(Transaction(txn_id="SELF", ts=datetime(2026, 10, 23), src_account="A2217",
+                                              dst_account="A2217", amount=500000, rail=Rail.NEFT))
+    assert scored.probability == 0 and not scored.reasons and case is None
+
+
+def test_no_alerts_during_warm_up():
+    b = s.Builder()
+    ring = s.mule_ring(b)
+    engine = Engine()
+    engine.warmup = engine.warmup * 100  # the whole 21-day scenario now falls inside warm-up
+    out = {t.txn_id: engine.process(t)[0] for t in b.sorted()}
+    hop = out[ring["hop"][1]]
+    assert hop.reasons and not hop.is_alert
+    assert engine.stats()["warming_up"] == 1.0
