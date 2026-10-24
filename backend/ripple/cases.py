@@ -93,9 +93,13 @@ class CaseEngine:
             keep, *others = sorted(roots)  # the oldest case id survives a merge
             case = self.cases[keep]
             for other in others:
-                case.alerts.extend(self.cases.pop(other).alerts)
+                merged = self.cases.pop(other).alerts
+                for t in merged:
+                    t.case_id = keep
+                case.alerts.extend(merged)
                 self._parent[other] = keep
-            case.alerts.sort(key=lambda t: t.ts)
+            if others:  # alerts arrive in time order, so only a merge can put them out of order
+                case.alerts.sort(key=lambda t: t.ts)
         else:
             keep = f"C-{self._next:04d}"
             self._next += 1
@@ -105,8 +109,6 @@ class CaseEngine:
         for account in linked_accounts(alert):
             self._latest[account] = (keep, alert.ts)
         alert.case_id = keep
-        for t in case.alerts:
-            t.case_id = keep
         return case
 
     def get(self, case_id: str) -> Case | None:

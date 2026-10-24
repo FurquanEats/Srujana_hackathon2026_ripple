@@ -133,9 +133,11 @@ class GraphLayer:
         if idx is None:
             return 0.0, None
         members = self.communities[idx]
+        if not MIN_COMMUNITY <= len(members) <= MAX_COMMUNITY:
+            return 0.0, None  # checked first: intersecting a huge community with the alerted set on every payment is slow
         flagged = members & self.alerted.keys()
-        share = len(flagged) / len(members) if members else 0.0
-        if not MIN_COMMUNITY <= len(members) <= MAX_COMMUNITY or len(flagged) < MIN_FLAGGED or share < MIN_FLAGGED_SHARE:
+        share = len(flagged) / len(members)
+        if len(flagged) < MIN_FLAGGED or share < MIN_FLAGGED_SHARE:
             return 0.0, None
         strength = min(1.0, 0.3 + share)
         hub = max(members, key=lambda a: self.pagerank.get(a, 0.0))
