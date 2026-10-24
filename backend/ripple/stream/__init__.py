@@ -2,6 +2,6 @@
 transactions, case updates and stats out to /ws/stream."""
 
 from ripple.stream.bus import EventBus
-from ripple.stream.replay import ingest, load_transactions, replay
+from ripple.stream.replay import Feed, ingest, load_transactions, replay, replay_feed
 
-__all__ = ["EventBus", "ingest", "load_transactions", "replay"]
+__all__ = ["EventBus", "Feed", "ingest", "load_transactions", "replay", "replay_feed"]

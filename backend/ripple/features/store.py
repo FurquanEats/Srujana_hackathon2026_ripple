@@ -13,6 +13,7 @@ import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
+from ripple.cash import is_cash_deposit
 from ripple.schema import Rail, Transaction
 
 EDGE_WINDOW = timedelta(hours=72)  # longest detector window (temporal cycle)
@@ -75,7 +76,7 @@ class FeatureStore:
         for state in (src, dst):
             _prune(state, ts)
 
-        if txn.rail == Rail.CASH:
+        if is_cash_deposit(txn):
             dst.cash_deposits.append(Edge(txn.txn_id, ts, txn.src_account, txn.amount))
         else:
             src.outgoing.append(Edge(txn.txn_id, ts, txn.dst_account, txn.amount))
@@ -96,7 +97,7 @@ class FeatureStore:
     def after_score(self, txn: Transaction) -> None:
         """Records values that must exclude the current transaction while it is scored."""
         src = self.accounts[txn.src_account]
-        if txn.rail != Rail.CASH:
+        if not is_cash_deposit(txn):
             src.max_out_amount = max(src.max_out_amount, txn.amount)
 
 
@@ -180,7 +181,7 @@ def hour_share(state: AccountState, hour: int, skip_last: bool = True) -> float 
 def feature_vector(txn: Transaction, src: AccountState, dst: AccountState) -> dict[str, float]:
     """Raw behavioural features for the ML model. Training and live scoring must both use this function."""
     ts = txn.ts
-    own = txn.rail != Rail.CASH
+    own = not is_cash_deposit(txn)
     b = baseline(src, skip_last=own)
     in_24h = window(dst.incoming, ts, timedelta(hours=24))
     src_in_30m = window(src.incoming, ts, timedelta(minutes=30))

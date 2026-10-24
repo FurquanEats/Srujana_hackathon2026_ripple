@@ -1,8 +1,9 @@
 """FastAPI entrypoint: REST routes for cases, feedback and evaluation, transaction ingest, and the /ws/stream WebSocket.
 
-RIPPLE_SOURCE=engine runs the live engine; RIPPLE_DATA (CSV or Parquet) is then replayed at RIPPLE_SPEED seconds of
-data per real second, and POST /ingest accepts more transactions at any time. RIPPLE_SOURCE=fixtures (the default)
-serves the sample responses in /fixtures.
+RIPPLE_SOURCE=engine runs the live engine. RIPPLE_DATA is replayed at RIPPLE_SPEED seconds of data per real second:
+a CSV or Parquet file, or "sim:india" for a freshly simulated legitimate month whose scam scenarios are injected live
+with POST /inject/{kind}. POST /ingest accepts more transactions at any time, and POST /trace follows a victim's money.
+RIPPLE_SOURCE=fixtures (the default) serves the sample responses in /fixtures.
 """
 
 from __future__ import annotations
@@ -12,12 +13,13 @@ import contextlib
 import json
 import os
 from collections.abc import AsyncIterator
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from ripple import feedback, fixtures, interdiction
+from ripple import feedback, fixtures, interdiction, trace
 from ripple.cases import queue_order
 from ripple.engine import Engine
 from ripple.schema import (
@@ -26,12 +28,14 @@ from ripple.schema import (
     EvalReport,
     Feedback,
     FeedbackResult,
+    InjectResult,
     InterdictionPlan,
     Layer,
     ScoredTransaction,
+    TraceRequest,
     Transaction,
 )
-from ripple.stream import EventBus, ingest, load_transactions, replay
+from ripple.stream import EventBus, Feed, ingest, load_transactions, replay_feed
 
 
 def create_app(source: str | None = None, data: str | None = None, speed: float | None = None) -> FastAPI:
@@ -41,12 +45,21 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
     live = source == "engine"
     engine = Engine(os.environ.get("RIPPLE_PACK", "india")) if live else None
     bus = EventBus()
+    feed = Feed()
+    world = None
+    if engine is not None and data:
+        if data.startswith("sim:"):
+            from ripple.sim.india import World
+
+            world = World()
+            world.simulate()
+            feed.add(row.txn for row in world.sorted_rows())
+        else:
+            feed.add(load_transactions(data))
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        task = None
-        if engine is not None and data:
-            task = asyncio.create_task(replay(engine, bus, load_transactions(data), speed))
+        task = asyncio.create_task(replay_feed(engine, bus, feed, speed)) if engine is not None else None
         yield
         if task:
             task.cancel()
@@ -114,6 +127,36 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         if engine is None:
             raise HTTPException(status_code=409, detail="ingest needs RIPPLE_SOURCE=engine")
         return [ingest(engine, bus, t).txn for t in sorted(txns, key=lambda t: t.ts)]
+
+    @app.post("/inject/{kind}")
+    def post_inject(kind: str) -> InjectResult:
+        """Adds a simulated scenario (mule_ring, scam_fanout, sim_swap_takeover, cash_structuring, diwali_spike,
+        digital_arrest) at the stream's current time; it flows through the engine like any other traffic."""
+        if engine is None or world is None:
+            raise HTTPException(status_code=409, detail="inject needs RIPPLE_SOURCE=engine and RIPPLE_DATA=sim:india")
+        from ripple.sim.india import INJECTORS
+
+        if kind not in INJECTORS:
+            raise HTTPException(status_code=404, detail=f"unknown scenario {kind}; choose from {INJECTORS}")
+        at = (engine.store.now or datetime.now()) + timedelta(minutes=2)
+        before = len(world.rows)
+        txns = world.inject(kind, at)
+        feed.add(txns)
+        victim = next((row for row in world.rows[before:] if row.victim_account), None)
+        return InjectResult(kind=kind, at=at, txn_ids=[t.txn_id for t in txns],
+                            victim_account=victim.victim_account if victim else None,
+                            victim_paid_at=victim.txn.ts if victim else None)
+
+    @app.post("/trace")
+    def post_trace(report: TraceRequest) -> InterdictionPlan:
+        """Follows a victim's money forward from the reported time and returns where it sits and what to freeze."""
+        if engine is None:
+            raise HTTPException(status_code=409, detail="trace needs RIPPLE_SOURCE=engine")
+        from_ts = report.from_ts or ((engine.store.now or datetime.now()) - timedelta(hours=24))
+        result = trace.trace(engine, report.account, from_ts.replace(tzinfo=None), report.amount)
+        if result is None:
+            raise HTTPException(status_code=404, detail=f"no payments from {report.account} after {from_ts}")
+        return result
 
     @app.get("/stats")
     def stats() -> dict[str, float]:

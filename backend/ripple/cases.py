@@ -12,12 +12,18 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
 
-from ripple.schema import CaseSummary, Rail, ScoredTransaction, Tier
+from ripple.cash import is_cash_deposit, is_cash_out
+from ripple.schema import CaseSummary, ScoredTransaction, Tier
 
 
 def linked_accounts(txn: ScoredTransaction) -> tuple[str, ...]:
-    """Accounts an alert links. A cash deposit's source is a branch or teller, not an account, so it never links cases."""
-    return (txn.dst_account,) if txn.rail == Rail.CASH else (txn.src_account, txn.dst_account)
+    """Accounts an alert links. A cash deposit's source is the branch counter and a cash-out's destination is an ATM
+    or exchange, not a customer, so neither links cases."""
+    if is_cash_deposit(txn):
+        return (txn.dst_account,)
+    if is_cash_out(txn):
+        return (txn.src_account,)  # an ATM or exchange account would link every unrelated withdrawal
+    return (txn.src_account, txn.dst_account)
 
 
 @dataclass
@@ -40,7 +46,7 @@ class Case:
         the pattern is the deposits together. `amount_of` returns a transaction's amount by id, or 0 if unknown."""
         moved: dict[str, float] = {}
         for t in self.alerts:
-            mover = t.dst_account if t.rail == Rail.CASH else t.src_account
+            mover = t.dst_account if is_cash_deposit(t) else t.src_account
             moved[mover] = moved.get(mover, 0.0) + t.amount
             for r in t.reasons:
                 if r.code == "cash_structuring":

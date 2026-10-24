@@ -17,8 +17,9 @@ from datetime import datetime, timedelta
 
 import networkx as nx
 
+from ripple.cash import is_cash_deposit
 from ripple.fmt import names
-from ripple.schema import Layer, Rail, Reason, Transaction
+from ripple.schema import Layer, Reason, Transaction
 
 MIN_COMMUNITY, MAX_COMMUNITY = 3, 60
 MIN_FLAGGED, MIN_FLAGGED_SHARE = 3, 0.3  # a community scores only when this many of its members, and this share, are flagged
@@ -52,7 +53,7 @@ class GraphLayer:
         self._since_recompute = 0
 
     def add(self, txn: Transaction) -> None:
-        if txn.rail == Rail.CASH or txn.src_account == txn.dst_account:
+        if is_cash_deposit(txn) or txn.src_account == txn.dst_account:
             return
         edge = _Edge(txn.txn_id, txn.ts, txn.src_account, txn.dst_account, txn.amount)
         self.edges.append(edge)

@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Any, Callable
 
 from ripple.features.store import AccountState, Edge, FeatureStore, baseline, window
+from ripple.cash import is_cash_deposit
 from ripple.fmt import duration, ids, money, names
 from ripple.schema import Layer, Rail, Reason, Transaction
 
@@ -41,7 +42,7 @@ def pass_through(txn: Transaction, store: FeatureStore, src: AccountState, dst: 
 
     Requiring new senders keeps a salaried customer who pays rent right after a known employer's salary out of it.
     """
-    if txn.rail == Rail.CASH:
+    if is_cash_deposit(txn):
         return None
     lookback = timedelta(hours=p["lookback_hours"])
     received = window(src.incoming, txn.ts, lookback)
@@ -88,7 +89,7 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
     outflow must be close to the inflow: a shop paying its supplier many times what customers paid it today is
     spending its own money, not passing someone else's along.
     """
-    if txn.rail == Rail.CASH:
+    if is_cash_deposit(txn):
         return None
     span = timedelta(hours=p["window_hours"])
     cutoff = txn.ts - span
@@ -121,7 +122,7 @@ def fan_in_out(txn: Transaction, store: FeatureStore, src: AccountState, dst: Ac
 def fan_out_burst(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """Many first-time payees in a short burst, well above the account's own usual rate of new payees: typical of
     scam proceeds being dispersed, or a takeover. A business that always pays new payees does not trigger it."""
-    if txn.rail == Rail.CASH:
+    if is_cash_deposit(txn):
         return None
     span = timedelta(minutes=p["window_minutes"])
     cutoff = txn.ts - span
@@ -160,7 +161,7 @@ def scatter_gather(txn: Transaction, store: FeatureStore, src: AccountState, dst
     the window. Without these checks, an employer or gig platform paying people who later shop at the same store, or
     shops banking cash and paying one supplier, look exactly like this pattern.
     """
-    if txn.rail == Rail.CASH:
+    if is_cash_deposit(txn):
         return None
     span = timedelta(hours=p["window_hours"])
     gathered = window(dst.incoming, txn.ts, span)
@@ -204,7 +205,7 @@ def scatter_gather(txn: Transaction, store: FeatureStore, src: AccountState, dst
 
 def temporal_cycle(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """Money that returns to where it started through a time-ordered chain of 3 or more accounts."""
-    if txn.rail == Rail.CASH or txn.src_account == txn.dst_account:
+    if is_cash_deposit(txn) or txn.src_account == txn.dst_account:
         return None
     origin, closer = txn.dst_account, txn.src_account
     start = txn.ts - timedelta(hours=p["window_hours"])
@@ -250,7 +251,7 @@ def temporal_cycle(txn: Transaction, store: FeatureStore, src: AccountState, dst
 
 def cash_structuring(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """Repeated cash deposits kept just under the Rs 50,000 a day at which PAN must be quoted."""
-    if txn.rail != Rail.CASH or not p["band_low"] <= txn.amount <= p["band_high"]:
+    if not is_cash_deposit(txn) or not p["band_low"] <= txn.amount <= p["band_high"]:
         return None
     recent = window(dst.cash_deposits, txn.ts, timedelta(days=p["window_days"]))
     banded = [e for e in recent if p["band_low"] <= e.amount <= p["band_high"]]
@@ -272,7 +273,7 @@ def cash_structuring(txn: Transaction, store: FeatureStore, src: AccountState, d
 
 def ctr_reportable(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """Cash this calendar month above the CTR limit. A reporting fact, not suspicion, so its strength is low."""
-    if txn.rail != Rail.CASH or p.get("ctr_monthly_limit") is None:
+    if not is_cash_deposit(txn) or p.get("ctr_monthly_limit") is None:
         return None
     month = [e for e in dst.cash_deposits if (e.ts.year, e.ts.month) == (txn.ts.year, txn.ts.month)]
     total = sum(e.amount for e in month)
@@ -289,7 +290,7 @@ def ctr_reportable(txn: Transaction, store: FeatureStore, src: AccountState, dst
 
 def device_takeover(txn: Transaction, store: FeatureStore, src: AccountState, dst: AccountState, p: Params) -> Reason | None:
     """A new device followed quickly by the account's largest-ever payment to a new payee, as after a SIM swap."""
-    if txn.rail == Rail.CASH or not txn.device_id:
+    if is_cash_deposit(txn) or not txn.device_id:
         return None
     first_use = src.devices.get(txn.device_id)
     older = [d for d, seen in src.devices.items() if seen < (first_use or txn.ts)]

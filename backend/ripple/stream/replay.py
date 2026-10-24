@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+import heapq
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -53,3 +54,46 @@ async def replay(engine: Engine, bus: EventBus, txns: Iterable[Transaction], spe
             last_stats = time.monotonic()
         await asyncio.sleep(0)  # let WebSocket senders run between events
     bus.publish(StreamEvent(type="stats", stats=engine.stats()).model_dump(mode="json", exclude_none=True))
+
+
+class Feed:
+    """Transactions waiting to be replayed, kept in time order. Injected scenarios are inserted at their own times,
+    so the engine always sees one ordered stream even when a demo button adds transactions mid-replay."""
+
+    def __init__(self, txns: Iterable[Transaction] = ()) -> None:
+        self._items: list[tuple] = []
+        self._seq = 0
+        self.add(txns)
+
+    def add(self, txns: Iterable[Transaction]) -> None:
+        for txn in txns:
+            self._seq += 1
+            heapq.heappush(self._items, (txn.ts, self._seq, txn))
+
+    def pop(self) -> Transaction | None:
+        return heapq.heappop(self._items)[2] if self._items else None
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+
+async def replay_feed(engine: Engine, bus: EventBus, feed: Feed, speed: float = 60.0, idle: float = 0.25) -> None:
+    """Replays the feed and then keeps waiting for injected transactions, so the stream stays live for the demo."""
+    previous = None
+    last_stats = time.monotonic()
+    while True:
+        txn = feed.pop()
+        if txn is None:
+            await asyncio.sleep(idle)
+        else:
+            if previous is not None and speed > 0:
+                gap = (txn.ts - previous).total_seconds() / speed
+                if gap > 0:
+                    await asyncio.sleep(min(gap, MAX_SLEEP))
+            previous = max(previous, txn.ts) if previous else txn.ts
+            ingest(engine, bus, txn)
+            await asyncio.sleep(0)
+        if time.monotonic() - last_stats >= STATS_EVERY:
+            stats = engine.stats() | {"queued": float(len(feed))}
+            bus.publish(StreamEvent(type="stats", stats=stats).model_dump(mode="json", exclude_none=True))
+            last_stats = time.monotonic()

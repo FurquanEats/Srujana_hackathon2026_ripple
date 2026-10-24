@@ -246,3 +246,19 @@ class InterdictionPlan(BaseModel):
     recoverable_share_at_first_alert: float | None = None  # that amount over the traced money that had entered by then
     timeline: list[RecoveryPoint]
     method: str
+
+
+class TraceRequest(BaseModel):
+    """A victim's report: whose money, from when, and roughly how much."""
+
+    account: str
+    from_ts: datetime | None = None  # defaults to 24 hours before the engine's current time
+    amount: float | None = None
+
+
+class InjectResult(BaseModel):
+    kind: str
+    at: datetime
+    txn_ids: list[str]
+    victim_account: str | None = None  # whose money the scenario steals, for a "report a scam" trace
+    victim_paid_at: datetime | None = None

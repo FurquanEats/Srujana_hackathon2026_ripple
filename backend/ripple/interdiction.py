@@ -27,6 +27,7 @@ from datetime import datetime
 
 import networkx as nx
 
+from ripple.cash import is_cash_deposit, is_cash_out
 from ripple.fmt import money
 from ripple.schema import (
     AccountProfile,
@@ -34,7 +35,6 @@ from ripple.schema import (
     FreezeAction,
     InterdictionPlan,
     Layer,
-    Rail,
     RecoveryPoint,
     ScoredTransaction,
     TaintHolding,
@@ -54,17 +54,25 @@ class _Account:
 
 
 def plan(detail: CaseDetail, as_of: datetime | None = None) -> InterdictionPlan:
+    """Freeze plan for a case, tracing only its evidence: alerts and the transactions their detector reasons cite."""
     evidence = {t.txn_id for t in detail.timeline if t.is_alert}
     for t in detail.timeline:
         if t.is_alert:
             evidence.update(i for r in t.reasons if r.layer == Layer.DETECTOR for i in r.txn_ids)
-    txns = sorted((t for t in detail.timeline if t.txn_id in evidence), key=lambda t: t.ts)
-    as_of = as_of or (txns[-1].ts if txns else detail.updated_at)
+    trail = [t for t in detail.timeline if t.txn_id in evidence]
+    return plan_trail(detail.case_id, trail, detail.profiles, as_of or (max(t.ts for t in trail) if trail else detail.updated_at))
+
+
+def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[AccountProfile],
+               as_of: datetime | None = None) -> InterdictionPlan:
+    """Freeze plan for any money trail: a case's evidence, or the hops followed forward from a victim's report."""
+    txns = sorted(trail, key=lambda t: t.ts)
+    as_of = as_of or (txns[-1].ts if txns else datetime.now())
     txns = [t for t in txns if t.ts <= as_of]
     # Roles come from the evidence alone: whoever receives traced money holds it; whoever only sends is a source.
-    holders = {t.dst_account for t in txns}
-    senders = {t.src_account for t in txns if t.rail != Rail.CASH}
-    entries = [t for t in txns if t.src_account not in holders or t.rail == Rail.CASH]
+    holders = {t.dst_account for t in txns if not is_cash_out(t)}
+    senders = {t.src_account for t in txns if not is_cash_deposit(t)}
+    entries = [t for t in txns if (t.src_account not in holders or is_cash_deposit(t)) and t.dst_account in holders]
     if not entries and txns:  # a closed loop such as a cycle: the money starts with the first payment
         holders.add(txns[0].dst_account)
         entries = [txns[0]]
@@ -83,11 +91,11 @@ def plan(detail: CaseDetail, as_of: datetime | None = None) -> InterdictionPlan:
         dst = accounts.get(t.dst_account)
         if t.txn_id in entry_ids:
             stolen += t.amount
-            victims.append("cash deposits" if t.rail == Rail.CASH else t.src_account)
+            victims.append("cash deposits" if is_cash_deposit(t) else t.src_account)
             dst.received += t.amount
             dst.held += t.amount
             dst.tainted += t.amount
-        elif t.src_account in accounts and t.rail != Rail.CASH:
+        elif t.src_account in accounts and not is_cash_deposit(t):
             src = accounts[t.src_account]
             share = src.tainted / src.held if src.held > 0 else 0.0
             moved = min(src.tainted, t.amount * share)
@@ -109,7 +117,7 @@ def plan(detail: CaseDetail, as_of: datetime | None = None) -> InterdictionPlan:
             recoverable_at_first_alert = round(recoverable, 2)
             entered_at_alert = stolen
 
-    profiles = {p.account_id: p for p in detail.profiles}
+    profiles = {p.account_id: p for p in profiles}
     costs = {a: _collateral_cost(profiles.get(a)) for a in accounts}
     collectors = holders - senders
     cut = _minimum_cut(txns, accounts, costs, exits | collectors)
@@ -136,7 +144,7 @@ def plan(detail: CaseDetail, as_of: datetime | None = None) -> InterdictionPlan:
         key=lambda h: -h.tainted,
     )
     return InterdictionPlan(
-        case_id=detail.case_id,
+        case_id=case_id,
         as_of=as_of,
         stolen=round(stolen, 2),
         victims=list(dict.fromkeys(victims)),
@@ -177,7 +185,7 @@ def _minimum_cut(txns: list[ScoredTransaction], accounts: dict[str, _Account], c
     for a in accounts:
         g.add_edge(("in", a), ("out", a), capacity=costs[a])
     for t in txns:
-        if t.src_account in accounts and t.dst_account in accounts and t.rail != Rail.CASH:
+        if t.src_account in accounts and t.dst_account in accounts and not is_cash_deposit(t):
             g.add_edge(("out", t.src_account), ("in", t.dst_account))
     for a in holding:
         g.add_edge(SOURCE, ("in", a))

@@ -9,8 +9,9 @@ from __future__ import annotations
 from datetime import timedelta
 
 from ripple.features.store import AccountState, baseline, hour_share, window
+from ripple.cash import is_cash_deposit
 from ripple.fmt import money
-from ripple.schema import Layer, Rail, Reason, Transaction
+from ripple.schema import Layer, Reason, Transaction
 
 MIN_HISTORY = 5
 
@@ -23,7 +24,7 @@ def score(txn: Transaction, src: AccountState, dst: AccountState) -> tuple[float
     """Returns (score 0..1, reasons, whether the source had enough history to judge)."""
     reasons: list[Reason] = []
     has_history = True
-    if txn.rail != Rail.CASH:
+    if not is_cash_deposit(txn):
         b = baseline(src)
         has_history = b is not None and b.n >= MIN_HISTORY
         if has_history:
