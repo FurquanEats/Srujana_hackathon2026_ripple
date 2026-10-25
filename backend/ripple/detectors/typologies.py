@@ -17,6 +17,7 @@ Params = dict[str, Any]
 # processors, payroll or large merchants, not mules. Pass-through and fan-in checks skip them: summing their windows on every payment is
 # the costliest step at IBM AML scale, and they do not fit the mule pattern anyway.
 HUB_LIMIT = 1000
+MERCHANT_SENDERS = 20  # an account paid by more distinct senders than this is a shop, not an intermediary
 
 
 def _reason(code: str, text: str, strength: float, txn_ids: list[str], counterfactual: str | None = None) -> Reason:
@@ -178,8 +179,8 @@ def scatter_gather(txn: Transaction, store: FeatureStore, src: AccountState, dst
     legs: dict[str, list[tuple[Edge, Edge]]] = {}  # origin -> [(origin->intermediary, intermediary->dst)]
     for out_leg in gathered:
         mid = store.get(out_leg.counterparty)
-        if mid is None or out_leg.counterparty == txn.dst_account:
-            continue
+        if mid is None or out_leg.counterparty == txn.dst_account or len(mid.senders) > MERCHANT_SENDERS:
+            continue  # a shop is not a laundering hop: a customer's shops all paying one supplier is ordinary trade
         for in_leg in window(mid.incoming, out_leg.ts, span):
             if (in_leg.ts <= out_leg.ts and in_leg.counterparty not in (txn.dst_account, out_leg.counterparty)
                     and out_leg.amount >= p["min_pass_share"] * in_leg.amount):

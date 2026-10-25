@@ -85,6 +85,21 @@ def test_scatter_gather_hit_and_near_miss():
     assert "scatter_gather" not in codes(run(b)[last.txn_id])
 
 
+def test_scatter_gather_ignores_a_customer_whose_shops_pay_the_same_supplier():
+    b = s.Builder()
+    shops = ("SHOPA", "SHOPB", "SHOPC")
+    for a in ("CUST", "SUPP", *shops):
+        b.history(a)
+    t = s.RING_DAY + timedelta(hours=2)
+    for shop in shops:  # each shop has many customers
+        for k in range(25):
+            b.pay(t - timedelta(hours=30, minutes=k), f"OTHER{k:02d}", shop, 400)
+    for i, shop in enumerate(shops):
+        b.pay(t + timedelta(minutes=10 * i), "CUST", shop, 1800)
+        last = b.pay(t + timedelta(hours=20, minutes=10 * i), shop, "SUPP", 30000)
+    assert "scatter_gather" not in codes(run(b)[last.txn_id])
+
+
 def test_temporal_cycle_hit_slow_cycle_miss_and_refund_ignored():
     b = s.Builder()
     legs = s.cycle(b)
