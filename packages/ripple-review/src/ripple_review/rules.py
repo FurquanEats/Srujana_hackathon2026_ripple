@@ -57,7 +57,7 @@ class Reading:
 
     @property
     def kind(self) -> str:
-        return (self.extraction.document_type.value or "other").strip().lower()
+        return document_kind(self.extraction.document_type.value)
 
     @property
     def quoted(self) -> bool:
@@ -77,17 +77,40 @@ def paise(text: str | None) -> int | None:
     return int((value * 100).to_integral_value())
 
 
+def document_kind(text: str | None) -> str:
+    """'Tax Invoice', 'tax-invoice' and 'tax_invoice' are the same kind: a check keyed on the kind must never be
+    skipped because of how the model spelled it."""
+    return re.sub(r"[^a-z0-9]+", "_", (text or "other").strip().lower()).strip("_") or "other"
+
+
+MONTHS = {m: i for i, m in enumerate(
+    ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), start=1)}  # fmt: skip
+
+
 def parse_date(text: str | None) -> date | None:
+    """ISO dates, and the day-first forms Indian documents print: 17/11/2026, 17-11-2026, 17.11.26, 17 Nov 2026."""
     if not text:
         return None
+    t = text.strip()
     try:
-        return date.fromisoformat(text.strip()[:10])
+        return date.fromisoformat(t[:10])
+    except ValueError:
+        pass
+    numeric = re.fullmatch(r"(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2}|\d{4})", t)
+    named = re.fullmatch(r"(\d{1,2})[\s\-]+([A-Za-z]{3,9})[,\s\-]+(\d{4})", t)
+    try:
+        if numeric:
+            day, month, year = (int(g) for g in numeric.groups())
+            return date(year + 2000 if year < 100 else year, month, day)
+        if named and named.group(2)[:3].lower() in MONTHS:
+            return date(int(named.group(3)), MONTHS[named.group(2)[:3].lower()], int(named.group(1)))
     except ValueError:
         return None
+    return None
 
 
 def read(name: str, extraction: Extraction) -> Reading:
-    kind = (extraction.document_type.value or "").strip().lower()
+    kind = document_kind(extraction.document_type.value)
     payer = (
         extraction.issuer.value
         if kind in PAYER_IS_ISSUER
@@ -195,7 +218,10 @@ def _decide(  # noqa: PLR0911, PLR0912 - one return per verdict path
             reasons.append(
                 f"The issuer GSTIN {gstin} fails its check character or differs from the bank's KYC."
             )
-    if doc.on is not None and doc.on > credit.at.date() + DATE_GRACE:
+    if doc.on is None:
+        failed.append("date_order")
+        reasons.append("The document's date could not be read, so it cannot be checked against the payment.")
+    elif doc.on > credit.at.date() + DATE_GRACE:
         failed.append("date_order")
         reasons.append(f"The document is dated {doc.on.isoformat()}, more than 7 days after the payment.")
     payer_ok = same_party(doc.payer, credit.remitter.name)

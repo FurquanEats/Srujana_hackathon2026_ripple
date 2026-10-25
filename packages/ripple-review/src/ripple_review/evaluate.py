@@ -11,13 +11,14 @@ import argparse
 import json
 import os
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from ripple_review.docset import load_cases
 from ripple_review.extract import DEFAULT_MODEL, CachedReader, GeminiReader, Reader
 from ripple_review.model import Extraction
-from ripple_review.rules import paise, read, review
+from ripple_review.rules import paise, parse_date, read, review
 
 FIELDS = ("total", "date", "issuer_gstin", "payment_reference")
 
@@ -41,6 +42,8 @@ def field_matches(field: str, extraction: Extraction, truth: dict[str, Any]) -> 
         return got in (None, "")
     if field == "total":
         return bool(paise(got) == expected)
+    if field == "date":
+        return parse_date(got) == date.fromisoformat(str(expected))
     return (got or "").strip().upper() == str(expected).strip().upper()
 
 

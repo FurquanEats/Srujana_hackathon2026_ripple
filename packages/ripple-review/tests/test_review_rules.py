@@ -5,6 +5,7 @@ This separates the rules from Gemini: any miss here is a rules bug, not a readin
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +13,7 @@ import pytest
 
 from ripple_review.docset import Case, load_cases
 from ripple_review.model import Extraction, Quoted
-from ripple_review.rules import read, review, same_party
+from ripple_review.rules import document_kind, parse_date, read, review, same_party
 
 DOCSET = Path(__file__).resolve().parents[3] / "eval" / "documents"
 CASES = load_cases(DOCSET)
@@ -89,3 +90,49 @@ def test_a_bill_of_supply_with_another_gstin_fails_the_gstin_check() -> None:
     forged = perfect(doc).model_copy(update={"issuer_gstin": other})
     verdicts = {v.credit_id: v for v in review(case.holder, case.credits, [read(doc["file"], forged)])}
     assert "gstin_valid" in verdicts["C1"].failed_checks
+
+
+def as_the_model_writes_it(doc: dict[str, Any]) -> Extraction:
+    """A perfect reading, spelled the way Gemini actually returns it: 'Tax Invoice' and a day-first date."""
+    reading = perfect(doc)
+    kind = (reading.document_type.value or "").replace("_", " ").title()
+    day_first = reading.date.value
+    if day_first:
+        day_first = date.fromisoformat(day_first).strftime("%d/%m/%Y")
+    return reading.model_copy(update={
+        "document_type": Quoted(value=kind, quote=kind),
+        "date": Quoted(value=day_first, quote=day_first) if day_first else reading.date,
+    })  # fmt: skip
+
+
+@pytest.mark.parametrize("case", CASES, ids=lambda c: c.case_id)
+def test_the_model_s_spelling_of_dates_and_types_changes_no_verdict(case: Case) -> None:
+    readings = [read(d["file"], as_the_model_writes_it(d)) for d in case.documents]
+    verdicts = {v.credit_id: v for v in review(case.holder, case.credits, readings, case.tds_percent)}
+    for exp in case.expected:
+        assert verdicts[exp["credit_id"]].verdict.value == exp["verdict"], case.case_id
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [("2026-11-17", date(2026, 11, 17)), ("17/11/2026", date(2026, 11, 17)), ("17-11-26", date(2026, 11, 17)),
+     ("17.11.2026", date(2026, 11, 17)), ("17 Nov 2026", date(2026, 11, 17)), ("17 November, 2026", date(2026, 11, 17)),
+     ("31/02/2026", None), ("next Tuesday", None), (None, None)],
+)  # fmt: skip
+def test_indian_day_first_dates_are_read(text: str | None, expected: date | None) -> None:
+    assert parse_date(text) == expected
+
+
+def test_a_date_that_cannot_be_read_never_explains_a_credit() -> None:
+    case = next(c for c in CASES if c.case_id == "D01")
+    doc = case.documents[0]
+    vague = perfect(doc).model_copy(update={"date": Quoted(value="mid October", quote="mid October")})
+    [verdict] = review(case.holder, case.credits, [read(doc["file"], vague)])
+    assert verdict.verdict.value == "not_explained"
+    assert "date_order" in verdict.failed_checks
+
+
+def test_document_kinds_are_normalised() -> None:
+    assert document_kind("Tax Invoice") == document_kind("tax-invoice") == "tax_invoice"
+    assert document_kind("E-Invoice") == "e_invoice"
+    assert document_kind(None) == "other"
