@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const session = await currentSession();
   if (!session) redirect("/sign-in");
-  const theme = (await cookies()).get("ripple_theme")?.value === "light" ? "tone-light" : "tone-dark";
+  const theme = (await cookies()).get("ripple_theme")?.value === "dark" ? "tone-dark" : "tone-light";
   const items = NAV[session.role];
   let clock = "";
   try {
@@ -32,7 +32,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
       <div className="flex min-h-dvh flex-col md:flex-row">
         <aside className="border-line md:w-60 md:shrink-0 md:border-r">
           <div className="flex h-14 items-center justify-between px-4 md:px-5">
-            <Link href="/" className="pixel text-lg" aria-label="Ripple, home">
+            <Link href="/" className="pixel wordmark text-lg" aria-label="Ripple, home">
               Ripple
             </Link>
             <span className="text-faint text-xs md:hidden">{roleLabel(session.role)}</span>

@@ -197,6 +197,12 @@ def capture() -> dict[str, dict[str, Any]]:
         }
         shadow = post(Role.FRM_ANALYST, member, "/v1/detection/shadow-run", {"budget_per_day": 5})
         frm["/v1/detection/shadow-run"] = shadow.json() if shadow.is_success else None
+        frm["/v1/detection/history"] = get(Role.FRM_ANALYST, member, "/v1/detection/history")
+        referenced = {c["account_number"] for c in frm["/v1/mule-cases"]}
+        referenced |= {n["account_number"] for n in nodal["/v1/notices"] if n["account_number"]}
+        referenced |= {h["account_number"] for h in frm["/v1/holds"]}
+        for account in sorted(referenced):
+            frm[f"/v1/accounts/{account}"] = get(Role.NODAL_OFFICER, member, f"/v1/accounts/{account}")
         frm["/v1/audit"] = get(Role.NODAL_OFFICER, member, "/v1/audit?limit=300")
         frm["payment-checks"] = checks.get(member, [])
         saved[f"bank.{member}"] = {**nodal, **frm}

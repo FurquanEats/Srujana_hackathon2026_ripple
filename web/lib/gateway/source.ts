@@ -11,7 +11,9 @@ import type { ReviewPack } from "@/lib/review/types";
 
 import {
   apply,
+  applyLiens,
   DemoConflict,
+  grievancesFiled,
   encodeChanges,
   parseChanges,
   verdictDecisions,
@@ -29,7 +31,10 @@ import holdersFixture from "./fixtures/holders.json";
 import victimsFixture from "./fixtures/victims.json";
 import police from "./fixtures/police.json";
 import type {
+  AccountView,
   AuditLog,
+  LienRelease,
+  ThresholdApproval,
   CaseSummary,
   CustomerHold,
   HoldReport,
@@ -117,7 +122,8 @@ export async function notice(s: DemoSession, id: string): Promise<NoticeDetail> 
 }
 
 export async function liens(s: DemoSession): Promise<Lien[]> {
-  return LIVE ? gatewayFetch(caller(s), "/v1/liens") : saved(s, "/v1/liens");
+  if (LIVE) return gatewayFetch(caller(s), "/v1/liens");
+  return applyLiens(s.member ?? "", saved(s, "/v1/liens"), await changes());
 }
 
 export async function muleCases(s: DemoSession, includeClosed = false): Promise<MuleCase[]> {
@@ -157,7 +163,8 @@ async function record(s: DemoSession, change: Change, route: string, body: unkno
   }
   const list = [...(await changes()), change];
   try {
-    if (change.k !== "verdict")
+    if (change.k === "lien") applyLiens(change.m, savedFor(change.m, "/v1/liens"), list);
+    else if (change.k !== "verdict" && change.k !== "grievance")
       apply(
         change.m,
         institutionName(change.m),
@@ -407,4 +414,135 @@ export async function decideVerdict(
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });
+}
+
+export async function account(s: DemoSession, accountNumber: string): Promise<AccountView> {
+  if (LIVE) return gatewayFetch(caller(s), `/v1/accounts/${accountNumber}`);
+  const base = saved<AccountView>(s, `/v1/accounts/${accountNumber}`);
+  const state = await bankState(s);
+  const accountLiens = applyLiens(s.member ?? "", saved(s, "/v1/liens"), await changes()).filter(
+    (l) => l.account_number === accountNumber,
+  );
+  const accountHolds = state.holds.filter((h) => h.account_number === accountNumber);
+  const clock = await now(s);
+  const onHold = accountHolds
+    .filter((h) => !h.released_at && !h.whole_account && h.placed_at <= clock)
+    .reduce((sum, h) => sum + h.amount, 0);
+  const liened = accountLiens.filter((l) => !l.released_at).reduce((sum, l) => sum + l.amount, 0);
+  return {
+    ...base,
+    liens: accountLiens,
+    holds: accountHolds,
+    flags: state.cases.filter((c) => c.account_number === accountNumber),
+    liened,
+    on_hold: onHold,
+    available: Math.max(base.balance - liened - onHold, 0),
+  };
+}
+
+export async function releaseLien(s: DemoSession, lienId: string, body: LienRelease): Promise<void> {
+  const change: Change = {
+    k: "lien",
+    m: s.member ?? "",
+    id: lienId,
+    a: body.authority,
+    o: body.order,
+    r: body.reason,
+    v: body.to_victim,
+    by: s.subject ?? `demo-${s.role}`,
+    at: await now(s),
+  };
+  await record(s, change, `/v1/liens/${lienId}/release`, body);
+}
+
+export async function policeRelease(
+  s: DemoSession,
+  member: string,
+  lienId: string,
+  body: LienRelease,
+): Promise<void> {
+  const change: Change = {
+    k: "lien",
+    m: member,
+    id: lienId,
+    a: body.authority,
+    o: body.order,
+    r: body.reason,
+    v: body.to_victim,
+    by: `demo-${s.role}`,
+    at: await now(s),
+  };
+  await record(s, change, `/v1/police/liens/${member}/${lienId}/release`, body);
+}
+
+/** Lien releases visible on saved data, for the trail: lien id -> the release. */
+export async function releasedLiens(): Promise<
+  Map<string, { at: string; order: string; toVictim: boolean }>
+> {
+  if (LIVE) return new Map();
+  return new Map(
+    (await changes()).flatMap((c) =>
+      c.k === "lien" ? [[c.id, { at: c.at, order: c.o, toVictim: c.v }] as const] : [],
+    ),
+  );
+}
+
+export async function holdNote(s: DemoSession, holdId: string, note: string): Promise<void> {
+  const change: Change = {
+    k: "note",
+    m: s.member ?? "",
+    id: holdId,
+    n: note,
+    by: `demo-${s.role}`,
+    at: await now(s),
+  };
+  await record(s, change, `/v1/holds/${holdId}/note`, { note });
+}
+
+export async function callBack(s: DemoSession, holdId: string, note: string): Promise<void> {
+  const text = `Customer asked for a call back: ${note}`.slice(0, 2000);
+  const change: Change = {
+    k: "note",
+    m: s.member ?? "",
+    id: holdId,
+    n: text,
+    by: `customer:${s.subject}`,
+    at: await now(s),
+  };
+  await record(s, change, `/v1/my-holds/${holdId}/call-back`, { note });
+}
+
+export async function thresholdHistory(s: DemoSession): Promise<ThresholdApproval[]> {
+  if (LIVE) return gatewayFetch(caller(s), "/v1/detection/history");
+  const mine = (await changes()).flatMap((c) =>
+    c.k === "thresholds" && c.m === s.member
+      ? [{ settings: c.t, budget_per_day: null, approved_by: "demo-frm_analyst", approved_at: c.at }]
+      : [],
+  );
+  return [...mine.reverse(), ...(saved<ThresholdApproval[] | undefined>(s, "/v1/detection/history") ?? [])];
+}
+
+export async function filedGrievances(): Promise<Map<string, string>> {
+  return grievancesFiled(await changes());
+}
+
+export async function fileGrievance(s: DemoSession, caseId: string): Promise<void> {
+  const change: Change = { k: "grievance", m: s.member ?? "", c: caseId, at: await now(s) };
+  const list = [...(await changes()), change];
+  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+}
+
+export async function fileComplaint(s: DemoSession, body: unknown): Promise<string> {
+  if (!LIVE)
+    throw new GatewayFailure(409, {
+      error: "conflict",
+      message:
+        "This copy runs on saved data, so a new complaint cannot be traced. Start the network and set RIPPLE_GATEWAY=live.",
+    });
+  return (await gatewayFetch<{ ack_number: string }>(caller(s), "/v1/complaints", body)).ack_number;
 }

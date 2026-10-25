@@ -275,3 +275,29 @@
     font-size: 0.75rem;
   }
 }
+
+/* Inside the workspace, headings are set in the sans face for reading; the pixel face stays on the home page and
+   the wordmark. */
+@layer components {
+  .workspace .pixel:not(.wordmark) {
+    font-family: var(--font-sans);
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+}
+
+@media print {
+  .workspace aside,
+  .workspace header,
+  .workspace form,
+  .workspace .no-print,
+  .workspace details {
+    display: none !important;
+  }
+  .workspace {
+    background: #fff !important;
+    color: #121212 !important;
+  }
+}

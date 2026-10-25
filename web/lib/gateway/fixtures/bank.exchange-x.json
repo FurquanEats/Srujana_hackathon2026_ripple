@@ -1,678 +1,1279 @@
 {
-  "/v1/notices": [
-    {
-      "account_number": "9846077006",
-      "ack_number": "37456153881292",
-      "exit_count": 0,
-      "held": 10000000,
-      "holder_name": "Exchange X customer",
-      "layer": 3,
-      "lien_id": "L6F87A0B3F27EC414",
-      "notice_id": "37456153881292-005",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:07.775828Z",
-      "status": "matched",
-      "traced_in": 10000000
+ "/v1/notices": [
+  {
+   "account_number": "9124511006",
+   "ack_number": "36512145633292",
+   "exit_count": 0,
+   "held": 10000000,
+   "holder_name": "Exchange X customer",
+   "layer": 3,
+   "lien_id": "LEA3C537022099746",
+   "notice_id": "36512145633292-005",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:54.365036Z",
+   "status": "matched",
+   "traced_in": 10000000
+  },
+  {
+   "account_number": "91804205117543",
+   "ack_number": "30391446601247",
+   "exit_count": 0,
+   "held": 10000000,
+   "holder_name": "Bikash Shaw",
+   "layer": 3,
+   "lien_id": "L451A1A23C545AF9E",
+   "notice_id": "30391446601247-005",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:50.316535Z",
+   "status": "matched",
+   "traced_in": 10000000
+  },
+  {
+   "account_number": "16624411087213",
+   "ack_number": "25925884038089",
+   "exit_count": 1,
+   "held": 0,
+   "holder_name": "Vertex Capital Advisors",
+   "layer": 3,
+   "lien_id": null,
+   "notice_id": "25925884038089-004",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:50.185788Z",
+   "status": "matched",
+   "traced_in": 2450000
+  }
+ ],
+ "/v1/notices/36512145633292-005": {
+  "credit": {
+   "amount": 10000000,
+   "at": "2026-10-25T19:30:51.227948Z",
+   "rail": "imps",
+   "reference": "124511000007"
+  },
+  "exits": [],
+  "legal_basis": "BNSS s.168 read with s.94",
+  "onward": [],
+  "statement": [
+   {
+    "amount": 10000000,
+    "at": "2026-10-25T19:30:51.227948Z",
+    "counterparty": {
+     "account_number": "5124511002",
+     "ifsc": "BKCC0000001",
+     "vpa": null
     },
-    {
-      "account_number": "91804205117543",
-      "ack_number": "30391446601247",
-      "exit_count": 0,
-      "held": 10000000,
-      "holder_name": "Bikash Shaw",
-      "layer": 3,
-      "lien_id": "L52A5EF826CE050E1",
-      "notice_id": "30391446601247-005",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:01.399246Z",
-      "status": "matched",
-      "traced_in": 10000000
-    },
-    {
-      "account_number": "16624411087213",
-      "ack_number": "25925884038089",
-      "exit_count": 1,
-      "held": 0,
-      "holder_name": "Vertex Capital Advisors",
-      "layer": 3,
-      "lien_id": null,
-      "notice_id": "25925884038089-004",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:01.158584Z",
-      "status": "matched",
-      "traced_in": 2450000
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "124511000007",
+    "txn_id": "C124511000007",
+    "victim_money": {
+     "36512145633292": 10000000
     }
+   }
   ],
-  "/v1/notices/37456153881292-005": {
-    "credit": {
-      "amount": 10000000,
-      "at": "2026-10-25T19:00:02.201713Z",
-      "rail": "imps",
-      "reference": "846077000007"
-    },
-    "exits": [],
-    "legal_basis": "BNSS s.168 read with s.94",
-    "onward": [],
-    "statement": [
-      {
-        "amount": 10000000,
-        "at": "2026-10-25T19:00:02.201713Z",
-        "counterparty": {
-          "account_number": "5846077002",
-          "ifsc": "BKCC0000001",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "846077000007",
-        "txn_id": "C846077000007",
-        "victim_money": {
-          "37456153881292": 10000000
-        }
-      }
-    ],
-    "summary": {
-      "account_number": "9846077006",
-      "ack_number": "37456153881292",
-      "exit_count": 0,
-      "held": 10000000,
-      "holder_name": "Exchange X customer",
-      "layer": 3,
-      "lien_id": "L6F87A0B3F27EC414",
-      "notice_id": "37456153881292-005",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:07.775828Z",
-      "status": "matched",
-      "traced_in": 10000000
-    }
+  "summary": {
+   "account_number": "9124511006",
+   "ack_number": "36512145633292",
+   "exit_count": 0,
+   "held": 10000000,
+   "holder_name": "Exchange X customer",
+   "layer": 3,
+   "lien_id": "LEA3C537022099746",
+   "notice_id": "36512145633292-005",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:54.365036Z",
+   "status": "matched",
+   "traced_in": 10000000
+  }
+ },
+ "/v1/notices/30391446601247-005": {
+  "credit": {
+   "amount": 10000000,
+   "at": "2026-09-18T05:38:00Z",
+   "rail": "imps",
+   "reference": "412178680646"
   },
-  "/v1/notices/30391446601247-005": {
-    "credit": {
-      "amount": 10000000,
-      "at": "2026-09-18T05:38:00Z",
-      "rail": "imps",
-      "reference": "412178680646"
+  "exits": [],
+  "legal_basis": "BNSS s.168 read with s.94",
+  "onward": [],
+  "statement": [
+   {
+    "amount": 10000000,
+    "at": "2026-09-18T05:38:00Z",
+    "counterparty": {
+     "account_number": "69456866879566",
+     "ifsc": "BKCC0818460",
+     "vpa": null
     },
-    "exits": [],
-    "legal_basis": "BNSS s.168 read with s.94",
-    "onward": [],
-    "statement": [
-      {
-        "amount": 10000000,
-        "at": "2026-09-18T05:38:00Z",
-        "counterparty": {
-          "account_number": "69456866879566",
-          "ifsc": "BKCC0818460",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "412178680646",
-        "txn_id": "XCHX-7-000000016",
-        "victim_money": {
-          "30391446601247": 10000000
-        }
-      }
-    ],
-    "summary": {
-      "account_number": "91804205117543",
-      "ack_number": "30391446601247",
-      "exit_count": 0,
-      "held": 10000000,
-      "holder_name": "Bikash Shaw",
-      "layer": 3,
-      "lien_id": "L52A5EF826CE050E1",
-      "notice_id": "30391446601247-005",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:01.399246Z",
-      "status": "matched",
-      "traced_in": 10000000
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "412178680646",
+    "txn_id": "XCHX-7-000000016",
+    "victim_money": {
+     "30391446601247": 10000000
     }
+   }
+  ],
+  "summary": {
+   "account_number": "91804205117543",
+   "ack_number": "30391446601247",
+   "exit_count": 0,
+   "held": 10000000,
+   "holder_name": "Bikash Shaw",
+   "layer": 3,
+   "lien_id": "L451A1A23C545AF9E",
+   "notice_id": "30391446601247-005",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:50.316535Z",
+   "status": "matched",
+   "traced_in": 10000000
+  }
+ },
+ "/v1/notices/25925884038089-004": {
+  "credit": {
+   "amount": 7350000,
+   "at": "2026-09-03T14:00:00Z",
+   "rail": "imps",
+   "reference": "173669389380"
   },
-  "/v1/notices/25925884038089-004": {
-    "credit": {
+  "exits": [
+   {
+    "amount": 7350000,
+    "at": "2026-09-03T16:40:00Z",
+    "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
+    "location": null,
+    "mode": "crypto",
+    "reference": "243784442953",
+    "traced_amount": 2450000
+   }
+  ],
+  "legal_basis": "BNSS s.168 read with s.94",
+  "onward": [],
+  "statement": [
+   {
+    "amount": 7350000,
+    "at": "2026-09-03T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "173669389380",
+    "txn_id": "XCHX-7-000000001",
+    "victim_money": {
+     "25925884038089": 2450000
+    }
+   },
+   {
+    "amount": 7350000,
+    "at": "2026-09-03T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
+     "location": null,
+     "mode": "crypto",
+     "reference": "243784442953"
+    },
+    "rail": "internal",
+    "reference": "243784442953",
+    "txn_id": "XCHX-7-000000002",
+    "victim_money": {
+     "25925884038089": 2450000
+    }
+   },
+   {
+    "amount": 25280000,
+    "at": "2026-09-04T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "833364240893",
+    "txn_id": "XCHX-7-000000004",
+    "victim_money": {}
+   },
+   {
+    "amount": 25280000,
+    "at": "2026-09-04T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0xfc5cb65c99e3a0c9ebd6f80c468f29e5e1b55896",
+     "location": null,
+     "mode": "crypto",
+     "reference": "550475659874"
+    },
+    "rail": "internal",
+    "reference": "550475659874",
+    "txn_id": "XCHX-7-000000005",
+    "victim_money": {}
+   },
+   {
+    "amount": 38410000,
+    "at": "2026-09-05T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "322088685638",
+    "txn_id": "XCHX-7-000000007",
+    "victim_money": {}
+   },
+   {
+    "amount": 38410000,
+    "at": "2026-09-05T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0xcb413d0f9abf00298206ce3789de68bda8a5e5d5",
+     "location": null,
+     "mode": "crypto",
+     "reference": "867088565746"
+    },
+    "rail": "internal",
+    "reference": "867088565746",
+    "txn_id": "XCHX-7-000000008",
+    "victim_money": {}
+   },
+   {
+    "amount": 47130000,
+    "at": "2026-09-06T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "171501339393",
+    "txn_id": "XCHX-7-000000009",
+    "victim_money": {}
+   }
+  ],
+  "summary": {
+   "account_number": "16624411087213",
+   "ack_number": "25925884038089",
+   "exit_count": 1,
+   "held": 0,
+   "holder_name": "Vertex Capital Advisors",
+   "layer": 3,
+   "lien_id": null,
+   "notice_id": "25925884038089-004",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:36:50.185788Z",
+   "status": "matched",
+   "traced_in": 2450000
+  }
+ },
+ "/v1/liens": [
+  {
+   "account_number": "9124511006",
+   "ack_number": "36512145633292",
+   "amount": 10000000,
+   "basis": "BNSS s.168 read with s.94",
+   "holder_name": "Exchange X customer",
+   "lien_id": "LEA3C537022099746",
+   "placed_at": "2026-10-25T19:36:54.365036Z",
+   "release_authority": null,
+   "release_order": null,
+   "release_reason": null,
+   "released_at": null,
+   "returned_to_victim": false
+  },
+  {
+   "account_number": "91804205117543",
+   "ack_number": "30391446601247",
+   "amount": 10000000,
+   "basis": "BNSS s.168 read with s.94",
+   "holder_name": "Bikash Shaw",
+   "lien_id": "L451A1A23C545AF9E",
+   "placed_at": "2026-10-25T19:36:50.316535Z",
+   "release_authority": null,
+   "release_order": null,
+   "release_reason": null,
+   "released_at": null,
+   "returned_to_victim": false
+  }
+ ],
+ "/v1/mule-cases": [
+  {
+   "account_number": "91804205117543",
+   "active_hold_id": null,
+   "declared_annual_income": 18000000,
+   "declared_profile": "individual; Delivery rider; declared annual income ₹1,80,000",
+   "first_at": "2026-09-18T05:38:00Z",
+   "flagged_amount": 10000000,
+   "flags": [
+    {
+     "amount": 10000000,
+     "at": "2026-09-18T05:38:00Z",
+     "cited_txns": [
+      "XCHX-7-000000016"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000016"
+     ],
+     "dismissed_reason": null,
+     "key": "out_of_profile:91804205117543:XCHX-7-000000016",
+     "reason": "Credits of ₹1,00,000 arrived in the 30 days to 18 Sep 2026, 11:08 AM IST, and that is 6.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
+     "rule": "out_of_profile",
+     "status": "open",
+     "title": "Out of profile"
+    },
+    {
+     "amount": 10000000,
+     "at": "2026-09-18T05:38:00Z",
+     "cited_txns": [
+      "XCHX-7-000000016"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000016"
+     ],
+     "dismissed_reason": null,
+     "key": "dormant_then_busy:91804205117543:XCHX-7-000000016",
+     "reason": "The account had no transactions for 200 days, then received ₹1,00,000 on 18 Sep 2026, 11:08 AM IST.",
+     "rule": "dormant_then_busy",
+     "status": "open",
+     "title": "Dormant, then busy"
+    }
+   ],
+   "holder_name": "Bikash Shaw",
+   "last_at": "2026-09-18T05:38:00Z",
+   "priority": "high",
+   "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+   "reported": true,
+   "rules": [
+    "out_of_profile",
+    "dormant_then_busy"
+   ]
+  },
+  {
+   "account_number": "16624411087213",
+   "active_hold_id": null,
+   "declared_annual_income": 120000000,
+   "declared_profile": "proprietorship; Financial consultancy; declared annual turnover ₹12,00,000",
+   "first_at": "2026-09-03T14:00:00Z",
+   "flagged_amount": 32630000,
+   "flags": [
+    {
+     "amount": 7350000,
+     "at": "2026-09-03T14:00:00Z",
+     "cited_txns": [
+      "XCHX-7-000000001"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000001"
+     ],
+     "dismissed_reason": null,
+     "key": "dormant_then_busy:16624411087213:XCHX-7-000000001",
+     "reason": "The account had no transactions for 185 days, then received ₹73,500 on 03 Sep 2026, 07:30 PM IST.",
+     "rule": "dormant_then_busy",
+     "status": "open",
+     "title": "Dormant, then busy"
+    },
+    {
+     "amount": 32630000,
+     "at": "2026-09-04T14:00:00Z",
+     "cited_txns": [
+      "XCHX-7-000000001",
+      "XCHX-7-000000004"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000001",
+      "XCHX-7-000000004"
+     ],
+     "dismissed_reason": null,
+     "key": "out_of_profile:16624411087213:XCHX-7-000000001",
+     "reason": "Credits of ₹3,26,300 arrived in the 30 days to 04 Sep 2026, 07:30 PM IST, and that is 3.3 times the declared monthly income or turnover of ₹1,00,000 (₹12,00,000 a year).",
+     "rule": "out_of_profile",
+     "status": "open",
+     "title": "Out of profile"
+    }
+   ],
+   "holder_name": "Vertex Capital Advisors",
+   "last_at": "2026-09-04T14:00:00Z",
+   "priority": "high",
+   "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+   "reported": true,
+   "rules": [
+    "dormant_then_busy",
+    "out_of_profile"
+   ]
+  },
+  {
+   "account_number": "88522562974498",
+   "active_hold_id": null,
+   "declared_annual_income": 120000000,
+   "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
+   "first_at": "2026-09-09T12:23:00Z",
+   "flagged_amount": 4000000,
+   "flags": [
+    {
+     "amount": 4000000,
+     "at": "2026-09-09T12:23:00Z",
+     "cited_txns": [
+      "XCHX-7-000000012"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000012"
+     ],
+     "dismissed_reason": null,
+     "key": "dormant_then_busy:88522562974498:XCHX-7-000000012",
+     "reason": "The account had no transactions for 408 days, then received ₹40,000 on 09 Sep 2026, 05:53 PM IST.",
+     "rule": "dormant_then_busy",
+     "status": "open",
+     "title": "Dormant, then busy"
+    }
+   ],
+   "holder_name": "Shalini Verma",
+   "last_at": "2026-09-09T12:23:00Z",
+   "priority": "low",
+   "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+   "reported": false,
+   "rules": [
+    "dormant_then_busy"
+   ]
+  },
+  {
+   "account_number": "37284508470120",
+   "active_hold_id": null,
+   "declared_annual_income": 54000000,
+   "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+   "first_at": "2026-09-04T05:17:00Z",
+   "flagged_amount": 2900000,
+   "flags": [
+    {
+     "amount": 2900000,
+     "at": "2026-09-04T05:17:00Z",
+     "cited_txns": [
+      "XCHX-7-000000003"
+     ],
+     "credit_txns": [
+      "XCHX-7-000000003"
+     ],
+     "dismissed_reason": null,
+     "key": "dormant_then_busy:37284508470120:XCHX-7-000000003",
+     "reason": "The account had no transactions for 403 days, then received ₹29,000 on 04 Sep 2026, 10:47 AM IST.",
+     "rule": "dormant_then_busy",
+     "status": "open",
+     "title": "Dormant, then busy"
+    }
+   ],
+   "holder_name": "Gaurav Rao",
+   "last_at": "2026-09-04T05:17:00Z",
+   "priority": "low",
+   "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+   "reported": false,
+   "rules": [
+    "dormant_then_busy"
+   ]
+  }
+ ],
+ "/v1/holds": [],
+ "/v1/detection/thresholds": {
+  "cash_out_minutes": 60,
+  "dormant_days": 90,
+  "new_senders": 5,
+  "pass_through_minutes": 30,
+  "profile_multiple": 3.0
+ },
+ "/v1/detection/shadow-run": {
+  "accounts": 1,
+  "budget_per_day": 5.0,
+  "expected_flags_per_day": 0.03,
+  "known_bad": 3,
+  "proposal": {
+   "cash_out_minutes": 180,
+   "dormant_days": 30,
+   "new_senders": 3,
+   "pass_through_minutes": 180,
+   "profile_multiple": 1.5
+  },
+  "rules": [
+   {
+    "chosen": 180,
+    "rows": [
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 10
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 30
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 60
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 180
+     }
+    ],
+    "rule": "pass_through",
+    "title": "Pass-through"
+   },
+   {
+    "chosen": 3,
+    "rows": [
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 20
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 10
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 5
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 3
+     }
+    ],
+    "rule": "many_new_senders",
+    "title": "Many new senders"
+   },
+   {
+    "chosen": 1.5,
+    "rows": [
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 5.0
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 3.0
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 2.0
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 1.5
+     }
+    ],
+    "rule": "out_of_profile",
+    "title": "Out of profile"
+   },
+   {
+    "chosen": 30,
+    "rows": [
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 180
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 90
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 60
+     },
+     {
+      "accounts_flagged": 1,
+      "flags_per_day": 0.03,
+      "known_bad_flagged": 1,
+      "value": 30
+     }
+    ],
+    "rule": "dormant_then_busy",
+    "title": "Dormant, then busy"
+   },
+   {
+    "chosen": 180,
+    "rows": [
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 15
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 30
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 60
+     },
+     {
+      "accounts_flagged": 0,
+      "flags_per_day": 0.0,
+      "known_bad_flagged": 0,
+      "value": 180
+     }
+    ],
+    "rule": "quick_cash_out",
+    "title": "Quick cash-out"
+   }
+  ],
+  "since": "2026-09-25T19:37:13.198777+00:00",
+  "until": "2026-10-25T19:37:13.198777+00:00",
+  "within_budget": true
+ },
+ "/v1/detection/history": [],
+ "/v1/accounts/16624411087213": {
+  "account_number": "16624411087213",
+  "account_type": "regular",
+  "available": 47130000,
+  "balance": 47130000,
+  "counterparties_30d": 0,
+  "credits_30d": 0,
+  "debits_30d": 0,
+  "declared_annual_income": 120000000,
+  "declared_profile": "proprietorship; Financial consultancy; declared annual turnover ₹12,00,000",
+  "flags": [
+   {
+    "account_number": "16624411087213",
+    "active_hold_id": null,
+    "declared_annual_income": 120000000,
+    "declared_profile": "proprietorship; Financial consultancy; declared annual turnover ₹12,00,000",
+    "first_at": "2026-09-03T14:00:00Z",
+    "flagged_amount": 32630000,
+    "flags": [
+     {
       "amount": 7350000,
       "at": "2026-09-03T14:00:00Z",
-      "rail": "imps",
-      "reference": "173669389380"
-    },
-    "exits": [
-      {
-        "amount": 7350000,
-        "at": "2026-09-03T16:40:00Z",
-        "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
-        "location": null,
-        "mode": "crypto",
-        "reference": "243784442953",
-        "traced_amount": 2450000
-      }
+      "cited_txns": [
+       "XCHX-7-000000001"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000001"
+      ],
+      "dismissed_reason": null,
+      "key": "dormant_then_busy:16624411087213:XCHX-7-000000001",
+      "reason": "The account had no transactions for 185 days, then received ₹73,500 on 03 Sep 2026, 07:30 PM IST.",
+      "rule": "dormant_then_busy",
+      "status": "open",
+      "title": "Dormant, then busy"
+     },
+     {
+      "amount": 32630000,
+      "at": "2026-09-04T14:00:00Z",
+      "cited_txns": [
+       "XCHX-7-000000001",
+       "XCHX-7-000000004"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000001",
+       "XCHX-7-000000004"
+      ],
+      "dismissed_reason": null,
+      "key": "out_of_profile:16624411087213:XCHX-7-000000001",
+      "reason": "Credits of ₹3,26,300 arrived in the 30 days to 04 Sep 2026, 07:30 PM IST, and that is 3.3 times the declared monthly income or turnover of ₹1,00,000 (₹12,00,000 a year).",
+      "rule": "out_of_profile",
+      "status": "open",
+      "title": "Out of profile"
+     }
     ],
-    "legal_basis": "BNSS s.168 read with s.94",
-    "onward": [],
-    "statement": [
-      {
-        "amount": 7350000,
-        "at": "2026-09-03T14:00:00Z",
-        "counterparty": {
-          "account_number": "19770520161305",
-          "ifsc": "BKBB0723143",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "173669389380",
-        "txn_id": "XCHX-7-000000001",
-        "victim_money": {
-          "25925884038089": 2450000
-        }
-      },
-      {
-        "amount": 7350000,
-        "at": "2026-09-03T16:40:00Z",
-        "counterparty": null,
-        "direction": "debit",
-        "exit": {
-          "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
-          "location": null,
-          "mode": "crypto",
-          "reference": "243784442953"
-        },
-        "rail": "internal",
-        "reference": "243784442953",
-        "txn_id": "XCHX-7-000000002",
-        "victim_money": {
-          "25925884038089": 2450000
-        }
-      },
-      {
-        "amount": 25280000,
-        "at": "2026-09-04T14:00:00Z",
-        "counterparty": {
-          "account_number": "19770520161305",
-          "ifsc": "BKBB0723143",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "833364240893",
-        "txn_id": "XCHX-7-000000004",
-        "victim_money": {}
-      },
-      {
-        "amount": 25280000,
-        "at": "2026-09-04T16:40:00Z",
-        "counterparty": null,
-        "direction": "debit",
-        "exit": {
-          "identifier": "0xfc5cb65c99e3a0c9ebd6f80c468f29e5e1b55896",
-          "location": null,
-          "mode": "crypto",
-          "reference": "550475659874"
-        },
-        "rail": "internal",
-        "reference": "550475659874",
-        "txn_id": "XCHX-7-000000005",
-        "victim_money": {}
-      },
-      {
-        "amount": 38410000,
-        "at": "2026-09-05T14:00:00Z",
-        "counterparty": {
-          "account_number": "19770520161305",
-          "ifsc": "BKBB0723143",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "322088685638",
-        "txn_id": "XCHX-7-000000007",
-        "victim_money": {}
-      },
-      {
-        "amount": 38410000,
-        "at": "2026-09-05T16:40:00Z",
-        "counterparty": null,
-        "direction": "debit",
-        "exit": {
-          "identifier": "0xcb413d0f9abf00298206ce3789de68bda8a5e5d5",
-          "location": null,
-          "mode": "crypto",
-          "reference": "867088565746"
-        },
-        "rail": "internal",
-        "reference": "867088565746",
-        "txn_id": "XCHX-7-000000008",
-        "victim_money": {}
-      },
-      {
-        "amount": 47130000,
-        "at": "2026-09-06T14:00:00Z",
-        "counterparty": {
-          "account_number": "19770520161305",
-          "ifsc": "BKBB0723143",
-          "vpa": null
-        },
-        "direction": "credit",
-        "exit": null,
-        "rail": "imps",
-        "reference": "171501339393",
-        "txn_id": "XCHX-7-000000009",
-        "victim_money": {}
-      }
-    ],
-    "summary": {
-      "account_number": "16624411087213",
-      "ack_number": "25925884038089",
-      "exit_count": 1,
-      "held": 0,
-      "holder_name": "Vertex Capital Advisors",
-      "layer": 3,
-      "lien_id": null,
-      "notice_id": "25925884038089-004",
-      "onward_count": 0,
-      "reason": null,
-      "received_at": "2026-10-25T19:06:01.158584Z",
-      "status": "matched",
-      "traced_in": 2450000
-    }
-  },
-  "/v1/liens": [
-    {
-      "account_number": "9846077006",
-      "ack_number": "37456153881292",
-      "amount": 10000000,
-      "basis": "BNSS s.168 read with s.94",
-      "holder_name": "Exchange X customer",
-      "lien_id": "L6F87A0B3F27EC414",
-      "placed_at": "2026-10-25T19:06:07.775828Z",
-      "released_at": null
-    },
-    {
-      "account_number": "91804205117543",
-      "ack_number": "30391446601247",
-      "amount": 10000000,
-      "basis": "BNSS s.168 read with s.94",
-      "holder_name": "Bikash Shaw",
-      "lien_id": "L52A5EF826CE050E1",
-      "placed_at": "2026-10-25T19:06:01.399246Z",
-      "released_at": null
-    }
-  ],
-  "/v1/mule-cases": [
-    {
-      "account_number": "91804205117543",
-      "active_hold_id": null,
-      "declared_annual_income": 18000000,
-      "declared_profile": "individual; Delivery rider; declared annual income ₹1,80,000",
-      "first_at": "2026-09-18T05:38:00Z",
-      "flagged_amount": 10000000,
-      "flags": [
-        {
-          "amount": 10000000,
-          "at": "2026-09-18T05:38:00Z",
-          "cited_txns": ["XCHX-7-000000016"],
-          "credit_txns": ["XCHX-7-000000016"],
-          "dismissed_reason": null,
-          "key": "out_of_profile:91804205117543:XCHX-7-000000016",
-          "reason": "Credits of ₹1,00,000 arrived in the 30 days to 18 Sep 2026, 11:08 AM IST, and that is 6.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
-          "rule": "out_of_profile",
-          "status": "open",
-          "title": "Out of profile"
-        },
-        {
-          "amount": 10000000,
-          "at": "2026-09-18T05:38:00Z",
-          "cited_txns": ["XCHX-7-000000016"],
-          "credit_txns": ["XCHX-7-000000016"],
-          "dismissed_reason": null,
-          "key": "dormant_then_busy:91804205117543:XCHX-7-000000016",
-          "reason": "The account had no transactions for 200 days, then received ₹1,00,000 on 18 Sep 2026, 11:08 AM IST.",
-          "rule": "dormant_then_busy",
-          "status": "open",
-          "title": "Dormant, then busy"
-        }
-      ],
-      "holder_name": "Bikash Shaw",
-      "last_at": "2026-09-18T05:38:00Z",
-      "priority": "high",
-      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
-      "reported": true,
-      "rules": ["out_of_profile", "dormant_then_busy"]
-    },
-    {
-      "account_number": "16624411087213",
-      "active_hold_id": null,
-      "declared_annual_income": 120000000,
-      "declared_profile": "proprietorship; Financial consultancy; declared annual turnover ₹12,00,000",
-      "first_at": "2026-09-03T14:00:00Z",
-      "flagged_amount": 32630000,
-      "flags": [
-        {
-          "amount": 7350000,
-          "at": "2026-09-03T14:00:00Z",
-          "cited_txns": ["XCHX-7-000000001"],
-          "credit_txns": ["XCHX-7-000000001"],
-          "dismissed_reason": null,
-          "key": "dormant_then_busy:16624411087213:XCHX-7-000000001",
-          "reason": "The account had no transactions for 185 days, then received ₹73,500 on 03 Sep 2026, 07:30 PM IST.",
-          "rule": "dormant_then_busy",
-          "status": "open",
-          "title": "Dormant, then busy"
-        },
-        {
-          "amount": 32630000,
-          "at": "2026-09-04T14:00:00Z",
-          "cited_txns": ["XCHX-7-000000001", "XCHX-7-000000004"],
-          "credit_txns": ["XCHX-7-000000001", "XCHX-7-000000004"],
-          "dismissed_reason": null,
-          "key": "out_of_profile:16624411087213:XCHX-7-000000001",
-          "reason": "Credits of ₹3,26,300 arrived in the 30 days to 04 Sep 2026, 07:30 PM IST, and that is 3.3 times the declared monthly income or turnover of ₹1,00,000 (₹12,00,000 a year).",
-          "rule": "out_of_profile",
-          "status": "open",
-          "title": "Out of profile"
-        }
-      ],
-      "holder_name": "Vertex Capital Advisors",
-      "last_at": "2026-09-04T14:00:00Z",
-      "priority": "high",
-      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
-      "reported": true,
-      "rules": ["dormant_then_busy", "out_of_profile"]
-    },
-    {
-      "account_number": "88522562974498",
-      "active_hold_id": null,
-      "declared_annual_income": 120000000,
-      "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
-      "first_at": "2026-09-09T12:23:00Z",
-      "flagged_amount": 4000000,
-      "flags": [
-        {
-          "amount": 4000000,
-          "at": "2026-09-09T12:23:00Z",
-          "cited_txns": ["XCHX-7-000000012"],
-          "credit_txns": ["XCHX-7-000000012"],
-          "dismissed_reason": null,
-          "key": "dormant_then_busy:88522562974498:XCHX-7-000000012",
-          "reason": "The account had no transactions for 408 days, then received ₹40,000 on 09 Sep 2026, 05:53 PM IST.",
-          "rule": "dormant_then_busy",
-          "status": "open",
-          "title": "Dormant, then busy"
-        }
-      ],
-      "holder_name": "Shalini Verma",
-      "last_at": "2026-09-09T12:23:00Z",
-      "priority": "low",
-      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
-      "reported": false,
-      "rules": ["dormant_then_busy"]
-    },
-    {
-      "account_number": "37284508470120",
-      "active_hold_id": null,
-      "declared_annual_income": 54000000,
-      "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
-      "first_at": "2026-09-04T05:17:00Z",
-      "flagged_amount": 2900000,
-      "flags": [
-        {
-          "amount": 2900000,
-          "at": "2026-09-04T05:17:00Z",
-          "cited_txns": ["XCHX-7-000000003"],
-          "credit_txns": ["XCHX-7-000000003"],
-          "dismissed_reason": null,
-          "key": "dormant_then_busy:37284508470120:XCHX-7-000000003",
-          "reason": "The account had no transactions for 403 days, then received ₹29,000 on 04 Sep 2026, 10:47 AM IST.",
-          "rule": "dormant_then_busy",
-          "status": "open",
-          "title": "Dormant, then busy"
-        }
-      ],
-      "holder_name": "Gaurav Rao",
-      "last_at": "2026-09-04T05:17:00Z",
-      "priority": "low",
-      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
-      "reported": false,
-      "rules": ["dormant_then_busy"]
-    }
-  ],
-  "/v1/holds": [],
-  "/v1/detection/thresholds": {
-    "cash_out_minutes": 60,
-    "dormant_days": 90,
-    "new_senders": 5,
-    "pass_through_minutes": 30,
-    "profile_multiple": 3.0
-  },
-  "/v1/detection/shadow-run": {
-    "accounts": 1,
-    "budget_per_day": 5.0,
-    "expected_flags_per_day": 0.03,
-    "known_bad": 3,
-    "proposal": {
-      "cash_out_minutes": 180,
-      "dormant_days": 30,
-      "new_senders": 3,
-      "pass_through_minutes": 180,
-      "profile_multiple": 1.5
-    },
+    "holder_name": "Vertex Capital Advisors",
+    "last_at": "2026-09-04T14:00:00Z",
+    "priority": "high",
+    "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+    "reported": true,
     "rules": [
-      {
-        "chosen": 180,
-        "rows": [
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 10
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 30
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 60
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 180
-          }
-        ],
-        "rule": "pass_through",
-        "title": "Pass-through"
-      },
-      {
-        "chosen": 3,
-        "rows": [
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 20
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 10
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 5
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 3
-          }
-        ],
-        "rule": "many_new_senders",
-        "title": "Many new senders"
-      },
-      {
-        "chosen": 1.5,
-        "rows": [
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 5.0
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 3.0
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 2.0
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 1.5
-          }
-        ],
-        "rule": "out_of_profile",
-        "title": "Out of profile"
-      },
-      {
-        "chosen": 30,
-        "rows": [
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 180
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 90
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 60
-          },
-          {
-            "accounts_flagged": 1,
-            "flags_per_day": 0.03,
-            "known_bad_flagged": 1,
-            "value": 30
-          }
-        ],
-        "rule": "dormant_then_busy",
-        "title": "Dormant, then busy"
-      },
-      {
-        "chosen": 180,
-        "rows": [
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 15
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 30
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 60
-          },
-          {
-            "accounts_flagged": 0,
-            "flags_per_day": 0.0,
-            "known_bad_flagged": 0,
-            "value": 180
-          }
-        ],
-        "rule": "quick_cash_out",
-        "title": "Quick cash-out"
-      }
-    ],
-    "since": "2026-09-25T19:06:19.456612+00:00",
-    "until": "2026-10-25T19:06:19.456612+00:00",
-    "within_budget": true
-  },
-  "/v1/audit": {
-    "broken_at": null,
-    "entries": [
-      {
-        "action": "notice_answered",
-        "actor": "cfcfrms",
-        "at": "2026-10-25T19:06:07.775828+00:00",
-        "hash": "b737fad9da8b330d1e7adb0c93bece8e26a3c103235b61ca464fe28fb5e234e8",
-        "record": {
-          "ack_number": "37456153881292",
-          "held": 10000000,
-          "lien_id": "L6F87A0B3F27EC414",
-          "notice_id": "37456153881292-005",
-          "status": "matched"
-        },
-        "seq": 3
-      },
-      {
-        "action": "notice_answered",
-        "actor": "cfcfrms",
-        "at": "2026-10-25T19:06:01.399246+00:00",
-        "hash": "7e4e6491970730e9659908c5835a6c86d498db196ae18b8ced25dca499e28e3a",
-        "record": {
-          "ack_number": "30391446601247",
-          "held": 10000000,
-          "lien_id": "L52A5EF826CE050E1",
-          "notice_id": "30391446601247-005",
-          "status": "matched"
-        },
-        "seq": 2
-      },
-      {
-        "action": "notice_answered",
-        "actor": "cfcfrms",
-        "at": "2026-10-25T19:06:01.158584+00:00",
-        "hash": "39743602a0153c81af028ae8843c0484bac3c0449f9f70e0ed6cb4c04e654684",
-        "record": {
-          "ack_number": "25925884038089",
-          "held": 0,
-          "lien_id": null,
-          "notice_id": "25925884038089-004",
-          "status": "matched"
-        },
-        "seq": 1
-      }
+     "dormant_then_busy",
+     "out_of_profile"
     ]
-  },
-  "payment-checks": []
+   }
+  ],
+  "holder_name": "Vertex Capital Advisors",
+  "holds": [],
+  "ifsc": "XCHX0067892",
+  "liened": 0,
+  "liens": [],
+  "notices": [
+   {
+    "account_number": "16624411087213",
+    "ack_number": "25925884038089",
+    "exit_count": 1,
+    "held": 0,
+    "holder_name": "Vertex Capital Advisors",
+    "layer": 3,
+    "lien_id": null,
+    "notice_id": "25925884038089-004",
+    "onward_count": 0,
+    "reason": null,
+    "received_at": "2026-10-25T19:36:50.185788Z",
+    "status": "matched",
+    "traced_in": 2450000
+   }
+  ],
+  "on_hold": 0,
+  "opened_at": "2026-03-02T05:32:00Z",
+  "statement": [
+   {
+    "amount": 47130000,
+    "at": "2026-09-06T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "171501339393",
+    "txn_id": "XCHX-7-000000009"
+   },
+   {
+    "amount": 38410000,
+    "at": "2026-09-05T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0xcb413d0f9abf00298206ce3789de68bda8a5e5d5",
+     "location": null,
+     "mode": "crypto",
+     "reference": "867088565746"
+    },
+    "rail": "internal",
+    "reference": "867088565746",
+    "txn_id": "XCHX-7-000000008"
+   },
+   {
+    "amount": 38410000,
+    "at": "2026-09-05T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "322088685638",
+    "txn_id": "XCHX-7-000000007"
+   },
+   {
+    "amount": 25280000,
+    "at": "2026-09-04T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0xfc5cb65c99e3a0c9ebd6f80c468f29e5e1b55896",
+     "location": null,
+     "mode": "crypto",
+     "reference": "550475659874"
+    },
+    "rail": "internal",
+    "reference": "550475659874",
+    "txn_id": "XCHX-7-000000005"
+   },
+   {
+    "amount": 25280000,
+    "at": "2026-09-04T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "833364240893",
+    "txn_id": "XCHX-7-000000004"
+   },
+   {
+    "amount": 7350000,
+    "at": "2026-09-03T16:40:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
+     "location": null,
+     "mode": "crypto",
+     "reference": "243784442953"
+    },
+    "rail": "internal",
+    "reference": "243784442953",
+    "txn_id": "XCHX-7-000000002"
+   },
+   {
+    "amount": 7350000,
+    "at": "2026-09-03T14:00:00Z",
+    "counterparty": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "173669389380",
+    "txn_id": "XCHX-7-000000001"
+   }
+  ],
+  "vpa": null
+ },
+ "/v1/accounts/37284508470120": {
+  "account_number": "37284508470120",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 0,
+  "counterparties_30d": 0,
+  "credits_30d": 0,
+  "debits_30d": 0,
+  "declared_annual_income": 54000000,
+  "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+  "flags": [
+   {
+    "account_number": "37284508470120",
+    "active_hold_id": null,
+    "declared_annual_income": 54000000,
+    "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+    "first_at": "2026-09-04T05:17:00Z",
+    "flagged_amount": 2900000,
+    "flags": [
+     {
+      "amount": 2900000,
+      "at": "2026-09-04T05:17:00Z",
+      "cited_txns": [
+       "XCHX-7-000000003"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000003"
+      ],
+      "dismissed_reason": null,
+      "key": "dormant_then_busy:37284508470120:XCHX-7-000000003",
+      "reason": "The account had no transactions for 403 days, then received ₹29,000 on 04 Sep 2026, 10:47 AM IST.",
+      "rule": "dormant_then_busy",
+      "status": "open",
+      "title": "Dormant, then busy"
+     }
+    ],
+    "holder_name": "Gaurav Rao",
+    "last_at": "2026-09-04T05:17:00Z",
+    "priority": "low",
+    "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+    "reported": false,
+    "rules": [
+     "dormant_then_busy"
+    ]
+   }
+  ],
+  "holder_name": "Gaurav Rao",
+  "holds": [],
+  "ifsc": "XCHX0067892",
+  "liened": 0,
+  "liens": [],
+  "notices": [],
+  "on_hold": 0,
+  "opened_at": "2025-07-28T05:00:00Z",
+  "statement": [
+   {
+    "amount": 2900000,
+    "at": "2026-09-04T17:06:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0x9867c4a4a842c7573027cfd74fbe15e7a741f9aa",
+     "location": null,
+     "mode": "crypto",
+     "reference": "438737238118"
+    },
+    "rail": "internal",
+    "reference": "438737238118",
+    "txn_id": "XCHX-7-000000006"
+   },
+   {
+    "amount": 2900000,
+    "at": "2026-09-04T05:17:00Z",
+    "counterparty": {
+     "account_number": "47735673501016",
+     "ifsc": "BKCC0924061",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "356075174363",
+    "txn_id": "XCHX-7-000000003"
+   }
+  ],
+  "vpa": null
+ },
+ "/v1/accounts/88522562974498": {
+  "account_number": "88522562974498",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 0,
+  "counterparties_30d": 0,
+  "credits_30d": 0,
+  "debits_30d": 0,
+  "declared_annual_income": 120000000,
+  "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
+  "flags": [
+   {
+    "account_number": "88522562974498",
+    "active_hold_id": null,
+    "declared_annual_income": 120000000,
+    "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
+    "first_at": "2026-09-09T12:23:00Z",
+    "flagged_amount": 4000000,
+    "flags": [
+     {
+      "amount": 4000000,
+      "at": "2026-09-09T12:23:00Z",
+      "cited_txns": [
+       "XCHX-7-000000012"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000012"
+      ],
+      "dismissed_reason": null,
+      "key": "dormant_then_busy:88522562974498:XCHX-7-000000012",
+      "reason": "The account had no transactions for 408 days, then received ₹40,000 on 09 Sep 2026, 05:53 PM IST.",
+      "rule": "dormant_then_busy",
+      "status": "open",
+      "title": "Dormant, then busy"
+     }
+    ],
+    "holder_name": "Shalini Verma",
+    "last_at": "2026-09-09T12:23:00Z",
+    "priority": "low",
+    "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+    "reported": false,
+    "rules": [
+     "dormant_then_busy"
+    ]
+   }
+  ],
+  "holder_name": "Shalini Verma",
+  "holds": [],
+  "ifsc": "XCHX0067892",
+  "liened": 0,
+  "liens": [],
+  "notices": [],
+  "on_hold": 0,
+  "opened_at": "2025-07-28T05:00:00Z",
+  "statement": [
+   {
+    "amount": 4000000,
+    "at": "2026-09-09T16:10:00Z",
+    "counterparty": null,
+    "direction": "debit",
+    "exit": {
+     "identifier": "0x768ea64fdce1bed8029deee4462a7d2361a1d966",
+     "location": null,
+     "mode": "crypto",
+     "reference": "886637821878"
+    },
+    "rail": "internal",
+    "reference": "886637821878",
+    "txn_id": "XCHX-7-000000013"
+   },
+   {
+    "amount": 4000000,
+    "at": "2026-09-09T12:23:00Z",
+    "counterparty": {
+     "account_number": "88411196671483",
+     "ifsc": "BKDD0156790",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "921501573730",
+    "txn_id": "XCHX-7-000000012"
+   }
+  ],
+  "vpa": null
+ },
+ "/v1/accounts/9124511006": {
+  "account_number": "9124511006",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 10000000,
+  "counterparties_30d": 1,
+  "credits_30d": 10000000,
+  "debits_30d": 0,
+  "declared_annual_income": null,
+  "declared_profile": "",
+  "flags": [],
+  "holder_name": "Exchange X customer",
+  "holds": [],
+  "ifsc": "XCHX0000001",
+  "liened": 10000000,
+  "liens": [
+   {
+    "account_number": "9124511006",
+    "ack_number": "36512145633292",
+    "amount": 10000000,
+    "basis": "BNSS s.168 read with s.94",
+    "holder_name": "Exchange X customer",
+    "lien_id": "LEA3C537022099746",
+    "placed_at": "2026-10-25T19:36:54.365036Z",
+    "release_authority": null,
+    "release_order": null,
+    "release_reason": null,
+    "released_at": null,
+    "returned_to_victim": false
+   }
+  ],
+  "notices": [
+   {
+    "account_number": "9124511006",
+    "ack_number": "36512145633292",
+    "exit_count": 0,
+    "held": 10000000,
+    "holder_name": "Exchange X customer",
+    "layer": 3,
+    "lien_id": "LEA3C537022099746",
+    "notice_id": "36512145633292-005",
+    "onward_count": 0,
+    "reason": null,
+    "received_at": "2026-10-25T19:36:54.365036Z",
+    "status": "matched",
+    "traced_in": 10000000
+   }
+  ],
+  "on_hold": 0,
+  "opened_at": "2026-09-25T19:24:51.227948Z",
+  "statement": [
+   {
+    "amount": 10000000,
+    "at": "2026-10-25T19:30:51.227948Z",
+    "counterparty": {
+     "account_number": "5124511002",
+     "ifsc": "BKCC0000001",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "124511000007",
+    "txn_id": "C124511000007"
+   }
+  ],
+  "vpa": null
+ },
+ "/v1/accounts/91804205117543": {
+  "account_number": "91804205117543",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 10000000,
+  "counterparties_30d": 0,
+  "credits_30d": 0,
+  "debits_30d": 0,
+  "declared_annual_income": 18000000,
+  "declared_profile": "individual; Delivery rider; declared annual income ₹1,80,000",
+  "flags": [
+   {
+    "account_number": "91804205117543",
+    "active_hold_id": null,
+    "declared_annual_income": 18000000,
+    "declared_profile": "individual; Delivery rider; declared annual income ₹1,80,000",
+    "first_at": "2026-09-18T05:38:00Z",
+    "flagged_amount": 10000000,
+    "flags": [
+     {
+      "amount": 10000000,
+      "at": "2026-09-18T05:38:00Z",
+      "cited_txns": [
+       "XCHX-7-000000016"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000016"
+      ],
+      "dismissed_reason": null,
+      "key": "out_of_profile:91804205117543:XCHX-7-000000016",
+      "reason": "Credits of ₹1,00,000 arrived in the 30 days to 18 Sep 2026, 11:08 AM IST, and that is 6.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
+      "rule": "out_of_profile",
+      "status": "open",
+      "title": "Out of profile"
+     },
+     {
+      "amount": 10000000,
+      "at": "2026-09-18T05:38:00Z",
+      "cited_txns": [
+       "XCHX-7-000000016"
+      ],
+      "credit_txns": [
+       "XCHX-7-000000016"
+      ],
+      "dismissed_reason": null,
+      "key": "dormant_then_busy:91804205117543:XCHX-7-000000016",
+      "reason": "The account had no transactions for 200 days, then received ₹1,00,000 on 18 Sep 2026, 11:08 AM IST.",
+      "rule": "dormant_then_busy",
+      "status": "open",
+      "title": "Dormant, then busy"
+     }
+    ],
+    "holder_name": "Bikash Shaw",
+    "last_at": "2026-09-18T05:38:00Z",
+    "priority": "high",
+    "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+    "reported": true,
+    "rules": [
+     "out_of_profile",
+     "dormant_then_busy"
+    ]
+   }
+  ],
+  "holder_name": "Bikash Shaw",
+  "holds": [],
+  "ifsc": "XCHX0067892",
+  "liened": 10000000,
+  "liens": [
+   {
+    "account_number": "91804205117543",
+    "ack_number": "30391446601247",
+    "amount": 10000000,
+    "basis": "BNSS s.168 read with s.94",
+    "holder_name": "Bikash Shaw",
+    "lien_id": "L451A1A23C545AF9E",
+    "placed_at": "2026-10-25T19:36:50.316535Z",
+    "release_authority": null,
+    "release_order": null,
+    "release_reason": null,
+    "released_at": null,
+    "returned_to_victim": false
+   }
+  ],
+  "notices": [
+   {
+    "account_number": "91804205117543",
+    "ack_number": "30391446601247",
+    "exit_count": 0,
+    "held": 10000000,
+    "holder_name": "Bikash Shaw",
+    "layer": 3,
+    "lien_id": "L451A1A23C545AF9E",
+    "notice_id": "30391446601247-005",
+    "onward_count": 0,
+    "reason": null,
+    "received_at": "2026-10-25T19:36:50.316535Z",
+    "status": "matched",
+    "traced_in": 10000000
+   }
+  ],
+  "on_hold": 0,
+  "opened_at": "2026-03-02T05:32:00Z",
+  "statement": [
+   {
+    "amount": 10000000,
+    "at": "2026-09-18T05:38:00Z",
+    "counterparty": {
+     "account_number": "69456866879566",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "412178680646",
+    "txn_id": "XCHX-7-000000016"
+   }
+  ],
+  "vpa": "bikashshaw7743@xchx"
+ },
+ "/v1/audit": {
+  "broken_at": null,
+  "entries": [
+   {
+    "action": "notice_answered",
+    "actor": "cfcfrms",
+    "at": "2026-10-25T19:36:54.365036+00:00",
+    "hash": "37da55b187656d0d3e7aabcae2e44424be59d4442d99f7256f95f1e5a282d109",
+    "record": {
+     "ack_number": "36512145633292",
+     "held": 10000000,
+     "lien_id": "LEA3C537022099746",
+     "notice_id": "36512145633292-005",
+     "status": "matched"
+    },
+    "seq": 3
+   },
+   {
+    "action": "notice_answered",
+    "actor": "cfcfrms",
+    "at": "2026-10-25T19:36:50.316535+00:00",
+    "hash": "646944c6b7841f1727e108aac56af7478fef6393349ffc866d49ac8a22fc774d",
+    "record": {
+     "ack_number": "30391446601247",
+     "held": 10000000,
+     "lien_id": "L451A1A23C545AF9E",
+     "notice_id": "30391446601247-005",
+     "status": "matched"
+    },
+    "seq": 2
+   },
+   {
+    "action": "notice_answered",
+    "actor": "cfcfrms",
+    "at": "2026-10-25T19:36:50.185788+00:00",
+    "hash": "fc13383a58d63687599f15a3955895016d51dd616b5c8a7cdfe721f7a3054149",
+    "record": {
+     "ack_number": "25925884038089",
+     "held": 0,
+     "lien_id": null,
+     "notice_id": "25925884038089-004",
+     "status": "matched"
+    },
+    "seq": 1
+   }
+  ]
+ },
+ "payment-checks": []
 }

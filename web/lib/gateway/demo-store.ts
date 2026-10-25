@@ -6,7 +6,7 @@
  */
 import { formatInr } from "@/lib/format";
 
-import type { Hold, HoldDeadline, MuleCase, Thresholds } from "./types";
+import type { Hold, HoldDeadline, Lien, MuleCase, Thresholds } from "./types";
 
 export type Change =
   | { k: "dismiss"; m: string; a: string; r: string }
@@ -23,7 +23,10 @@ export type Change =
     }
   | { k: "step"; m: string; id: string; s: HoldStep; b: Record<string, string>; at: string }
   | { k: "thresholds"; m: string; t: Thresholds; at: string }
-  | { k: "verdict"; m: string; c: string; cr: string; d: "confirmed" | "overruled"; n: string; at: string };
+  | { k: "verdict"; m: string; c: string; cr: string; d: "confirmed" | "overruled"; n: string; at: string }
+  | { k: "note"; m: string; id: string; n: string; by: string; at: string }
+  | { k: "lien"; m: string; id: string; a: string; o: string; r: string; v: boolean; by: string; at: string }
+  | { k: "grievance"; m: string; c: string; at: string };
 
 export type HoldStep = "explanation" | "decision" | "police-instruction" | "confirm-mule" | "str-filed";
 
@@ -82,6 +85,14 @@ function isChange(value: unknown): value is Change {
       return str(c.id) && STEPS.has(c.s as string) && typeof c.b === "object" && c.b !== null && str(c.at);
     case "thresholds":
       return typeof c.t === "object" && c.t !== null && str(c.at);
+    case "note":
+      return str(c.id) && str(c.n) && str(c.by) && str(c.at);
+    case "lien":
+      return (
+        str(c.id) && str(c.a) && str(c.o) && str(c.r) && typeof c.v === "boolean" && str(c.by) && str(c.at)
+      );
+    case "grievance":
+      return str(c.c) && str(c.at);
     case "verdict":
       return str(c.c) && str(c.cr) && (c.d === "confirmed" || c.d === "overruled") && str(c.n) && str(c.at);
     default:
@@ -224,8 +235,16 @@ export function apply(
       );
     } else if (change.k === "thresholds") {
       thresholds = change.t;
-    } else if (change.k === "verdict") {
-      continue; // read by the review pages through `verdictDecisions`
+    } else if (change.k === "verdict" || change.k === "lien" || change.k === "grievance") {
+      continue; // read through `verdictDecisions`, `applyLiens` and `grievancesFiled`
+    } else if (change.k === "note") {
+      const index = holds.findIndex((h) => h.hold_id === change.id);
+      const current = holds[index];
+      if (!current) throw new DemoConflict("No such hold at this bank.");
+      holds[index] = {
+        ...current,
+        notes: [...(current.notes ?? []), { at: change.at, actor: change.by, note: change.n }],
+      };
     } else if (change.k === "hold") {
       const c = cases.find((x) => x.account_number === change.a);
       if (!c) throw new DemoConflict("This account has no open flags.");
@@ -359,4 +378,28 @@ export function verdictDecisions(
   const out = new Map<string, { d: "confirmed" | "overruled"; n: string; at: string }>();
   for (const c of changes) if (c.k === "verdict") out.set(`${c.c}:${c.cr}`, { d: c.d, n: c.n, at: c.at });
   return out;
+}
+
+/** Liens with a visitor's releases applied; throws DemoConflict for a lien already released. */
+export function applyLiens(member: string, saved: Lien[], changes: Change[]): Lien[] {
+  const liens = structuredClone(saved);
+  for (const c of changes) {
+    if (c.k !== "lien" || c.m !== member) continue;
+    const lien = liens.find((l) => l.lien_id === c.id);
+    if (!lien) throw new DemoConflict(`No lien ${c.id} at this bank.`);
+    if (lien.released_at) throw new DemoConflict("This lien is already released.");
+    Object.assign(lien, {
+      released_at: c.at,
+      release_authority: c.a,
+      release_order: c.o,
+      release_reason: c.r,
+      returned_to_victim: c.v,
+    });
+  }
+  return liens;
+}
+
+/** Evidence packs the grievance officer filed: case id -> when. */
+export function grievancesFiled(changes: Change[]): Map<string, string> {
+  return new Map(changes.flatMap((c) => (c.k === "grievance" ? [[c.c, c.at] as const] : [])));
 }

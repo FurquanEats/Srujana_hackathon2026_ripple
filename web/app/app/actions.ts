@@ -209,3 +209,117 @@ export async function verdictAction(form: FormData): Promise<void> {
     done: decision === "confirmed" ? `Verdict for ${credit} confirmed.` : `Verdict for ${credit} overruled.`,
   });
 }
+
+const LIEN = /^L[0-9A-F]{16}$/;
+
+function releaseBody(form: FormData, toVictim: boolean) {
+  const authority = text(form, "authority", 3, 200);
+  const order = text(form, "order", 3, 64);
+  const reason = text(form, "reason", 5, 2000);
+  return authority && order && reason ? { authority, order, reason, to_victim: toVictim } : null;
+}
+
+export async function releaseLienAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "nodal_officer") redirect("/sign-in");
+  const id = String(form.get("lien_id") ?? "");
+  const back_to = String(form.get("back") ?? "/app/liens");
+  const path = back_to.startsWith("/app/") ? back_to : "/app/liens";
+  if (!LIEN.test(id)) back(path, { error: "That is not a lien." });
+  const body = releaseBody(form, form.get("to_victim") === "on");
+  if (!body) back(path, { error: "Name who ordered the release, the order's reference, and the reason." });
+  await attempt(path, "Lien released and recorded in the audit log.", () =>
+    source.releaseLien(session, id, body),
+  );
+}
+
+export async function policeReleaseAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "police_officer") redirect("/sign-in");
+  const member = String(form.get("member") ?? "");
+  const id = String(form.get("lien_id") ?? "");
+  const ack = String(form.get("ack") ?? "");
+  const path = /^[23]\d{13}$/.test(ack) ? `/app/cases/${ack}` : "/app/cases";
+  if (!/^[a-z]+-[a-z]$/.test(member) || !LIEN.test(id))
+    back(path, { error: "That is not a lien on this trail." });
+  const body = releaseBody(form, true);
+  if (!body) back(path, { error: "Name the police station, the order's reference, and the reason." });
+  await attempt(path, "The bank was told to return the money to the victim.", () =>
+    source.policeRelease(session, member, id, body),
+  );
+}
+
+export async function holdNoteAction(form: FormData): Promise<void> {
+  const session = await frm();
+  const id = String(form.get("hold_id") ?? "");
+  if (!HOLD.test(id)) back("/app/holds", { error: "That is not a hold." });
+  const note = text(form, "note", 1, 2000);
+  if (!note) back(`/app/holds/${id}`, { error: "Write the note first." });
+  await attempt(`/app/holds/${id}`, "Note added to the hold's record.", () =>
+    source.holdNote(session, id, note),
+  );
+}
+
+export async function callBackAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "account_holder") redirect("/sign-in");
+  const id = String(form.get("hold_id") ?? "");
+  const note = text(form, "note", 3, 500);
+  if (!HOLD.test(id) || !note)
+    back("/app/my-hold", { error: "Say when and on which number the bank should call." });
+  await attempt("/app/my-hold", "The bank will call you back.", () => source.callBack(session, id, note));
+}
+
+export async function fileGrievanceAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "grievance_officer") redirect("/sign-in");
+  const caseId = String(form.get("case") ?? "");
+  if (!/^D\d{2}$/.test(caseId)) back("/app/reviews", { error: "Unknown evidence pack." });
+  await source.fileGrievance(session, caseId);
+  back(`/app/reviews/${caseId}`, {
+    done: "Grievance filed with the evidence pack. The investigating officer has 15 days to decide.",
+  });
+}
+
+export async function fileComplaintAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "police_officer") redirect("/sign-in");
+  const path = "/app/cases/new";
+  const victim = text(form, "victim", 2, 120);
+  const reference = text(form, "reference", 6, 32);
+  const amount = Number(form.get("amount"));
+  const ifsc = String(form.get("ifsc") ?? "")
+    .trim()
+    .toUpperCase();
+  const account = String(form.get("account") ?? "").trim();
+  const rail = String(form.get("rail") ?? "");
+  const at = String(form.get("at") ?? "");
+  const channel = String(form.get("channel") ?? "3");
+  if (
+    !victim ||
+    !reference ||
+    !(amount > 0) ||
+    !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc) ||
+    !/^\d{6,20}$/.test(account)
+  )
+    back(path, {
+      error: "Fill in the victim, the payment reference, a positive amount, and a valid IFSC and account.",
+    });
+  if (!["upi", "imps", "neft", "rtgs"].includes(rail) || Number.isNaN(Date.parse(at)))
+    back(path, { error: "Choose the rail and the time of the payment." });
+  const ack = `${channel === "2" ? "2" : "3"}${String(Date.now()).slice(-13)}`;
+  let filed = "";
+  try {
+    filed = await source.fileComplaint(session, {
+      ack_number: ack,
+      victim_name: victim,
+      payment: { rail, reference, amount: Math.round(amount * 100), at: new Date(at).toISOString() },
+      beneficiary: { ifsc, account_number: account, vpa: null },
+      filed_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (error instanceof source.GatewayFailure) back(path, { error: error.message });
+    throw error;
+  }
+  redirect(`/app/cases/${filed}`);
+}

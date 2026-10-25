@@ -90,6 +90,10 @@ export type Lien = {
   basis: string;
   placed_at: string;
   released_at: string | null;
+  release_authority?: string | null;
+  release_order?: string | null;
+  release_reason?: string | null;
+  returned_to_victim?: boolean;
 };
 
 export type CaseTotals = {
@@ -202,6 +206,7 @@ export type Hold = {
   str_filed_at: string | null;
   str_reference: string | null;
   compliance_breach: string | null;
+  notes?: { at: string; actor: string; note: string }[];
 };
 
 export type Thresholds = {
@@ -297,11 +302,58 @@ export type VictimPlace = {
   held: number;
   state: string;
   cashed_out: number;
+  returned?: number;
 };
 
 export type VictimStatus = CaseTotals & {
+  returned?: number;
   ack_number: string;
   victim_name: string;
   filed_at: string;
   places: VictimPlace[];
 };
+
+export type AccountLine = {
+  txn_id: string;
+  at: string;
+  direction: "credit" | "debit";
+  rail: Rail;
+  reference: string;
+  amount: number;
+  counterparty: AccountRef | null;
+  exit: ExitDetail | null;
+};
+
+export type AccountView = {
+  account_number: string;
+  ifsc: string;
+  vpa: string | null;
+  holder_name: string;
+  account_type: string;
+  declared_profile: string;
+  declared_annual_income: number | null;
+  opened_at: string;
+  balance: number;
+  liened: number;
+  on_hold: number;
+  available: number;
+  credits_30d: number;
+  debits_30d: number;
+  counterparties_30d: number;
+  statement: AccountLine[];
+  notices: NoticeSummary[];
+  liens: Lien[];
+  flags: MuleCase[];
+  holds: Hold[];
+};
+
+export type ThresholdApproval = {
+  settings: Thresholds;
+  budget_per_day: number | null;
+  approved_by: string;
+  approved_at: string;
+};
+
+export type HoldNote = { at: string; actor: string; note: string };
+
+export type LienRelease = { authority: string; order: string; reason: string; to_victim: boolean };
