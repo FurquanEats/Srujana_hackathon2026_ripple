@@ -1,22 +1,12 @@
-"""What the simulator sends to each institution's node.
-
-TODO(rebuild/node-hub): `AccountOpening`, `LedgerPosting` and `ExitDetail` stand in for the messages that pull
-request adds to `ripple_core.messages`, with the fields it describes. Once it lands, import them from there and
-delete these copies; the simulator only builds them in `world.py`.
-"""
+"""What the simulator sends to each institution's node: `ripple_core.messages` account openings and ledger postings."""
 
 from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated
 
-from pydantic import AwareDatetime, Field
-
-from ripple_core.messages import AccountRef, AccountType, ExitMode, Model, Payment
-from ripple_core.tracing import Direction
-
-Paise = Annotated[int, Field(ge=0)]
+from ripple_core.messages import AccountOpening, LedgerPosting, Model, PaiseAmount
+from ripple_core.money import fmt_inr
 
 
 class HolderKind(StrEnum):
@@ -29,42 +19,21 @@ class DeclaredProfile(Model):
 
     holder_kind: HolderKind
     occupation: str
-    annual_income: Paise  # declared income for an individual, turnover for a business
+    annual_income: PaiseAmount  # declared income for an individual, turnover for a business
     business_type: str | None = None
     mobile: str | None = None
 
-
-class AccountOpening(Model):
-    account_number: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
-    ifsc: str
-    holder: str
-    account_type: AccountType
-    vpa: str | None
-    profile: DeclaredProfile
-    opening_balance: Paise
-    opened_at: AwareDatetime
-
-
-class ExitDetail(Model):
-    """Where money left the banking system, with the identifier the SOP asks for (para 9.1)."""
-
-    mode: ExitMode
-    identifier: Annotated[str, Field(min_length=1)]  # ATM ID, merchant ID, wallet address
-    location: str | None = None
-
-
-class LedgerPosting(Model):
-    txn_id: Annotated[str, Field(min_length=1)]
-    account_number: str
-    direction: Direction
-    payment: Payment
-    counterparty: AccountRef | ExitDetail
+    def describe(self) -> str:
+        """The profile as the one line a node keeps (`AccountOpening.declared_profile`)."""
+        income = "turnover" if self.holder_kind is HolderKind.BUSINESS else "income"
+        kind = self.business_type or self.holder_kind.value
+        return f"{kind}; {self.occupation}; declared annual {income} {fmt_inr(self.annual_income)}"
 
 
 class Delivery(Model):
     """One message for one member's node, which the simulator signs as the party "sim"."""
 
-    member: str
+    member: str  # the member's id in network.toml
     message: AccountOpening | LedgerPosting
 
     @property

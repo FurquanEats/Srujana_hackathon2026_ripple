@@ -8,10 +8,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import Literal
 
-from ripple_core.messages import AccountRef, AccountType, ExitMode, Payment, Rail
-from ripple_core.tracing import Direction
-from ripple_sim.events import AccountOpening, DeclaredProfile, Delivery, ExitDetail, LedgerPosting
+from ripple_core.messages import (
+    AccountOpening,
+    AccountRef,
+    ExitDetail,
+    ExitMode,
+    LedgerPosting,
+    Payment,
+    Rail,
+)
+from ripple_sim.events import DeclaredProfile, Delivery
 from ripple_sim.identifiers import SeededIds
 from ripple_sim.network import Member
 
@@ -75,14 +83,13 @@ class World:
         self.accounts.append(account)
         self.deliveries.append(
             Delivery(
-                member=member.name,
+                member=member.id,
                 message=AccountOpening(
                     account_number=number,
                     ifsc=ifsc,
-                    holder=holder,
-                    account_type=AccountType.REGULAR,
+                    holder_name=holder,
                     vpa=vpa,
-                    profile=profile,
+                    declared_profile=profile.describe(),
                     opening_balance=opening_balance,
                     opened_at=at.astimezone(UTC),
                 ),
@@ -129,8 +136,8 @@ class World:
         )
         payer.balance -= amount
         payee.balance += amount
-        self._post(payer, Direction.DEBIT, payment, payee.ref)
-        self._post(payee, Direction.CREDIT, payment, payer.ref)
+        self._post(payer, "debit", payment, counterparty=payee.ref)
+        self._post(payee, "credit", payment, counterparty=payer.ref)
         return payment
 
     def exit(
@@ -155,23 +162,29 @@ class World:
             at=at.astimezone(UTC),
         )
         account.balance -= amount
-        self._post(
-            account, Direction.DEBIT, payment, ExitDetail(mode=mode, identifier=identifier, location=location)
-        )
+        exit_ = ExitDetail(mode=mode, reference=payment.reference, identifier=identifier, location=location)
+        self._post(account, "debit", payment, exit_=exit_)
         return payment
 
     def _post(
-        self, account: Account, direction: Direction, payment: Payment, counterparty: AccountRef | ExitDetail
+        self,
+        account: Account,
+        direction: Literal["credit", "debit"],
+        payment: Payment,
+        *,
+        counterparty: AccountRef | None = None,
+        exit_: ExitDetail | None = None,
     ) -> None:
         self.deliveries.append(
             Delivery(
-                member=account.member.name,
+                member=account.member.id,
                 message=LedgerPosting(
                     txn_id=self._txn_id(account.member),
                     account_number=account.number,
                     direction=direction,
                     payment=payment,
                     counterparty=counterparty,
+                    exit=exit_,
                 ),
             )
         )

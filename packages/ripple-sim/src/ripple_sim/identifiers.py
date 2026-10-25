@@ -15,8 +15,11 @@ from ripple_core import ids
 
 
 class SeededIds:
-    def __init__(self, rng: random.Random) -> None:
+    def __init__(self, rng: random.Random, seed: int = 0) -> None:
+        if seed < 0:
+            raise ValueError("the seed must not be negative")
         self._rng = rng
+        self._seed = seed
         self._used: set[str] = set()
 
     def _digits(self, n: int) -> str:
@@ -56,8 +59,13 @@ class SeededIds:
         return self._fresh(lambda: first + self._digits(13), ids.is_ncrp_ack)
 
     def vpa(self, name: str, handle: str) -> str:
-        base = "".join(c for c in name.lower() if c.isascii() and c.isalnum())[:12] or "user"
-        return self._fresh(lambda: f"{base}{self._digits(3)}@{handle}", ids.is_vpa)
+        """A UPI ID such as `arjunmondal7042@bkbb`: the name, the seed, then 3 digits.
+
+        Nodes keep UPI IDs unique, and with the seed in them two seeds never make the same one, so several seeds
+        can be posted to one network.
+        """
+        base = "".join(c for c in name.lower() if c.isascii() and c.isalpha())[:12] or "user"
+        return self._fresh(lambda: f"{base}{self._seed}{self._digits(3)}@{handle}", ids.is_vpa)
 
     def atm_id(self, bank_code: str) -> str:
         return self._fresh(lambda: f"{bank_code}{self._digits(4)}")

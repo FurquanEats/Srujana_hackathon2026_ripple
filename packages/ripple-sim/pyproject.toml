@@ -5,7 +5,12 @@ description = "Ripple's payment network simulator: a seeded month of Indian bank
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "ripple-core",
+    "ripple-service",
 ]
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+ripple-service = { workspace = true }
 
 [project.scripts]
 ripple-sim = "ripple_sim.cli:main"

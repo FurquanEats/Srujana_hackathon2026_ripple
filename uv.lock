@@ -939,10 +939,14 @@ version = "0.1.0"
 source = { editable = "packages/ripple-sim" }
 dependencies = [
     { name = "ripple-core" },
+    { name = "ripple-service" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "ripple-core", editable = "packages/ripple-core" }]
+requires-dist = [
+    { name = "ripple-core", editable = "packages/ripple-core" },
+    { name = "ripple-service", editable = "packages/ripple-service" },
+]
 
 [[package]]
 name = "ruff"
