@@ -12,6 +12,7 @@ import { api, money, time, type InterdictionPlan, type LearnRequest } from "@/li
 type Errors = Partial<Record<"account" | "date" | "time" | "amount", string>>;
 
 const ACCOUNT = /^[A-Za-z0-9][A-Za-z0-9_-]{1,39}$/;
+const CASE_ID = /^C-\d+$/i;
 
 /** "2026-10-30T16:08:59" -> ["2026-10-30", "16:08:59"]. Timestamps stay in the stream's local time, as the API expects. */
 function splitTs(ts: string | null): [string, string] {
@@ -24,8 +25,8 @@ const parseAmount = (s: string) => Number(s.replace(/[,\s₹]/g, ""));
 
 function validate(account: string, date: string, clock: string, amount: string): Errors {
   const e: Errors = {};
-  if (!account.trim()) e.account = "Enter the victim's account number.";
-  else if (!ACCOUNT.test(account.trim())) e.account = "Use letters, digits, hyphens or underscores only, for example AC0037.";
+  if (!account.trim()) e.account = "Enter the victim's account number or a case number.";
+  else if (!ACCOUNT.test(account.trim())) e.account = "Use letters, digits, hyphens or underscores only, for example AC0038 or C-0007.";
   if (date && !clock) e.time = "Add the time of the payment, or clear the date.";
   if (clock && !date) e.date = "Add the date of the payment, or clear the time.";
   if (amount.trim()) {
@@ -80,7 +81,7 @@ function ReportForm() {
       const n = amt.trim() ? parseAmount(amt) : undefined;
       const from = d && c ? `${d}T${withSeconds(c)}` : undefined;
       setPlan(await api.trace(acc.trim(), from, n));
-      setTraced({ account: acc.trim(), from_ts: from ?? null, amount: n ?? null });
+      setTraced(CASE_ID.test(acc.trim()) ? { case_id: acc.trim().toUpperCase() } : { account: acc.trim(), from_ts: from ?? null, amount: n ?? null });
       requestAnimationFrame(() => resultRef.current?.focus());
     } catch (e) {
       setPlan(null);
@@ -121,16 +122,16 @@ function ReportForm() {
   return (
     <div className="space-y-6">
       <PageHeader title="Report a scam"
-                  description="For the officer handling a 1930 helpline or cybercrime-portal complaint. Enter the victim's account and when they paid; Ripple follows the money through every hop it can see." />
+                  description="For the officer handling a 1930 helpline or cybercrime-portal complaint. Enter the victim's account and when they paid, or a case number from the queue; Ripple follows the money through every hop it can see." />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Victim's report" className="lg:col-span-2">
           <form ref={formRef} noValidate onSubmit={submit} aria-busy={busy} className="space-y-5">
-            <Field label="Victim's account number" error={errors.account} hint="The account the money was paid from, for example AC0037.">
+            <Field label="Victim's account or case number" error={errors.account} hint="The account the money was paid from (for example AC0038), or a case number from the queue (for example C-0007).">
               {(a) => (
                 <input {...a} name="account" value={account} autoComplete="off" spellCheck={false} required aria-required
                        onChange={(e) => { setAccount(e.target.value); if (errors.account) setErrors({ ...errors, account: undefined }); }}
-                       placeholder="AC0037" className={`${inputClass} font-mono sm:max-w-xs`} />
+                       placeholder="AC0038 or C-0007" className={`${inputClass} font-mono sm:max-w-xs`} />
               )}
             </Field>
 
@@ -205,7 +206,7 @@ function ReportForm() {
               </Card>
               <FreezeList plan={plan} />
               <RecoveryChart plan={plan} />
-              {traced && <LearnFromTrail key={`${traced.account}-${traced.from_ts}`} request={traced} what="this scam" />}
+              {traced && <LearnFromTrail key={`${traced.case_id ?? traced.account}-${traced.from_ts}`} request={traced} what="this scam" />}
             </>
           )}
         </div>

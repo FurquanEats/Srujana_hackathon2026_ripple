@@ -54,3 +54,14 @@ def test_load_transactions_from_csv(tmp_path):
     txns = load_transactions(path)
     assert len(txns) == len(payload)
     assert [t.ts for t in txns] == sorted(t.ts for t in txns)
+
+
+def test_trace_accepts_a_case_number_and_explains_unknown_input():
+    client = TestClient(create_app(source="engine", data=""))
+    payload, _ = ring_payload()
+    client.post("/ingest", json=payload)
+    case_id = client.get("/cases").json()[0]["case_id"]
+    plan = client.post("/trace", json={"account": case_id.lower()})
+    assert plan.status_code == 200 and plan.json()["case_id"] == case_id
+    assert "no case C-9999" in client.post("/trace", json={"account": "C-9999"}).json()["detail"]
+    assert "no account called NOPE1" in client.post("/trace", json={"account": "NOPE1"}).json()["detail"]

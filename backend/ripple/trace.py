@@ -43,14 +43,13 @@ def onward(engine: Engine, trail: list[ScoredTransaction], max_hops: int = 3) ->
     for _ in range(max_hops):
         nxt: list[tuple[str, datetime]] = []
         for account, since in frontier:
-            state = engine.store.get(account)
-            if state is None or _merchant(engine, account):
+            if engine.store.get(account) is None or _merchant(engine, account):
                 continue
-            for edge in state.outgoing:
-                if edge.ts >= since and edge.txn_id not in seen and (txn := engine.lookup(edge.txn_id)) is not None:
-                    seen.add(edge.txn_id)
+            for txn in engine.payments(account):
+                if txn.src_account == account and txn.ts >= since and txn.txn_id not in seen:
+                    seen.add(txn.txn_id)
                     found.append(txn)
-                    nxt.append((edge.counterparty, edge.ts))
+                    nxt.append((txn.dst_account, txn.ts))
         frontier = nxt
         if len(found) > MAX_TXNS:
             break
@@ -63,14 +62,10 @@ def merchants(engine: Engine, accounts: set[str]) -> frozenset[str]:
 
 
 def own_funds(engine: Engine, accounts: set[str]) -> list[tuple[datetime, str, float, str]]:
-    """Every payment into these accounts within the engine's window, as (time, account, amount, txn id). Those not on
-    the traced trail are the accounts' own money mixed in with the traced money (see ripple.interdiction)."""
-    out = []
-    for account in accounts:
-        state = engine.store.get(account)
-        if state is not None:
-            out.extend((e.ts, account, e.amount, e.txn_id) for e in state.incoming)
-    return out
+    """Every payment into these accounts the engine still holds, as (time, account, amount, txn id). Those not on the
+    traced trail are the accounts' own money mixed in with the traced money (see ripple.interdiction)."""
+    return [(t.ts, account, t.amount, t.txn_id) for account in accounts for t in engine.payments(account)
+            if t.dst_account == account]
 
 
 def trace(engine: Engine, account: str, from_ts: datetime, amount: float | None = None, max_hops: int = 6,

@@ -10,6 +10,7 @@ RIPPLE_SOURCE=fixtures (the default) serves the sample responses in /fixtures.
 from __future__ import annotations
 
 import asyncio
+import re
 import contextlib
 import json
 import os
@@ -41,6 +42,7 @@ from ripple.schema import (
 )
 from ripple.stream import EventBus, Feed, ingest, load_transactions, replay_feed
 
+CASE_ID = re.compile(r"[Cc]-\d+")
 TOP_UP_BELOW = 500  # payments still queued: about a day of the simulated bank's ordinary traffic
 TOP_UP_DAYS = 2
 
@@ -215,10 +217,21 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         """Follows a victim's money forward from the reported time and returns where it sits and what to freeze."""
         if engine is None:
             raise HTTPException(status_code=409, detail="trace needs RIPPLE_SOURCE=engine")
+        account = report.account.strip()
+        if CASE_ID.fullmatch(account):  # officers often have the case number, not the victim's account
+            if engine.cases.get(account.upper()) is None:
+                raise HTTPException(status_code=404, detail=f"There is no case {account.upper()}. Case numbers are shown "
+                                    "in the case queue, for example C-0007.")
+            return get_interdiction(account.upper())
+        if engine.store.get(account) is None:
+            raise HTTPException(status_code=404, detail=f"Ripple has no account called {account}. Enter the victim's "
+                                "account number (for example AC0038) or a case number (for example C-0007).")
         from_ts = report.from_ts or ((engine.store.now or datetime.now()) - timedelta(hours=24))
-        result = trace.trace(engine, report.account, from_ts.replace(tzinfo=None), report.amount)
+        result = trace.trace(engine, account, from_ts.replace(tzinfo=None), report.amount)
         if result is None:
-            raise HTTPException(status_code=404, detail=f"no payments from {report.account} after {from_ts}")
+            raise HTTPException(status_code=404, detail=f"{account} made no payments to a new payee after "
+                                f"{from_ts:%d %b %Y, %H:%M}. Tracing reads the last 72 hours of payments, so for an older "
+                                "scam enter its case number instead.")
         return result
 
     def pattern(motif) -> LearnedPattern:

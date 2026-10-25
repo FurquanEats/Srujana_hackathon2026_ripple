@@ -40,6 +40,12 @@ from ripple.schema import (
 
 DETECTOR_EVIDENCE = 0.5  # detector score an alert needs before it may flag accounts in the graph layer
 LOG_WINDOW = timedelta(days=8)  # covers the longest evidence window (7-day cash structuring)
+# A non-alert payment that touches a case account, or an account a case account paid (up to ONWARD_HOPS away), from
+# three days before the case's first alert to three days after its last, is kept past LOG_WINDOW. A case's evidence,
+# the mules' own money and their later withdrawals then stay the same however old the case is.
+CASE_BEFORE = timedelta(hours=72)
+CASE_AFTER = timedelta(hours=72)
+ONWARD_HOPS = 3
 CONTEXT_WINDOW = timedelta(hours=24)
 
 
@@ -92,6 +98,8 @@ class Engine:
         self.dismissed: dict[tuple[str, str], datetime] = {}  # account pair -> suppressed until
         self.log: dict[str, ScoredTransaction] = {}  # every alert, in full
         self.recent: dict[str, _Recent] = {}  # every non-alert transaction within LOG_WINDOW, compact
+        self.kept: dict[str, _Recent] = {}  # older non-alert transactions that belong to a case's story
+        self._onward: dict[str, tuple[str, int]] = {}  # account paid by a case's money -> (case id, hops from the case)
         self.cases = CaseEngine(self.pack["tiers"], amount_of=self._amount_of)
         self._recent_order: deque[tuple[datetime, str]] = deque()
         self.shap: dict[str, list[ShapValue]] = {}
@@ -155,6 +163,7 @@ class Engine:
             if detector_score >= DETECTOR_EVIDENCE:
                 self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
             case = self.cases.add(scored)
+            self._onward.setdefault(scored.dst_account, (case.case_id, 1))
         self.processed += 1
         self._latency_ms.append((time.perf_counter() - began) * 1000)
         return scored, case
@@ -169,16 +178,56 @@ class Engine:
             )
             self._recent_order.append((scored.ts, scored.txn_id))
         while self._recent_order and scored.ts - self._recent_order[0][0] > LOG_WINDOW:
-            self.recent.pop(self._recent_order.popleft()[1], None)
+            old = self.recent.pop(self._recent_order.popleft()[1], None)
+            if old is not None and self._in_case(old):
+                self.kept[old.txn_id] = old
+
+    def _case_of(self, account: str, ts: datetime) -> tuple[str, int] | None:
+        """The case whose story this account belongs to at this time, and how many hops it is from the case."""
+        hit = self.cases._latest.get(account)
+        for case_id, hops in ((hit[0], 0) if hit else (None, 0), self._onward.get(account, (None, 0))):
+            case = self.cases.get(case_id) if case_id else None
+            if case and case.alerts[0].ts - CASE_BEFORE <= ts <= case.alerts[-1].ts + CASE_AFTER:
+                return case.case_id, hops
+        return None
+
+    def _in_case(self, t: _Recent) -> bool:
+        for account in (t.src, t.dst):
+            found = self._case_of(account, t.ts)
+            if found is None:
+                continue
+            state = self.store.get(t.dst)
+            shop = state is not None and len(state.senders) > 20
+            if account == t.src and found[1] < ONWARD_HOPS and not shop:
+                self._onward.setdefault(t.dst, (found[0], found[1] + 1))
+            return True
+        return False
+
+    def payments(self, account: str) -> list[ScoredTransaction]:
+        """Every payment into or out of an account that the engine still holds: its rolling window, every alert, and
+        the older payments kept for cases. Oldest first."""
+        found: dict[str, ScoredTransaction] = {}
+        state = self.store.get(account)
+        if state is not None:
+            for edge in state.incoming + state.outgoing:
+                if (txn := self.lookup(edge.txn_id)) is not None:
+                    found[txn.txn_id] = txn
+        for t in self.log.values():
+            if account in (t.src_account, t.dst_account):
+                found[t.txn_id] = t
+        for t in self.kept.values():
+            if account in (t.src, t.dst):
+                found[t.txn_id] = t.scored()
+        return sorted(found.values(), key=lambda t: t.ts)
 
     def _amount_of(self, txn_id: str) -> float:
-        hit = self.log.get(txn_id) or self.recent.get(txn_id)
+        hit = self.log.get(txn_id) or self.recent.get(txn_id) or self.kept.get(txn_id)
         return hit.amount if hit else 0.0
 
     def lookup(self, txn_id: str) -> ScoredTransaction | None:
         if txn_id in self.log:
             return self.log[txn_id]
-        hit = self.recent.get(txn_id)
+        hit = self.recent.get(txn_id) or self.kept.get(txn_id)
         return hit.scored() if hit else None
 
     def warming_up(self, ts: datetime) -> bool:
