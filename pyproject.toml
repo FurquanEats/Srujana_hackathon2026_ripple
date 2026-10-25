@@ -3,7 +3,7 @@ name = "ripple"
 version = "0.1.0"
 description = "Cross-bank fraud tracing for India: the bank node, the simulated CFCFRMS and DPIP hubs, and the payment network simulator"
 requires-python = ">=3.12,<3.13"
-dependencies = ["ripple-core", "ripple-service", "ripple-node", "ripple-hubs", "ripple-cli"]
+dependencies = ["ripple-core", "ripple-service", "ripple-node", "ripple-hubs", "ripple-cli", "ripple-sim"]
 
 [tool.uv]
 package = false
@@ -17,6 +17,7 @@ ripple-service = { workspace = true }
 ripple-node = { workspace = true }
 ripple-hubs = { workspace = true }
 ripple-cli = { workspace = true }
+ripple-sim = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -60,6 +61,7 @@ mypy_path = [
     "packages/ripple-node/src",
     "packages/ripple-hubs/src",
     "packages/ripple-cli/src",
+    "packages/ripple-sim/src",
 ]
 explicit_package_bases = true
 plugins = ["pydantic.mypy"]
@@ -72,7 +74,7 @@ pythonpath = ["packages/ripple-cli/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["ripple_core", "ripple_service", "ripple_node", "ripple_hubs", "ripple_cli"]
+source = ["ripple_core", "ripple_service", "ripple_node", "ripple_hubs", "ripple_cli", "ripple_sim"]
 
 [tool.coverage.report]
 fail_under = 85

@@ -1,0 +1,18 @@
+[project]
+name = "ripple-sim"
+version = "0.1.0"
+description = "Ripple's payment network simulator: a seeded month of Indian bank traffic, exits, and the demo scam as a fixed scenario"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ripple-core",
+]
+
+[project.scripts]
+ripple-sim = "ripple_sim.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ripple_sim"]

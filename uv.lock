@@ -10,6 +10,7 @@ members = [
     "ripple-hubs",
     "ripple-node",
     "ripple-service",
+    "ripple-sim",
 ]
 
 [[package]]
@@ -814,6 +815,7 @@ dependencies = [
     { name = "ripple-hubs" },
     { name = "ripple-node" },
     { name = "ripple-service" },
+    { name = "ripple-sim" },
 ]
 
 [package.dev-dependencies]
@@ -833,6 +835,7 @@ requires-dist = [
     { name = "ripple-hubs", editable = "packages/ripple-hubs" },
     { name = "ripple-node", editable = "packages/ripple-node" },
     { name = "ripple-service", editable = "packages/ripple-service" },
+    { name = "ripple-sim", editable = "packages/ripple-sim" },
 ]
 
 [package.metadata.requires-dev]
@@ -929,6 +932,17 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.36" },
     { name = "uvicorn", specifier = ">=0.32" },
 ]
+
+[[package]]
+name = "ripple-sim"
+version = "0.1.0"
+source = { editable = "packages/ripple-sim" }
+dependencies = [
+    { name = "ripple-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "ripple-core", editable = "packages/ripple-core" }]
 
 [[package]]
 name = "ruff"
