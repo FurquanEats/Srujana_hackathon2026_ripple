@@ -143,6 +143,16 @@ def current_thresholds(session: Session) -> Thresholds:
     return Thresholds(**json.loads(row.settings)) if row else Thresholds()
 
 
+def threshold_history(session: Session) -> list[dict[str, object]]:
+    """Every approved set of settings, newest first, with who approved it and on what review budget."""
+    rows = session.scalars(select(ThresholdRow).order_by(ThresholdRow.seq.desc()))
+    return [
+        {"settings": json.loads(r.settings), "budget_per_day": r.budget_per_day, "approved_by": r.approved_by,
+         "approved_at": r.approved_at.isoformat()}
+        for r in rows
+    ]  # fmt: skip
+
+
 def approve_thresholds(
     session: Session, settings: Thresholds, *, actor: str, now: datetime, budget_per_day: float | None
 ) -> ThresholdRow:

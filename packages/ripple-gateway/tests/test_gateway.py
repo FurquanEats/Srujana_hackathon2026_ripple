@@ -282,3 +282,59 @@ def test_the_police_see_reported_holds_and_instruct_the_bank(gw: TestClient) -> 
     assert done.json()["status"] == "held_on_police_instruction"
     assert gw.post(f"/v1/hold-reports/bank-z/{hold_id}/instruction", headers=police,
                    json={"instruction": "continue", "authority": "x" * 5}).status_code == 404  # fmt: skip
+
+
+def test_the_officer_opens_an_account_with_its_statement_flags_and_holds(gw: TestClient) -> None:
+    run_demo(gw)
+    account, hold_id = place_m3_hold(gw)
+    view = gw.get(f"/v1/accounts/{account}", headers=FRM_D).json()
+    assert view["holder_name"] == "M3 General Store (mule)"
+    assert view["on_hold"] > 0
+    assert view["available"] == view["balance"] - view["liened"] - view["on_hold"]
+    assert [h["hold_id"] for h in view["holds"]] == [hold_id]
+    assert view["flags"]
+    assert view["statement"]
+    assert gw.get("/v1/accounts/0000000000", headers=FRM_D).status_code == 404
+    assert gw.get(f"/v1/accounts/{account}", headers=POLICE).status_code == 403
+
+
+def test_the_police_return_liened_money_to_the_victim(gw: TestClient) -> None:
+    ack = run_demo(gw)
+    trail = gw.get(f"/v1/cases/{ack}/trail", headers=POLICE).json()
+    m1 = next(a for a in trail["accounts"] if a["holder_name"] == "M1 (mule)")
+    order = {"authority": "Cyber Crime PS, Hyderabad", "order": "CCPS/106/2026/41",
+             "reason": "Interim custody to the victim", "to_victim": True}  # fmt: skip
+    done = gw.post(f"/v1/police/liens/{m1['member']}/{m1['lien_id']}/release", headers=POLICE, json=order)
+    assert done.status_code == 200, done.text
+    again = gw.post(f"/v1/police/liens/{m1['member']}/{m1['lien_id']}/release", headers=POLICE, json=order)
+    assert again.status_code == 409
+    victim = {"X-Ripple-Session": issue(SECRET, sub=ack, role=Role.VICTIM, member=None, now=NOW)}
+    assert gw.get("/v1/my-complaint", headers=victim).json()["returned"] == 10_000_000
+    [lien] = [x for x in gw.get("/v1/liens", headers=BANK_B).json() if x["lien_id"] == m1["lien_id"]]
+    assert (lien["release_order"], lien["returned_to_victim"]) == ("CCPS/106/2026/41", True)
+    assert gw.post(f"/v1/liens/{m1['lien_id']}/release", headers=FRM_D, json=order).status_code == 403
+
+
+def test_hold_notes_and_call_backs_land_on_the_hold(gw: TestClient) -> None:
+    run_demo(gw)
+    account, hold_id = place_m3_hold(gw)
+    gw.post(f"/v1/holds/{hold_id}/note", headers=FRM_D, json={"note": "Called the customer; no answer."})
+    holder = {
+        "X-Ripple-Session": issue(SECRET, sub=account, role=Role.ACCOUNT_HOLDER, member="bank-d", now=NOW)
+    }
+    asked = gw.post(f"/v1/my-holds/{hold_id}/call-back", headers=holder, json={"note": "After 5 pm, please"})
+    assert asked.status_code == 200, asked.text
+    [hold] = gw.get("/v1/holds", headers=FRM_D).json()
+    assert [n["note"] for n in hold["notes"]] == [
+        "Called the customer; no answer.",
+        "Customer asked for a call back: After 5 pm, please",
+    ]
+
+
+def test_threshold_history_keeps_every_approval(gw: TestClient) -> None:
+    run_demo(gw)
+    settings = {"pass_through_minutes": 45, "new_senders": 4, "profile_multiple": 2.5, "dormant_days": 60,
+                "cash_out_minutes": 90}  # fmt: skip
+    gw.post("/v1/detection/thresholds", headers=FRM_D, json={**settings, "budget_per_day": 8})
+    [entry] = gw.get("/v1/detection/history", headers=FRM_D).json()
+    assert (entry["settings"], entry["budget_per_day"], entry["approved_by"]) == (settings, 8, "u1")

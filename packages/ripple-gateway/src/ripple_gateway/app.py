@@ -106,6 +106,18 @@ class PaymentCheckBody(Body):
     amount: Annotated[int, Field(gt=0, le=10**13)]
 
 
+class ReleaseBody(Body):
+    authority: Annotated[str, Field(min_length=3, max_length=200)]
+    order: Annotated[str, Field(min_length=3, max_length=64)]
+    reason: Annotated[str, Field(min_length=5, max_length=2000)]
+    to_victim: bool = False
+
+
+class NoteBody(Body):
+    note: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+LienPath = Annotated[str, Path(pattern=r"^L[0-9A-F]{16}$")]
 MemberPath = Annotated[str, Path(pattern=r"^[a-z]+-[a-z]$")]
 NoticePath = Annotated[str, Path(min_length=8, max_length=64, pattern=r"^[0-9A-Za-z-]+$")]
 
@@ -303,6 +315,46 @@ def build_app(ctx: GatewayContext) -> FastAPI:  # noqa: PLR0915 - one short func
         allow(who, POLICE_ROLES)
         return call("web", HUB, "/v1/complaints", body)
 
+    @app.get("/v1/accounts/{account_number}")
+    def account(who: Who, account_number: AccountPath) -> dict[str, Any]:
+        """One account at the officer's own bank: profile, balances, statement, notices, liens, flags and holds."""
+        return call("web", own_bank(who), "/v1/officer/account", {"account_number": account_number})
+
+    @app.post("/v1/liens/{lien_id}/release")
+    def release_lien(who: Who, lien_id: LienPath, body: ReleaseBody) -> dict[str, Any]:
+        """The nodal officer records a lien lifted on a police or court order."""
+        allow(who, frozenset({Role.NODAL_OFFICER}))
+        payload = {**body.model_dump(), "actor": who.sub, "lien_id": lien_id}
+        return call("web", own_bank(who), "/v1/officer/liens/release", payload)
+
+    @app.post("/v1/police/liens/{member}/{lien_id}/release")
+    def police_release(who: Who, member: MemberPath, lien_id: LienPath, body: ReleaseBody) -> dict[str, Any]:
+        """The police order a bank to return liened money to the victim (BNSS 106(3), SOP 11 Process 1)."""
+        allow(who, frozenset({Role.POLICE_OFFICER}))
+        if member not in bank_members():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such bank on the network.")
+        payload = {**body.model_dump(), "actor": who.sub, "lien_id": lien_id}
+        return call("web", member, "/v1/officer/liens/release", payload)
+
+    @app.post("/v1/holds/{hold_id}/note")
+    def hold_note(who: Who, hold_id: HoldPath, body: NoteBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "note", body)
+
+    @app.post("/v1/my-holds/{hold_id}/call-back")
+    def call_back(who: Who, hold_id: HoldPath, body: NoteBody) -> dict[str, Any]:
+        """The account holder asks the bank to call them; it lands in the hold's notes."""
+        bank, rows = own_holds(who)
+        if not any(h["hold_id"] == hold_id for h in rows):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such hold on your account.")
+        note = f"Customer asked for a call back: {body.note}"[:2000]
+        payload = {"note": note, "actor": f"customer:{who.sub}"[:64], "hold_id": hold_id}
+        return customer_view(call("web", bank, "/v1/officer/holds/note", payload))
+
+    @app.get("/v1/detection/history")
+    def threshold_history(who: Who) -> list[Any]:
+        result: list[Any] = call("web", frm_bank(who), "/v1/officer/detection/history", {})["history"]
+        return result
+
     @app.get("/v1/audit")
     def audit(who: Who, limit: int = 200) -> dict[str, Any]:
         return call("web", own_bank(who), "/v1/officer/audit", {"limit": max(1, min(limit, 1000))})
@@ -371,9 +423,21 @@ def build_app(ctx: GatewayContext) -> FastAPI:  # noqa: PLR0915 - one short func
              "cashed_out": sum(e["traced_amount"] for e in a["exits"])}
             for a in trail["accounts"]
         ]  # fmt: skip
+        returned: dict[str, int] = {}
+        for member in {a["member"] for a in trail["accounts"] if a["member"] and a["lien_id"]}:
+            try:
+                rows = call("web", member, "/v1/officer/liens", {})["liens"]
+            except HTTPException:
+                continue
+            for lien in rows:
+                if lien["ack_number"] == who.sub and lien.get("returned_to_victim"):
+                    returned[member] = returned.get(member, 0) + lien["amount"]
+        for place in places:
+            place["returned"] = returned.pop(place["member"], 0) if place["held"] else 0
         totals = {
             k: trail[k] for k in ("reported", "held", "cashed_out", "off_network", "not_found", "waiting")
         }
+        totals["returned"] = sum(p["returned"] for p in places)
         return {"ack_number": trail["ack_number"], **totals, "complete": trail["complete"], "places": places}
 
     def bank_members() -> list[str]:

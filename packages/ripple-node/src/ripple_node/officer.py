@@ -23,6 +23,7 @@ from ripple_core.messages import (
 from ripple_core.tracing import trace_account
 from ripple_node import ledger
 from ripple_node.ledger import Account, LienRow, NoticeRow, Posting
+from ripple_service.db import append_audit
 
 STATEMENT_LEAD = timedelta(days=1)  # how far before the traced credit the statement starts
 
@@ -77,6 +78,10 @@ class LienView(View):
     basis: str
     placed_at: datetime
     released_at: datetime | None
+    release_authority: str | None = None
+    release_order: str | None = None
+    release_reason: str | None = None
+    returned_to_victim: bool = False
 
 
 def _summary(row: NoticeRow, holders: dict[str, str]) -> NoticeSummary:
@@ -182,6 +187,131 @@ def liens(session: Session) -> list[LienView]:
             basis=r.basis,
             placed_at=r.placed_at,
             released_at=r.released_at,
+            release_authority=r.release_authority,
+            release_order=r.release_order,
+            release_reason=r.release_reason,
+            returned_to_victim=r.returned_to_victim,
         )
         for r in rows
     ]
+
+
+def release_lien(
+    session: Session,
+    lien_id: str,
+    *,
+    now: datetime,
+    actor: str,
+    authority: str,
+    order: str,
+    reason: str,
+    to_victim: bool,
+) -> LienRow:
+    """Lift a lien on a police or court order (SOP 11: interim custody under BNSS 106(3), or a court's order).
+
+    The bank never lifts a CFCFRMS lien on its own; the order's authority and reference are kept with the lien
+    and in the audit log. `to_victim` records that the money is returned to the victim rather than to the holder.
+    """
+    row = session.get(LienRow, lien_id)
+    if row is None:
+        raise ledger.LedgerConflict(f"no lien {lien_id} at this bank")
+    if row.released_at is not None:
+        raise ledger.LedgerConflict("this lien is already released")
+    row.released_at = now
+    row.released_by = actor
+    row.release_authority = authority.strip()
+    row.release_order = order.strip()
+    row.release_reason = reason.strip()
+    row.returned_to_victim = to_victim
+    append_audit(session, now, actor, "lien.release", {
+        "lien_id": lien_id, "account": row.account_number, "ack_number": row.claim, "amount": row.amount,
+        "authority": row.release_authority, "order": row.release_order, "to_victim": to_victim,
+    })  # fmt: skip
+    return row
+
+
+class AccountLine(View):
+    txn_id: str
+    at: datetime
+    direction: str
+    rail: Rail
+    reference: str
+    amount: int
+    counterparty: AccountRef | None
+    exit: ExitDetail | None
+
+
+class AccountView(View):
+    """Everything this bank knows about one of its accounts, for the officer's account page."""
+
+    account_number: str
+    ifsc: str
+    vpa: str | None
+    holder_name: str
+    account_type: str
+    declared_profile: str
+    declared_annual_income: int | None
+    opened_at: datetime
+    balance: int
+    liened: int
+    on_hold: int
+    available: int
+    credits_30d: int
+    debits_30d: int
+    counterparties_30d: int
+    statement: tuple[AccountLine, ...]
+    notices: tuple[NoticeSummary, ...]
+    liens: tuple[LienView, ...]
+
+
+STATEMENT_ROWS = 60
+
+
+def account_view(session: Session, account_number: str, now: datetime) -> AccountView | None:
+    account = session.get(Account, account_number)
+    if account is None:
+        return None
+    posts = ledger.postings(session, account_number)
+    month = [p for p in posts if now - timedelta(days=30) <= p.at <= now]
+    on_hold = sum(
+        h.amount for h in session.scalars(select(ledger.HoldRow).where(ledger.HoldRow.account_number == account_number))
+        if h.active_at(now) and not h.whole_account
+    )  # fmt: skip
+    balance = ledger.balance(session, account)
+    liened = ledger.held(session, account_number)
+    holders = _holders(session)
+    return AccountView(
+        account_number=account.account_number,
+        ifsc=account.ifsc,
+        vpa=account.vpa,
+        holder_name=account.holder_name,
+        account_type=account.account_type,
+        declared_profile=account.declared_profile,
+        declared_annual_income=account.declared_annual_income,
+        opened_at=account.opened_at,
+        balance=balance,
+        liened=liened,
+        on_hold=on_hold,
+        available=max(balance - liened - on_hold, 0),
+        credits_30d=sum(p.amount for p in month if p.direction == "credit"),
+        debits_30d=sum(p.amount for p in month if p.direction == "debit"),
+        counterparties_30d=len({p.counterparty for p in month if p.counterparty}),
+        statement=tuple(
+            AccountLine(
+                txn_id=p.txn_id,
+                at=p.at,
+                direction=p.direction,
+                rail=Rail(p.rail),
+                reference=p.reference,
+                amount=p.amount,
+                counterparty=p.counterparty_ref(),
+                exit=p.exit_detail(),
+            )
+            for p in reversed(posts[-STATEMENT_ROWS:])
+        ),
+        notices=tuple(
+            _summary(r, holders)
+            for r in session.scalars(select(NoticeRow).where(NoticeRow.account_number == account_number))
+        ),
+        liens=tuple(lien for lien in liens(session) if lien.account_number == account_number),
+    )

@@ -39,7 +39,7 @@ from ripple_core.money import fmt_inr
 from ripple_node import ledger
 from ripple_node.ledger import Account, HoldRow, LedgerConflict, NoticeRow
 from ripple_node.monitoring import FlagRow
-from ripple_service.db import append_audit
+from ripple_service.db import AuditEntry, append_audit
 
 EXPLAIN_WITHIN = timedelta(days=20)
 DECIDE_AFTER_EXPLANATION = timedelta(days=10)
@@ -65,6 +65,12 @@ class Deadline(View):
     met_at: datetime | None
     state: Literal["met", "open", "missed", "lapsed"]  # lapsed: the customer's own time ran out unused
     rule: str
+
+
+class Note(View):
+    at: datetime
+    actor: str
+    note: str
 
 
 class HoldView(View):
@@ -98,6 +104,7 @@ class HoldView(View):
     compliance_breach: str | None
     next_deadline: datetime | None
     deadlines: tuple[Deadline, ...]
+    notes: tuple[Note, ...] = ()
 
 
 def _when(at: datetime) -> str:
@@ -524,7 +531,27 @@ def view(session: Session, row: HoldRow, now: datetime) -> HoldView:
         compliance_breach=breach,
         next_deadline=min(open_dues) if open_dues else None,
         deadlines=marks,
+        notes=notes(session, row.hold_id),
     )
+
+
+def add_note(session: Session, hold_id: str, *, now: datetime, actor: str, note: str) -> HoldRow:
+    """A call, a document received, a reminder sent: kept in the audit log, so it is part of the hold's record."""
+    row = _get(session, hold_id)
+    _event(session, row, now, actor, "note", note=note.strip())
+    return row
+
+
+def notes(session: Session, hold_id: str) -> tuple[Note, ...]:
+    rows = session.scalars(
+        select(AuditEntry).where(AuditEntry.action == "hold.note").order_by(AuditEntry.seq)
+    )
+    found = []
+    for r in rows:
+        record = json.loads(r.record)
+        if record.get("hold_id") == hold_id:
+            found.append(Note(at=r.at, actor=r.actor, note=record.get("note", "")))
+    return tuple(found)
 
 
 def holds(session: Session, now: datetime) -> list[HoldView]:

@@ -76,6 +76,13 @@ class LienRow(NodeBase):
     basis: Mapped[str] = mapped_column(String(40))
     placed_at: Mapped[datetime] = mapped_column(UtcDateTime())
     released_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    released_by: Mapped[str | None] = mapped_column(String(64))
+    release_authority: Mapped[str | None] = mapped_column(
+        String(200)
+    )  # the police officer or court that ordered it
+    release_order: Mapped[str | None] = mapped_column(String(64))  # the order's reference
+    release_reason: Mapped[str | None] = mapped_column(Text)
+    returned_to_victim: Mapped[bool] = mapped_column(default=False)
 
 
 class HoldRow(NodeBase):

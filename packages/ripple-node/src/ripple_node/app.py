@@ -116,6 +116,23 @@ class Approval(Request):
     cash_out_minutes: Annotated[int, Field(ge=1, le=10_080)]
 
 
+class AccountQuery(Request):
+    account_number: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
+
+
+class LienRelease(Request):
+    actor: Actor
+    lien_id: Annotated[str, Field(min_length=4, max_length=32)]
+    authority: Annotated[str, Field(min_length=3, max_length=200)]
+    order: Annotated[str, Field(min_length=3, max_length=64)]
+    reason: Text
+    to_victim: bool = False
+
+
+class HoldNote(HoldStep):
+    note: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
 class AuditQuery(Request):
     limit: Annotated[int, Field(ge=1, le=1000)] = 200
 
@@ -343,6 +360,49 @@ def build_app(ctx: NodeContext) -> FastAPI:  # noqa: PLR0915 - one short functio
             return asdict(settings)
 
         return frm(body, Approval, act)
+
+    @app.post("/v1/officer/account")
+    def account(body: Sealed) -> Sealed:
+        opened = ctx.envelopes.open(body, {GATEWAY})
+        query = _parse(AccountQuery, opened)
+        with ctx.factory() as session:
+            found = officer.account_view(session, query.account_number, ctx.clock.now())
+            cases = [c for c in monitoring.cases(session, ctx.clock.now(), include_closed=True)
+                     if c.account_number == query.account_number]  # fmt: skip
+            account_holds = [
+                h for h in holds.holds(session, ctx.clock.now()) if h.account_number == query.account_number
+            ]
+        if found is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "no such account at this bank")
+        view = found.model_dump(mode="json")
+        view["flags"] = [c.model_dump(mode="json") for c in cases]
+        view["holds"] = [h.model_dump(mode="json") for h in account_holds]
+        return ctx.envelopes.seal(view, opened.sender)
+
+    @app.post("/v1/officer/liens/release")
+    def release_lien(body: Sealed) -> Sealed:
+        def act(session: Session, q: LienRelease) -> dict[str, Any]:
+            row = officer.release_lien(session, q.lien_id, now=ctx.clock.now(), actor=q.actor, authority=q.authority,
+                                       order=q.order, reason=q.reason, to_victim=q.to_victim)  # fmt: skip
+            return {"lien_id": row.lien_id, "released_at": ctx.clock.now().isoformat(), "amount": row.amount}
+
+        return frm(body, LienRelease, act)
+
+    @app.post("/v1/officer/holds/note")
+    def hold_note(body: Sealed) -> Sealed:
+        def act(session: Session, q: HoldNote) -> dict[str, Any]:
+            return hold_view(
+                session, holds.add_note(session, q.hold_id, now=ctx.clock.now(), actor=q.actor, note=q.note)
+            )
+
+        return frm(body, HoldNote, act)
+
+    @app.post("/v1/officer/detection/history")
+    def threshold_history(body: Sealed) -> Sealed:
+        def act(session: Session, _q: CasesQuery) -> dict[str, Any]:
+            return {"history": monitoring.threshold_history(session)}
+
+        return frm(body, CasesQuery, act)
 
     @app.post("/v1/officer/audit")
     def audit(body: Sealed) -> Sealed:
