@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from bisect import bisect_left
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -89,6 +90,9 @@ class RelayTracker:
         self.events: deque[RelayEvent] = deque()
         self.by_txn: dict[str, RelayEvent] = {}
         self.started: datetime | None = None
+        # Says whether a payment belongs to a case (set by the engine); such events leave the 30-day background but
+        # stay available as examples, so an officer can still learn from an old case.
+        self.keep: Callable[[str], bool] | None = None
 
     def _state(self, account: str, ts: datetime) -> _Account:
         state = self.accounts.get(account)
@@ -124,7 +128,9 @@ class RelayTracker:
             self.events.append(event)
             self.by_txn[event.txn_id] = event
             while self.events and ts - self.events[0].ts > HISTORY:
-                self.by_txn.pop(self.events.popleft().txn_id, None)
+                old = self.events.popleft()
+                if not (self.keep and self.keep(old.txn_id)):  # a case's own payments stay learnable however old
+                    self.by_txn.pop(old.txn_id, None)
         return event
 
     def _event(self, txn: Transaction, src: _Account) -> RelayEvent:

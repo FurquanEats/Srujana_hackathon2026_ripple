@@ -83,3 +83,23 @@ def test_api_learns_from_a_victims_report_then_deploys(team):
     assert deployed["deployed"] and client.get("/motifs").json()[0]["motif_id"] == body["motif_id"]
     assert client.post("/motifs/learn", json={}).status_code == 422
     assert TestClient(create_app(source="fixtures")).get("/motifs").json() == []
+
+
+def test_case_payments_stay_learnable_after_the_background_window():
+    from datetime import datetime, timedelta
+
+    from ripple.motifs import HISTORY
+    from ripple.schema import Rail, Transaction
+
+    tracker = RelayTracker()
+    tracker.keep = lambda txn_id: txn_id == "T2"
+    t0 = datetime(2026, 10, 1)
+    pay = lambda i, ts, src, dst: Transaction(txn_id=f"T{i}", ts=ts, src_account=src, dst_account=dst, amount=1000,
+                                              rail=Rail.IMPS)
+    tracker.observe(pay(1, t0, "V", "M"))
+    tracker.observe(pay(2, t0 + timedelta(hours=1), "M", "N"))  # a relay event the engine keeps for a case
+    tracker.observe(pay(3, t0 + timedelta(hours=2), "M", "O"))  # an ordinary one
+    tracker.observe(pay(4, t0 + HISTORY + timedelta(days=1), "P", "X"))
+    tracker.observe(pay(5, t0 + HISTORY + timedelta(days=1, hours=1), "X", "Y"))  # a new event clears the old ones
+    assert "T2" in tracker.by_txn and "T3" not in tracker.by_txn
+    assert all(e.txn_id != "T2" for e in tracker.events)  # no longer part of the background

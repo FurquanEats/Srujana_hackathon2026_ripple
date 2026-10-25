@@ -88,6 +88,7 @@ class Engine:
         self.external: Callable[[Transaction], Reason | None] | None = None  # e.g. a consortium hub lookup
         self.store = FeatureStore()
         self.motifs = MotifLayer()  # patterns learned from confirmed trails, see ripple.motifs
+        self.motifs.tracker.keep = lambda txn_id: txn_id in self.log or txn_id in self.kept
         self.graph = GraphLayer(self.pack["graph"]["recompute_every"], self.pack["graph"].get("window_days", 7))
         fusion_cfg = self.pack["fusion"]
         self.fusion = Fusion(fusion_cfg["weights"], fusion_cfg["baseline_only_cap"])
