@@ -1,49 +1,58 @@
-"""The institutions in the simulated network.
+"""The institutions in the simulated network, read from `network.toml` so the simulator and the nodes share one roster.
 
-The PRD's network has four banks, a wallet and a crypto exchange, plus the CFCFRMS hub, which keeps no customer
-accounts. Each member has a 4-letter code that starts its IFSCs and NEFT and RTGS UTRs, and a UPI handle.
-
-TODO(rebuild/node-hub): read these from network.toml at the repository root once that pull request lands, so the
-simulator and the nodes share one definition.
+Every member that holds customer accounts (the four banks, Wallet W and Exchange X) is one `Member` here, with the
+4-letter code that starts its IFSCs and NEFT and RTGS UTRs, and its UPI handle. The CFCFRMS hub keeps no accounts,
+so it is left out. The city is the simulator's own detail, used for ATM and shop locations.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from pathlib import Path
 
+from ripple_core.network import Kind, Network, load_network
 
-class MemberKind(StrEnum):
-    BANK = "bank"
-    WALLET = "wallet"
-    EXCHANGE = "exchange"
+NETWORK_TOML = Path(__file__).resolve().parents[4] / "network.toml"
+CITIES = {
+    "bank-a": "Mumbai",
+    "bank-b": "Patna",
+    "bank-c": "Kolkata",
+    "bank-d": "Bengaluru",
+    "wallet-w": "Noida",
+    "exchange-x": "Bengaluru",
+}
 
 
 @dataclass(frozen=True)
 class Member:
-    name: str  # the service name, for example "bank-a"
+    id: str  # the member's id in network.toml, for example "bank-a"
     code: str  # 4 capital letters
-    kind: MemberKind
-    display_name: str
+    kind: Kind
     upi_handle: str
-    city: str
+    city: str | None
 
 
-NETWORK: tuple[Member, ...] = (
-    Member("bank-a", "BKAA", MemberKind.BANK, "Bank A", "banka", "Mumbai"),
-    Member("bank-b", "BKBB", MemberKind.BANK, "Bank B", "bankb", "Patna"),
-    Member("bank-c", "BKCC", MemberKind.BANK, "Bank C", "bankc", "Kolkata"),
-    Member("bank-d", "BKDD", MemberKind.BANK, "Bank D", "bankd", "Bengaluru"),
-    Member("wallet-w", "WLTW", MemberKind.WALLET, "Wallet W", "walletw", "Noida"),
-    Member("exchange-x", "XCHX", MemberKind.EXCHANGE, "Exchange X", "exchx", "Bengaluru"),
-)
+def account_holders(network: Network) -> tuple[Member, ...]:
+    """The members that hold customer accounts, in network.toml's order."""
+    out: list[Member] = []
+    for m in network.members:
+        if m.kind is Kind.HUB:
+            continue
+        if m.bank_code is None or not m.vpa_handles:
+            raise ValueError(
+                f"{m.id} holds accounts, so network.toml must give it a bank_code and a UPI handle"
+            )
+        out.append(Member(m.id, m.bank_code, m.kind, m.vpa_handles[0], CITIES.get(m.id)))
+    return tuple(out)
 
-BY_NAME = {m.name: m for m in NETWORK}
-BANKS = tuple(m for m in NETWORK if m.kind is MemberKind.BANK)
+
+NETWORK = account_holders(load_network(NETWORK_TOML))
+BY_ID = {m.id: m for m in NETWORK}
+BANKS = tuple(m for m in NETWORK if m.kind is Kind.BANK)
 
 
-def member(name: str) -> Member:
+def member(member_id: str) -> Member:
     try:
-        return BY_NAME[name]
+        return BY_ID[member_id]
     except KeyError:
-        raise ValueError(f"no member named {name!r}") from None
+        raise ValueError(f"no member with id {member_id!r}") from None

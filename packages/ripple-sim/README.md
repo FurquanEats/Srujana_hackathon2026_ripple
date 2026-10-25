@@ -13,10 +13,30 @@ uv run ripple-sim --seed 7 --out data/sim
 This writes `deliveries.jsonl` (one message per line for one member's node, in time order) and `story.json` (the
 demo story's accounts, payments and the traced amounts the PRD expects). A seed always gives the same files.
 
+## Posting to the network
+
+```
+uv run ripple certs   # once
+uv run ripple up      # in another terminal
+uv run ripple-sim --seed 7 --out data/sim --post
+```
+
+`--post` sends every delivery to its member's node over mutual TLS, signed as the party "sim": each
+`AccountOpening` to `/v1/accounts`, and each member's `LedgerPosting`s in order to `/v1/postings`, in batches of
+`--batch-size` (200). A batch is all or nothing.
+
+- Nodes trace only what has happened by their own clock, so without `--month` the simulator runs the last full
+  month before the network's clock, and it refuses to post anything dated after it.
+- Transaction IDs and UPI IDs carry the seed, so several seeds can go to one network. Posting the same seed twice
+  fails, because each node refuses an account it already holds.
+- `packages/ripple-sim/tests/test_post.py` posts a month through the in-process network and checks the hub's
+  trail against `story.json`.
+
 ## What it simulates
 
-- **The network:** Bank A to D, Wallet W and Exchange X (`network.py`). IFSCs and NEFT and RTGS UTRs start with
-  the member's code, and UPI IDs end with its handle.
+- **The network:** Bank A to D, Wallet W and Exchange X, read from `network.toml` (`network.py` adds a city for
+  ATM and shop locations). IFSCs and NEFT and RTGS UTRs start with the member's code, and UPI IDs end with its
+  handle.
 - **A month of ordinary traffic** (`traffic.py`):
   - salaries by NEFT on the 1st;
   - rent once between the 1st and the 5th;
@@ -40,11 +60,5 @@ demo story's accounts, payments and the traced amounts the PRD expects). A seed 
   Rs 2,00,000, Galaxy Mobiles Rs 50,000 and the salary Rs 0.
 
 Identifiers come from the simulator's own seeded generator (`identifiers.py`). Each is checked with the
-`ripple_core.ids` validators. `ripple_core.ids` generators use `secrets` and can't be reproduced.
-
-## Waiting on rebuild/node-hub
-
-- `AccountOpening`, `LedgerPosting` and `ExitDetail` in `events.py` stand in for the messages that pull request
-  adds to `ripple_core.messages`.
-- The network in `network.py` stands in for `network.toml`.
-- Posting each delivery to its node, signed as the party "sim", is still to come.
+`ripple_core.ids` validators. `ripple_core.ids` generators use `secrets` and can't be reproduced. The messages are
+`ripple_core.messages.AccountOpening` and `LedgerPosting`; the declared KYC profile travels as one line of text.

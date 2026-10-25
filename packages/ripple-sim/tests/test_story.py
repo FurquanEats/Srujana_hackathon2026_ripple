@@ -3,11 +3,10 @@ from collections.abc import Mapping
 import pytest
 
 from ripple_core import ids
-from ripple_core.messages import ExitMode, Rail
+from ripple_core.messages import AccountOpening, ExitMode, LedgerPosting, Rail
 from ripple_core.money import rupees
 from ripple_core.tracing import AccountTrace, Direction, Entry, trace_account
 from ripple_sim.cli import EXPECTED_TRACED
-from ripple_sim.events import AccountOpening, ExitDetail, LedgerPosting
 from ripple_sim.scenario import M1_OWN, M2_OWN, M3_OWN
 from ripple_sim.simulation import DEFAULT_MONTH, Simulation, simulate
 from ripple_sim.traffic import TrafficConfig
@@ -23,7 +22,7 @@ def ledger(sim: Simulation, role: str) -> tuple[int, list[LedgerPosting]]:
     account = sim.story.accounts[role]
     opening = None
     postings: list[LedgerPosting] = []
-    for d in sim.for_member(account.member.name):
+    for d in sim.for_member(account.member.id):
         m = d.message
         if isinstance(m, AccountOpening) and m.account_number == account.number:
             opening = m.opening_balance
@@ -36,7 +35,7 @@ def ledger(sim: Simulation, role: str) -> tuple[int, list[LedgerPosting]]:
 def trace(sim: Simulation, role: str, traced_in: Mapping[str, int]) -> tuple[AccountTrace, dict[str, str]]:
     """Trace one claim through a story account. `traced_in` maps a payment reference to the claim's paise in it."""
     opening, postings = ledger(sim, role)
-    entries = [Entry(p.txn_id, p.payment.at, p.direction, p.payment.amount) for p in postings]
+    entries = [Entry(p.txn_id, p.payment.at, Direction(p.direction), p.payment.amount) for p in postings]
     by_ref = {p.payment.reference: p.txn_id for p in postings}
     claim = sim.story.ack_number
     result = trace_account(
@@ -76,7 +75,7 @@ def test_the_story_has_the_prds_amounts_and_rails(sim: Simulation) -> None:
 
 
 def test_each_account_sits_at_the_prds_institution(sim: Simulation) -> None:
-    where = {role: a.member.name for role, a in sim.story.accounts.items()}
+    where = {role: a.member.id for role, a in sim.story.accounts.items()}
     assert where["victim"] == "bank-a"
     assert where["m1"] == "bank-b"
     assert where["m2"] == "bank-c"
@@ -116,7 +115,7 @@ def test_m3_traces_ravi_traders_galaxy_mobiles_and_the_salary_as_the_prd_says(si
 
 def test_atm_exits_carry_an_atm_id_and_location(sim: Simulation) -> None:
     _, postings = ledger(sim, "m2")
-    exits = [p.counterparty for p in postings if isinstance(p.counterparty, ExitDetail)]
+    exits = [p.exit for p in postings if p.exit is not None]
     assert len(exits) == 2
     assert all(e.mode is ExitMode.ATM and e.identifier.startswith("BKCC") and e.location for e in exits)
     assert len({e.identifier for e in exits}) == 2  # two different ATMs
