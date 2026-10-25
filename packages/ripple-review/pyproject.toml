@@ -1,0 +1,24 @@
+[project]
+name = "ripple-review"
+version = "0.1.0"
+description = "The explanation review: Gemini reads the documents an account holder hands in, and fixed rules decide whether they explain each held credit"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ripple-core",
+    "google-genai>=1.0",
+    "pillow>=11",
+    "pypdfium2>=4.30",
+]
+
+[project.scripts]
+ripple-review-eval = "ripple_review.evaluate:main"
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ripple_review"]

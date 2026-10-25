@@ -44,3 +44,6 @@ eval/documents/.fonts/
 
 # Simulator output (regenerate with: uv run ripple-sim)
 data/sim/
+
+# Gemini extractions cached by the review evaluation
+eval/documents/.review-cache/
