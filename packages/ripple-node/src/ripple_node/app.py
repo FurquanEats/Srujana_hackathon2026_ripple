@@ -45,7 +45,7 @@ def build_app(ctx: NodeContext) -> FastAPI:
 
     @app.get("/v1/health")
     def health() -> dict[str, str]:
-        return {"member": ctx.member_id, "status": "ok"}
+        return {"member": ctx.member_id, "status": "ok", "now": ctx.clock.now().isoformat()}
 
     @app.post("/v1/accounts")
     def open_account(body: Sealed) -> Sealed:

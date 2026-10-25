@@ -1,4 +1,5 @@
-"""`ripple certs` creates the local network's keys and certificates; `ripple up` starts every service.
+"""`ripple certs` creates the local network's keys and certificates, `ripple up` starts every service, and
+`ripple demo` runs the PRD's demo story on the running network and prints the money trail.
 
 Each member of `network.toml` runs as its own process on its own localhost port, with its own database file,
 and accepts only mutually authenticated TLS connections. All processes share one simulated clock.
@@ -33,6 +34,7 @@ def main(argv: list[str] | None = None) -> int:
         "--speed", type=float, default=1.0, help="how much faster than real time the clock runs"
     )
     up_cmd.add_argument("--start", help="simulated start time, ISO 8601 (default: now in IST)")
+    commands.add_parser("demo", help="run the demo story on the running network (started with speed 1)")
     args = parser.parse_args(argv)
 
     root = repo_root()
@@ -46,6 +48,10 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"Wrote {len(written)} files under {paths.home}")
         return 0
+    if args.command == "demo":
+        from ripple_cli.show import run_demo  # noqa: PLC0415 - only the demo needs the network client
+
+        return run_demo(network, paths)
     return up(network, paths, root, args.speed, args.start)
 
 

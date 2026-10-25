@@ -284,7 +284,7 @@ def build_app(tracer: Tracer, envelopes: Envelopes) -> FastAPI:
 
     @app.get("/v1/health")
     def health() -> dict[str, str]:
-        return {"member": "cfcfrms", "status": "ok"}
+        return {"member": "cfcfrms", "status": "ok", "now": tracer.clock.now().isoformat()}
 
     @app.post("/v1/complaints")
     def push_complaint(body: Sealed, background: BackgroundTasks) -> Sealed:
