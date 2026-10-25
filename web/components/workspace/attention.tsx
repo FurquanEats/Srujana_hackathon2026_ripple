@@ -86,7 +86,7 @@ export function Explainer({
   children: React.ReactNode;
 }) {
   return (
-    <details className="border-line mb-8 border px-4 py-3 text-sm">
+    <details className="border-line my-8 border px-4 py-3 text-sm">
       <summary className="text-muted cursor-pointer select-none hover:text-[var(--fg)]">{title}</summary>
       <div className="text-muted mt-3 grid max-w-3xl gap-2 leading-relaxed">{children}</div>
     </details>

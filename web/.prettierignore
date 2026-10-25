@@ -7,3 +7,4 @@ app/fonts/OFL.txt
 lib/gateway/fixtures/
 lib/review/reviews.json
 public/review-docs/
+lib/review/results.json

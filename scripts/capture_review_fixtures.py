@@ -109,6 +109,7 @@ def main() -> int:
     }  # fmt: skip
     out = DOCSET / "review_results.json"
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (review_dir / "results.json").write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", "utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "rows"}, indent=1))
     for r in rows:
         print(f"{'ok ' if r['correct'] else ('UNSAFE' if r['unsafe'] else 'miss'):<6} {r['case']} {r['credit']} "

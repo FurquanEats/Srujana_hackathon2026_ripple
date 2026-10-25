@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { Attention } from "@/components/workspace/attention";
 import { HoldTimeline } from "@/components/workspace/hold-timeline";
 import { Empty, Held, Money, Notice, PageHeader } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
@@ -8,7 +9,7 @@ import type { Hold } from "@/lib/gateway/types";
 import { requireRole, type Outcome } from "@/lib/guard";
 import { statusLabel } from "@/lib/holds";
 
-import { myExplanationAction } from "../actions";
+import { callBackAction, myExplanationAction } from "../actions";
 
 export const metadata: Metadata = { title: "My hold" };
 
@@ -29,6 +30,30 @@ export default async function MyHoldPage({ searchParams }: { searchParams: Outco
       ) : (
         mine.map((h) => (
           <article key={h.hold_id} className="mb-10">
+            <Attention
+              tone={h.released_at ? "done" : h.explanation ? "info" : "action"}
+              title={
+                h.released_at
+                  ? "The hold has ended"
+                  : h.explanation
+                    ? "The bank has your explanation and is deciding"
+                    : `Explain these payments by ${formatIst(h.deadlines.find((d) => d.name === "Customer explanation")?.due ?? h.expires_at)}`
+              }
+              actions={
+                h.released_at || h.explanation
+                  ? []
+                  : [
+                      { label: "Send your explanation", href: "#explain", primary: true },
+                      { label: "Ask for a call back", href: "#call" },
+                    ]
+              }
+            >
+              {h.released_at
+                ? h.release_reason
+                : h.explanation
+                  ? "It must decide within 10 days of receiving your explanation."
+                  : "Only the amount on hold is stopped; the rest of your balance works as usual. If you do not explain, the bank may report the payments to the police."}
+            </Attention>
             <div className="mb-6 grid gap-3 sm:grid-cols-3">
               <div className="border-line border p-4">
                 <p className="text-faint text-xs">On hold</p>
@@ -61,7 +86,7 @@ export default async function MyHoldPage({ searchParams }: { searchParams: Outco
                   {h.customer_notice}
                 </pre>
               </section>
-              <section>
+              <section id="explain" className="scroll-mt-6">
                 <h2 className="pixel mb-3 text-lg">Your explanation</h2>
                 {h.explanation ? (
                   <div className="text-sm">
@@ -121,6 +146,27 @@ export default async function MyHoldPage({ searchParams }: { searchParams: Outco
                 )}
               </section>
             </div>
+            {!h.released_at && (
+              <section id="call" className="border-line mt-10 scroll-mt-6 border p-5">
+                <h2 className="pixel mb-1 text-lg">Ask the bank to call you</h2>
+                <p className="text-muted mb-3 text-sm">
+                  The request goes on your hold&apos;s record, so the officer handling it sees it.
+                </p>
+                <form action={callBackAction} className="flex flex-wrap gap-2">
+                  <input type="hidden" name="hold_id" value={h.hold_id} />
+                  <input
+                    name="note"
+                    required
+                    minLength={3}
+                    maxLength={500}
+                    className="field min-w-64 flex-1"
+                    placeholder="After 5 pm, on my registered mobile"
+                    aria-label="When to call"
+                  />
+                  <button className="button button-solid">Request a call back</button>
+                </form>
+              </section>
+            )}
             <section className="mt-10">
               <h2 className="pixel mb-2 text-lg">Your deadlines</h2>
               <HoldTimeline hold={h as unknown as Hold} now={clock} />

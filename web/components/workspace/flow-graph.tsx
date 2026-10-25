@@ -9,8 +9,12 @@ export type FlowNode = {
   href?: string;
 };
 
-const W = 920;
-const NODE_W = 230;
+const W = 1000;
+const NODE_W = 280;
+const PAD = 14;
+// Characters that fit in a box at each text size: sans 13 px is about 7 px a character, mono 12 px about 7.3 px.
+const LABEL_CHARS = Math.floor((NODE_W - 2 * PAD) / 7.2);
+const SUB_CHARS = Math.floor((NODE_W - 2 * PAD) / 7.4);
 const ROW = 64;
 const GAP = 12;
 const MIN_STROKE = 3;
@@ -24,17 +28,23 @@ const COLOURS: Record<NonNullable<FlowNode["kind"]>, string> = {
   plain: "var(--muted)",
 };
 
+function fit(text: string, chars: number): string {
+  return text.length > chars ? `${text.slice(0, chars - 1)}…` : text;
+}
+
 function Box({ node, x, y, align }: { node: FlowNode; x: number; y: number; align: "left" | "right" }) {
   const colour = COLOURS[node.kind ?? "plain"];
+  const sub = `${formatInr(node.amount)}${node.sub ? ` · ${node.sub}` : ""}`;
   const body = (
     <g transform={`translate(${x},${y})`}>
+      <title>{`${node.label}: ${sub}`}</title>
       <rect width={NODE_W} height={ROW - GAP} fill="var(--surface)" stroke="var(--line)" />
       <rect x={align === "left" ? NODE_W - 4 : 0} width={4} height={ROW - GAP} fill={colour} />
-      <text x={12} y={20} fontSize={13} fill="var(--fg)">
-        {node.label.length > 30 ? `${node.label.slice(0, 29)}…` : node.label}
+      <text x={PAD} y={20} fontSize={13} fill="var(--fg)">
+        {fit(node.label, LABEL_CHARS)}
       </text>
-      <text x={12} y={38} fontSize={12} fill="var(--muted)" fontFamily="var(--font-mono)">
-        {`${formatInr(node.amount)}${node.sub ? ` · ${node.sub}` : ""}`.slice(0, 36)}
+      <text x={PAD} y={38} fontSize={12} fill="var(--muted)" fontFamily="var(--font-mono)">
+        {fit(sub, SUB_CHARS)}
       </text>
     </g>
   );
@@ -68,8 +78,8 @@ export function FlowGraph({
   const H = rows * ROW + 20;
   const max = Math.max(...inflows.map((n) => n.amount), ...outflows.map((n) => n.amount), 1);
   const stroke = (amount: number) => MIN_STROKE + (MAX_STROKE - MIN_STROKE) * Math.sqrt(amount / max);
-  const cx = W / 2 - 90;
-  const cw = 180;
+  const cw = 200;
+  const cx = W / 2 - cw / 2;
   const cy = H / 2 - 40;
   const yFor = (i: number, n: number) => (H - n * ROW) / 2 + i * ROW + 10;
   return (
@@ -123,7 +133,7 @@ export function FlowGraph({
           <g transform={`translate(${cx},${cy})`}>
             <rect width={cw} height={80} fill="var(--fg)" />
             <text x={cw / 2} y={34} textAnchor="middle" fontSize={14} fill="var(--surface)" fontWeight={600}>
-              {centre.label.length > 22 ? `${centre.label.slice(0, 21)}…` : centre.label}
+              {fit(centre.label, 24)}
             </text>
             {centre.sub && (
               <text x={cw / 2} y={56} textAnchor="middle" fontSize={12} fill="var(--surface)" opacity={0.75}>

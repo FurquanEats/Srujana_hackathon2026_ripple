@@ -357,7 +357,20 @@ export async function myComplaint(s: DemoSession): Promise<VictimStatus> {
   const found = (victimsFixture as Record<string, VictimStatus>)[s.subject ?? ""];
   if (!found)
     throw new GatewayFailure(404, { error: "not_found", message: "No complaint with that acknowledgement." });
-  return found;
+  // Money the police ordered back to the victim on saved data: liens released to the victim, per bank.
+  const list = await changes();
+  const returnedBy = new Map<string, number>();
+  for (const member of Object.keys(BANKS)) {
+    for (const l of applyLiens(member, savedFor(member, "/v1/liens"), list))
+      if (l.ack_number === s.subject && l.returned_to_victim)
+        returnedBy.set(member, (returnedBy.get(member) ?? 0) + l.amount);
+  }
+  const places = found.places.map((p) => {
+    const returned = p.held && p.member ? (returnedBy.get(p.member) ?? 0) : 0;
+    if (p.member) returnedBy.delete(p.member);
+    return { ...p, returned };
+  });
+  return { ...found, places, returned: places.reduce((sum, p) => sum + (p.returned ?? 0), 0) };
 }
 
 /** Who can sign in as an account holder or a victim on this data. */

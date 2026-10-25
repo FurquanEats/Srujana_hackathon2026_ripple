@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { Notice, PageHeader, Stat } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
-import { LIVE, shadowRun, thresholds } from "@/lib/gateway/source";
+import { LIVE, shadowRun, thresholdHistory, thresholds } from "@/lib/gateway/source";
 import type { Thresholds } from "@/lib/gateway/types";
 import { requireRole } from "@/lib/guard";
 
@@ -57,7 +57,11 @@ export default async function DetectionPage({
   const session = await requireRole("frm_analyst");
   const { error, done, budget } = await searchParams;
   const perDay = Math.min(10_000, Math.max(0.5, Number(budget) || 5));
-  const [current, run] = await Promise.all([thresholds(session), shadowRun(session, perDay)]);
+  const [current, run, history] = await Promise.all([
+    thresholds(session),
+    shadowRun(session, perDay),
+    thresholdHistory(session),
+  ]);
   const proposal = run?.proposal ?? current;
   return (
     <>
@@ -182,6 +186,41 @@ export default async function DetectionPage({
             <button className="button button-solid">Approve and apply</button>
           </div>
         </form>
+      </section>
+      <section className="mt-10">
+        <h2 className="pixel mb-3 text-lg">Approval history</h2>
+        {history.length === 0 ? (
+          <p className="text-muted text-sm">
+            No settings approved yet: the rules run at Ripple&apos;s defaults.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table min-w-[720px]">
+              <thead>
+                <tr>
+                  <th>Approved</th>
+                  <th>By</th>
+                  {KNOBS.map((k) => (
+                    <th key={k.field}>{k.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((h) => (
+                  <tr key={h.approved_at}>
+                    <td className="text-muted text-xs whitespace-nowrap">{formatIst(h.approved_at)}</td>
+                    <td className="font-mono text-xs">{h.approved_by}</td>
+                    {KNOBS.map((k) => (
+                      <td key={k.field} className="font-mono">
+                        {h.settings[k.field]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </>
   );

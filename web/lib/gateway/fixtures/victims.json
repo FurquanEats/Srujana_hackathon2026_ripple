@@ -1,8 +1,83 @@
 {
- "36512145633292": {
+ "39577951100000": {
+  "victim_name": "Farhan Qureshi",
+  "filed_at": "2026-10-25T19:49:55.686359Z",
+  "ack_number": "39577951100000",
+  "reported": 24000000,
+  "held": 24000000,
+  "cashed_out": 0,
+  "off_network": 0,
+  "not_found": 0,
+  "waiting": 0,
+  "returned": 0,
+  "complete": true,
+  "places": [
+   {
+    "member": "bank-d",
+    "institution": "Bank D, a co-operative bank",
+    "layer": 1,
+    "held": 8000000,
+    "state": "answered",
+    "cashed_out": 0,
+    "returned": 0
+   },
+   {
+    "member": "bank-c",
+    "institution": "Bank C, a small finance bank",
+    "layer": 2,
+    "held": 10000000,
+    "state": "answered",
+    "cashed_out": 0,
+    "returned": 0
+   },
+   {
+    "member": "exchange-x",
+    "institution": "Exchange X, a crypto exchange on CFCFRMS",
+    "layer": 2,
+    "held": 6000000,
+    "state": "answered",
+    "cashed_out": 0,
+    "returned": 0
+   }
+  ]
+ },
+ "39577950000000": {
+  "victim_name": "Meena Iyer",
+  "filed_at": "2026-10-25T19:49:55.136801Z",
+  "ack_number": "39577950000000",
+  "reported": 9500000,
+  "held": 9500000,
+  "cashed_out": 0,
+  "off_network": 0,
+  "not_found": 0,
+  "waiting": 0,
+  "returned": 0,
+  "complete": true,
+  "places": [
+   {
+    "member": "bank-c",
+    "institution": "Bank C, a small finance bank",
+    "layer": 1,
+    "held": 5500000,
+    "state": "answered",
+    "cashed_out": 0,
+    "returned": 0
+   },
+   {
+    "member": "bank-d",
+    "institution": "Bank D, a co-operative bank",
+    "layer": 2,
+    "held": 4000000,
+    "state": "answered",
+    "cashed_out": 0,
+    "returned": 0
+   }
+  ]
+ },
+ "39826521718778": {
   "victim_name": "Retired teacher (victim)",
-  "filed_at": "2026-10-25T19:36:53.390589Z",
-  "ack_number": "36512145633292",
+  "filed_at": "2026-10-25T19:49:49.514550Z",
+  "ack_number": "39826521718778",
   "reported": 80000000,
   "held": 60000000,
   "cashed_out": 20000000,
@@ -79,7 +154,7 @@
  },
  "25300428205673": {
   "victim_name": "Manoj Gupta",
-  "filed_at": "2026-10-25T19:36:51.108877Z",
+  "filed_at": "2026-10-25T19:49:47.981739Z",
   "ack_number": "25300428205673",
   "reported": 300000,
   "held": 0,
@@ -112,7 +187,7 @@
  },
  "28858815922556": {
   "victim_name": "Kavita Rao",
-  "filed_at": "2026-10-25T19:36:50.910593Z",
+  "filed_at": "2026-10-25T19:49:47.828522Z",
   "ack_number": "28858815922556",
   "reported": 1000000,
   "held": 0,
@@ -145,7 +220,7 @@
  },
  "29162403489284": {
   "victim_name": "Arjun Das",
-  "filed_at": "2026-10-25T19:36:50.740180Z",
+  "filed_at": "2026-10-25T19:49:47.627197Z",
   "ack_number": "29162403489284",
   "reported": 500000,
   "held": 0,
@@ -178,7 +253,7 @@
  },
  "22928096743133": {
   "victim_name": "Priya Nair",
-  "filed_at": "2026-10-25T19:36:50.561077Z",
+  "filed_at": "2026-10-25T19:49:47.454211Z",
   "ack_number": "22928096743133",
   "reported": 200000,
   "held": 0,
@@ -211,7 +286,7 @@
  },
  "38069132210127": {
   "victim_name": "Ayesha Siddiqui",
-  "filed_at": "2026-10-25T19:36:50.496222Z",
+  "filed_at": "2026-10-25T19:49:47.374158Z",
   "ack_number": "38069132210127",
   "reported": 34000000,
   "held": 26000000,
@@ -253,7 +328,7 @@
  },
  "25925884038089": {
   "victim_name": "Rakesh Kulkarni",
-  "filed_at": "2026-10-25T19:36:49.706694Z",
+  "filed_at": "2026-10-25T19:49:46.642567Z",
   "ack_number": "25925884038089",
   "reported": 2500000,
   "held": 0,
@@ -304,7 +379,7 @@
  },
  "30391446601247": {
   "victim_name": "Sudha Raman",
-  "filed_at": "2026-10-25T19:36:49.634420Z",
+  "filed_at": "2026-10-25T19:49:46.579604Z",
   "ack_number": "30391446601247",
   "reported": 80000000,
   "held": 60000000,

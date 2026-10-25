@@ -3,7 +3,7 @@
   "holder_name": "Ravi Traders",
   "holds": [
    {
-    "hold_id": "H446CAE27531B1E7E",
+    "hold_id": "H3C084BB326B14D9B",
     "account_number": "28684417143731",
     "holder_name": "Ravi Traders",
     "amount": 20000000,
@@ -13,42 +13,42 @@
     ],
     "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
     "customer_notice": "Dear Ravi Traders,\n\nBank A, a public sector bank has placed a temporary hold on debits of ₹2,00,000 from your account ending 3731, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹2,00,000 on 18 Sep 2026, 11:07 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "placed_at": "2026-10-25T19:36:58.529297Z",
+    "placed_at": "2026-10-25T19:49:58.893195Z",
     "status": "explanation_received",
     "deadlines": [
      {
-      "due": "2026-10-25T19:36:58.529297Z",
-      "met_at": "2026-10-25T19:36:58.529297Z",
+      "due": "2026-10-25T19:49:58.893195Z",
+      "met_at": "2026-10-25T19:49:58.893195Z",
       "name": "Customer notified",
       "rule": "Annex III Step 2: at once when the customer is reached digitally",
       "state": "met"
      },
      {
-      "due": "2026-11-14T19:36:58.529297Z",
-      "met_at": "2026-10-25T19:36:58.639160Z",
+      "due": "2026-11-14T19:49:58.893195Z",
+      "met_at": "2026-10-25T19:49:58.968413Z",
       "name": "Customer explanation",
       "rule": "Annex III Step 3: 20 days from the hold",
       "state": "met"
      },
      {
-      "due": "2026-11-04T19:36:58.639160Z",
+      "due": "2026-11-04T19:49:58.968413Z",
       "met_at": null,
       "name": "Bank decision",
       "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
       "state": "open"
      },
      {
-      "due": "2026-12-24T19:36:58.529297Z",
+      "due": "2026-12-24T19:49:58.893195Z",
       "met_at": null,
       "name": "Maximum duration",
       "rule": "Annex III: no temporary debit hold lasts more than 60 days",
       "state": "open"
      }
     ],
-    "next_deadline": "2026-11-04T19:36:58.639160Z",
-    "expires_at": "2026-12-24T19:36:58.529297Z",
+    "next_deadline": "2026-11-04T19:49:58.968413Z",
+    "expires_at": "2026-12-24T19:49:58.893195Z",
     "explanation": "Payment for 400 bags of cement delivered to the buyer's shop; tax invoice and delivery challan attached.",
-    "explanation_at": "2026-10-25T19:36:58.639160Z",
+    "explanation_at": "2026-10-25T19:49:58.968413Z",
     "decision": null,
     "decision_reason": null,
     "released_at": null,
@@ -61,7 +61,7 @@
   "holder_name": "Arjun Mondal",
   "holds": [
    {
-    "hold_id": "HA8C326CD5497D9F6",
+    "hold_id": "HCED57185913F8251",
     "account_number": "97748343517098",
     "holder_name": "Arjun Mondal",
     "amount": 124000,
@@ -73,47 +73,47 @@
     ],
     "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
     "customer_notice": "Dear Arjun Mondal,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,240 from your account ending 7098, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹8,00,000 arrived in the 30 days to 18 Sep 2026, 11:02 AM IST, and the customer declared no income or turnover at account opening. The account had no transactions for 200 days, then received ₹8,00,000 on 18 Sep 2026, 11:02 AM IST. ₹8,00,000 arrived on 18 Sep 2026, 11:02 AM IST, and 87% of it left the account within 4 minutes in 3 debits.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "placed_at": "2026-10-25T19:36:59.054149Z",
+    "placed_at": "2026-10-25T19:49:59.370942Z",
     "status": "awaiting_explanation",
     "deadlines": [
      {
-      "due": "2026-10-25T19:36:59.054149Z",
-      "met_at": "2026-10-25T19:36:59.054149Z",
+      "due": "2026-10-25T19:49:59.370942Z",
+      "met_at": "2026-10-25T19:49:59.370942Z",
       "name": "Customer notified",
       "rule": "Annex III Step 2: at once when the customer is reached digitally",
       "state": "met"
      },
      {
-      "due": "2026-11-14T19:36:59.054149Z",
+      "due": "2026-11-14T19:49:59.370942Z",
       "met_at": null,
       "name": "Customer explanation",
       "rule": "Annex III Step 3: 20 days from the hold",
       "state": "open"
      },
      {
-      "due": "2026-11-24T19:36:59.054149Z",
+      "due": "2026-11-24T19:49:59.370942Z",
       "met_at": null,
       "name": "Bank decision",
       "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
       "state": "open"
      },
      {
-      "due": "2026-12-24T19:36:59.054149Z",
+      "due": "2026-12-24T19:49:59.370942Z",
       "met_at": null,
       "name": "Maximum duration",
       "rule": "Annex III: no temporary debit hold lasts more than 60 days",
       "state": "open"
      },
      {
-      "due": "2026-11-03T19:36:59.106998Z",
+      "due": "2026-11-03T19:49:59.441618Z",
       "met_at": null,
       "name": "STR filed with FIU-IND",
       "rule": "PML Rules, rule 8(3): 7 working days from forming the suspicion",
       "state": "open"
      }
     ],
-    "next_deadline": "2026-11-03T19:36:59.106998Z",
-    "expires_at": "2026-12-24T19:36:59.054149Z",
+    "next_deadline": "2026-11-03T19:49:59.441618Z",
+    "expires_at": "2026-12-24T19:49:59.370942Z",
     "explanation": null,
     "explanation_at": null,
     "decision": null,
@@ -128,7 +128,7 @@
   "holder_name": "Galaxy Mobiles",
   "holds": [
    {
-    "hold_id": "HF2A7F32624CD9B76",
+    "hold_id": "H045936E7E67B4F65",
     "account_number": "68021018459754",
     "holder_name": "Galaxy Mobiles",
     "amount": 12000000,
@@ -138,38 +138,38 @@
     ],
     "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
     "customer_notice": "Dear Galaxy Mobiles,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,20,000 from your account ending 9754, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹1,20,000 on 18 Sep 2026, 11:08 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "placed_at": "2026-10-25T19:36:58.812965Z",
+    "placed_at": "2026-10-25T19:49:59.141626Z",
     "status": "released",
     "deadlines": [
      {
-      "due": "2026-10-25T19:36:58.812965Z",
-      "met_at": "2026-10-25T19:36:58.812965Z",
+      "due": "2026-10-25T19:49:59.141626Z",
+      "met_at": "2026-10-25T19:49:59.141626Z",
       "name": "Customer notified",
       "rule": "Annex III Step 2: at once when the customer is reached digitally",
       "state": "met"
      },
      {
-      "due": "2026-11-14T19:36:58.812965Z",
-      "met_at": "2026-10-25T19:36:58.877117Z",
+      "due": "2026-11-14T19:49:59.141626Z",
+      "met_at": "2026-10-25T19:49:59.210801Z",
       "name": "Customer explanation",
       "rule": "Annex III Step 3: 20 days from the hold",
       "state": "met"
      },
      {
-      "due": "2026-11-04T19:36:58.877117Z",
-      "met_at": "2026-10-25T19:36:58.925126Z",
+      "due": "2026-11-04T19:49:59.210801Z",
+      "met_at": "2026-10-25T19:49:59.255051Z",
       "name": "Bank decision",
       "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
       "state": "met"
      }
     ],
     "next_deadline": null,
-    "expires_at": "2026-12-24T19:36:58.812965Z",
+    "expires_at": "2026-12-24T19:49:59.141626Z",
     "explanation": "GST tax invoice for 12 phones sold to a corporate buyer, with the buyer's purchase order.",
-    "explanation_at": "2026-10-25T19:36:58.877117Z",
+    "explanation_at": "2026-10-25T19:49:59.210801Z",
     "decision": "release",
     "decision_reason": "The invoice and purchase order match the credit, and selling phones fits the declared business.",
-    "released_at": "2026-10-25T19:36:58.925126Z",
+    "released_at": "2026-10-25T19:49:59.255051Z",
     "release_reason": "The bank was satisfied with the explanation (Annex III Step 4(a)).",
     "reported_at": null
    }
@@ -179,7 +179,7 @@
   "holder_name": "Bikash Shaw",
   "holds": [
    {
-    "hold_id": "H15F5EFEB0D8FE4A8",
+    "hold_id": "H21E2F796AC67840C",
     "account_number": "69456866879566",
     "holder_name": "Bikash Shaw",
     "amount": 86000,
@@ -192,40 +192,40 @@
     ],
     "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
     "customer_notice": "Dear Bikash Shaw,\n\nBank C, a small finance bank has placed a temporary hold on debits of ₹860 from your account ending 9566, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹3,00,000 arrived in the 30 days to 18 Sep 2026, 11:04 AM IST, and that is 20.0 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year). The account had no transactions for 200 days, then received ₹3,00,000 on 18 Sep 2026, 11:04 AM IST. ₹3,00,000 arrived on 18 Sep 2026, 11:04 AM IST, and 100% of it left the account within 5 minutes in 3 debits. ₹2,00,000 was withdrawn in cash in 2 withdrawals within 5 minutes of a ₹3,00,000 credit on 18 Sep 2026, 11:04 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "placed_at": "2026-10-25T19:36:59.247355Z",
+    "placed_at": "2026-10-25T19:49:59.596895Z",
     "status": "awaiting_explanation",
     "deadlines": [
      {
-      "due": "2026-10-25T19:36:59.247355Z",
-      "met_at": "2026-10-25T19:36:59.247355Z",
+      "due": "2026-10-25T19:49:59.596895Z",
+      "met_at": "2026-10-25T19:49:59.596895Z",
       "name": "Customer notified",
       "rule": "Annex III Step 2: at once when the customer is reached digitally",
       "state": "met"
      },
      {
-      "due": "2026-11-14T19:36:59.247355Z",
+      "due": "2026-11-14T19:49:59.596895Z",
       "met_at": null,
       "name": "Customer explanation",
       "rule": "Annex III Step 3: 20 days from the hold",
       "state": "open"
      },
      {
-      "due": "2026-11-24T19:36:59.247355Z",
+      "due": "2026-11-24T19:49:59.596895Z",
       "met_at": null,
       "name": "Bank decision",
       "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
       "state": "open"
      },
      {
-      "due": "2026-12-24T19:36:59.247355Z",
+      "due": "2026-12-24T19:49:59.596895Z",
       "met_at": null,
       "name": "Maximum duration",
       "rule": "Annex III: no temporary debit hold lasts more than 60 days",
       "state": "open"
      }
     ],
-    "next_deadline": "2026-11-14T19:36:59.247355Z",
-    "expires_at": "2026-12-24T19:36:59.247355Z",
+    "next_deadline": "2026-11-14T19:49:59.596895Z",
+    "expires_at": "2026-12-24T19:49:59.596895Z",
     "explanation": null,
     "explanation_at": null,
     "decision": null,
@@ -236,62 +236,62 @@
    }
   ]
  },
- "bank-d:7124511002": {
+ "bank-d:7243795002": {
   "holder_name": "M3 General Store (mule)",
   "holds": [
    {
-    "hold_id": "H416978CDD01A056F",
-    "account_number": "7124511002",
+    "hold_id": "HAB4EA5320CE82748",
+    "account_number": "7243795002",
     "holder_name": "M3 General Store (mule)",
     "amount": 21500000,
     "whole_account": false,
     "reasons": [
-     "Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 12:57 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
-     "₹2,50,000 arrived on 26 Oct 2026, 12:57 AM IST, and 80% of it left the account within 2 minutes in 1 debit."
+     "Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:10 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
+     "₹2,50,000 arrived on 26 Oct 2026, 01:10 AM IST, and 80% of it left the account within 2 minutes in 1 debit."
     ],
     "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "customer_notice": "Dear M3 General Store (mule),\n\nBank D, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 1002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 12:57 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 26 Oct 2026, 12:57 AM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-    "placed_at": "2026-10-25T19:36:59.391864Z",
+    "customer_notice": "Dear M3 General Store (mule),\n\nBank D, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 5002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:10 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 26 Oct 2026, 01:10 AM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
+    "placed_at": "2026-10-25T19:49:59.746128Z",
     "status": "reported_to_police",
     "deadlines": [
      {
-      "due": "2026-10-25T19:36:59.391864Z",
-      "met_at": "2026-10-25T19:36:59.391864Z",
+      "due": "2026-10-25T19:49:59.746128Z",
+      "met_at": "2026-10-25T19:49:59.746128Z",
       "name": "Customer notified",
       "rule": "Annex III Step 2: at once when the customer is reached digitally",
       "state": "met"
      },
      {
-      "due": "2026-11-14T19:36:59.391864Z",
-      "met_at": "2026-10-25T19:36:59.469636Z",
+      "due": "2026-11-14T19:49:59.746128Z",
+      "met_at": "2026-10-25T19:49:59.817510Z",
       "name": "Customer explanation",
       "rule": "Annex III Step 3: 20 days from the hold",
       "state": "met"
      },
      {
-      "due": "2026-11-04T19:36:59.469636Z",
-      "met_at": "2026-10-25T19:36:59.526725Z",
+      "due": "2026-11-04T19:49:59.817510Z",
+      "met_at": "2026-10-25T19:49:59.863744Z",
       "name": "Bank decision",
       "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
       "state": "met"
      },
      {
-      "due": "2026-11-24T19:36:59.526725Z",
+      "due": "2026-11-24T19:49:59.863744Z",
       "met_at": null,
       "name": "Release unless the police instruct otherwise",
       "rule": "Annex III Step 6: the 31st day from the report, within 60 days of the hold",
       "state": "open"
      }
     ],
-    "next_deadline": "2026-11-24T19:36:59.526725Z",
-    "expires_at": "2026-11-24T19:36:59.526725Z",
+    "next_deadline": "2026-11-24T19:49:59.863744Z",
+    "expires_at": "2026-11-24T19:49:59.863744Z",
     "explanation": "The customer sent no documents and said the money was a loan from a friend.",
-    "explanation_at": "2026-10-25T19:36:59.469636Z",
+    "explanation_at": "2026-10-25T19:49:59.817510Z",
     "decision": "report",
     "decision_reason": "No document supports the credit, which is five times the declared turnover and left within two minutes.",
     "released_at": null,
     "release_reason": null,
-    "reported_at": "2026-10-25T19:36:59.526725Z"
+    "reported_at": "2026-10-25T19:49:59.863744Z"
    }
   ]
  }

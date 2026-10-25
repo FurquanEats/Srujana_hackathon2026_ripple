@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import time
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
@@ -96,6 +97,73 @@ HOLD_PLAN: list[tuple[str, str, list[tuple[str, dict[str, str]]]]] = [
                                                      "declared turnover and left within two minutes."}),
     ]),
 ]  # fmt: skip
+
+
+# Two more scam shapes, so money is still sitting at every institution when the complaint arrives:
+# (name, victim, mules, payments as (payer, payee, rupees, minute, rail)). Person-to-person UPI stays under Rs 1 lakh.
+EXTRA_SCAMS = [
+    ("loan-app extortion", ("bank-a", "BKAA", "Meena Iyer (victim)", 2_00_000),
+     {"m4": ("bank-c", "BKCC", "Rohit Khanna",
+             "individual; delivery rider; declared annual income Rs 2,40,000", 2_40_000),
+      "m5": ("bank-d", "BKDD", "Asha Enterprises",
+             "proprietorship; tailoring; declared annual turnover Rs 3,00,000", 3_00_000)},
+     [("victim", "m4", 95_000, 0, "upi"), ("m4", "m5", 40_000, 4, "imps")]),
+    ("fake courier customs fee", ("bank-b", "BKBB", "Farhan Qureshi (victim)", 5_00_000),
+     {"m6": ("bank-d", "BKDD", "Vikram Joshi", "individual; student; declared annual income Rs 0", 0),
+      "m7": ("bank-c", "BKCC", "Nisha Traders",
+             "proprietorship; mobile accessories; declared annual turnover Rs 4,00,000", 4_00_000),
+      "m8": ("exchange-x", "XCHX", "Exchange X customer", "", None)},
+     [("victim", "m6", 2_40_000, 0, "imps"), ("m6", "m7", 1_00_000, 3, "imps"), ("m6", "m8", 60_000, 6, "imps")]),
+]  # fmt: skip
+
+
+def post_extra_scams() -> None:
+    """Post each extra scam through the nodes as the simulator ("sim") would, then file its complaint as police."""
+    from ripple_cli.show import network_now  # noqa: PLC0415 - only this step needs the network client
+    from ripple_core.clock import SimClock  # noqa: PLC0415
+    from ripple_core.network import load_network  # noqa: PLC0415
+    from ripple_core.signing import MemoryReplayGuard  # noqa: PLC0415
+    from ripple_service.config import Paths, load_keyring, load_signing_key  # noqa: PLC0415
+    from ripple_service.transport import Courier, Envelopes, mtls_post  # noqa: PLC0415
+
+    network = load_network(ROOT / "network.toml")
+    paths = Paths(ROOT / ".ripple")
+    now = network_now(network, paths)
+    sim = Courier(
+        Envelopes(load_signing_key(paths, "sim"), load_keyring(paths), SimClock(now), MemoryReplayGuard()),
+        mtls_post(network, paths, "sim"),
+    )
+    for k, (name, victim, mules, steps) in enumerate(EXTRA_SCAMS):
+        run = f"{int(time.time()) % 10**6:06d}{k}"
+        start = now - timedelta(minutes=20)
+        refs: dict[str, tuple[str, dict[str, Any]]] = {}
+        everyone = {"victim": (victim[0], victim[1], victim[2], "individual; salaried", None, victim[3]), **{
+            key: (m[0], m[1], m[2], m[3], m[4], 0) for key, m in mules.items()}}  # fmt: skip
+        for i, (key, (member, code, holder, profile, income, opening)) in enumerate(everyone.items()):
+            ref = {"ifsc": f"{code}0000002", "account_number": f"6{run}{i:02d}", "vpa": None}
+            refs[key] = (member, ref)
+            sim.call(member, "/v1/accounts", {
+                "account_number": ref["account_number"], "ifsc": ref["ifsc"], "holder_name": holder, "vpa": None,
+                "declared_profile": profile, "declared_annual_income": None if income is None else income * 100,
+                "opening_balance": opening * 100, "opened_at": (start - timedelta(days=200)).isoformat(),
+            })  # fmt: skip
+        first = None
+        for n, (payer, payee, rupees, minute, rail) in enumerate(steps):
+            payment = {"rail": rail, "reference": f"{run}{n:05d}", "amount": rupees * 100,
+                       "at": (start + timedelta(minutes=minute)).isoformat()}  # fmt: skip
+            first = first or payment
+            (a_member, a_ref), (b_member, b_ref) = refs[payer], refs[payee]
+            for member, txn, ref, direction, other in ((a_member, "D", a_ref, "debit", b_ref),
+                                                       (b_member, "C", b_ref, "credit", a_ref)):  # fmt: skip
+                sim.call(member, "/v1/postings", {"postings": [{
+                    "txn_id": f"{txn}{payment['reference']}", "account_number": ref["account_number"],
+                    "direction": direction, "payment": payment, "counterparty": other, "exit": None}]})  # fmt: skip
+        ack = f"3{run}{k}"[:14].ljust(14, "0")
+        complaint = {"ack_number": ack, "victim_name": victim[2].replace(" (victim)", ""), "payment": first,
+                     "beneficiary": refs[steps[0][1]][1], "filed_at": now.isoformat()}  # fmt: skip
+        print(
+            f"{name}: complaint {ack} {post(Role.POLICE_OFFICER, None, '/v1/complaints', complaint).status_code}"
+        )
 
 
 def run_holds() -> None:
@@ -222,6 +290,8 @@ def main() -> int:
         demo = post(Role.DEMO, None, "/v1/simulation/demo-story", {})
         print(f"demo story: {demo.status_code} {demo.text}")
         time.sleep(5)  # the hub sends its notices and every bank answers
+        post_extra_scams()
+        time.sleep(3)
         run_holds()
     OUT.mkdir(parents=True, exist_ok=True)
     for name, routes in capture().items():

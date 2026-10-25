@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Filters } from "@/components/workspace/filters";
 import { Empty, Held, Money, PageHeader } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
 import { cases } from "@/lib/gateway/source";
@@ -8,14 +9,47 @@ import { requireRole } from "@/lib/guard";
 
 export const metadata: Metadata = { title: "Cases" };
 
-export default async function CasesPage() {
+type Search = Promise<{ state?: string; q?: string }>;
+
+export default async function CasesPage({ searchParams }: { searchParams: Search }) {
   const session = await requireRole("police_officer", "demo");
-  const list = [...(await cases(session))].sort((a, b) => b.filed_at.localeCompare(a.filed_at));
+  const { state, q } = await searchParams;
+  const all = [...(await cases(session))].sort((a, b) => b.filed_at.localeCompare(a.filed_at));
+  const needle = (q ?? "").trim().toLowerCase();
+  const list = all.filter(
+    (c) =>
+      (!state || (state === "held" ? c.held > 0 : state === "tracing" ? !c.complete : c.complete)) &&
+      (!needle || `${c.victim_name} ${c.ack_number}`.toLowerCase().includes(needle)),
+  );
   return (
     <>
       <PageHeader
         title="Cases"
         lead="Every complaint filed on CFCFRMS and what happened to the money: held by a lien, cashed out, gone off the network, or still being traced. The four always add up to the amount reported."
+      />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        {session.role === "police_officer" && (
+          <Link href="/app/cases/new" className="button button-solid">
+            File a complaint
+          </Link>
+        )}
+      </div>
+      <Filters
+        values={{ state, q }}
+        total={all.length}
+        shown={list.length}
+        fields={[
+          {
+            name: "state",
+            label: "Show",
+            options: [
+              { value: "held", label: "Money held" },
+              { value: "tracing", label: "Still tracing" },
+              { value: "complete", label: "Trail complete" },
+            ],
+          },
+          { name: "q", label: "Victim or acknowledgement", placeholder: "Search" },
+        ]}
       />
       {list.length === 0 ? (
         <Empty>No complaints yet.</Empty>

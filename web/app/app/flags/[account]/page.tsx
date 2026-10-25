@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Attention, Explainer } from "@/components/workspace/attention";
+import { FlowGraph } from "@/components/workspace/flow-graph";
 import { Money, Notice, PageHeader, Priority } from "@/components/workspace/ui";
+import { creditsFlow } from "@/lib/flows";
 import { formatInr, formatIst } from "@/lib/format";
-import { muleCases, now } from "@/lib/gateway/source";
+import { account as accountView, muleCases, now } from "@/lib/gateway/source";
 import { requireRole, type Outcome } from "@/lib/guard";
 import { institutionName } from "@/lib/personas";
 
@@ -26,6 +29,8 @@ export default async function FlagPage({
   const found = (await muleCases(session, true)).find((c) => c.account_number === account);
   if (!found) notFound();
   const open = found.flags.filter((f) => f.status === "open");
+  const profile = await accountView(session, found.account_number).catch(() => null);
+  const flow = profile ? creditsFlow(profile, [...new Set(found.flags.flatMap((f) => f.credit_txns))]) : null;
   return (
     <>
       <PageHeader
@@ -39,10 +44,51 @@ export default async function FlagPage({
       />
       {error && <Notice kind="error">{error}</Notice>}
       {done && <Notice kind="done">{done}</Notice>}
-      <div className="mb-8 flex flex-wrap items-center gap-2 text-sm">
-        <Priority level={found.priority} />
-        <span className="text-muted">{found.priority_reason}</span>
-      </div>
+      {found.active_hold_id ? (
+        <Attention
+          tone="info"
+          title="A temporary debit hold is in force on this account"
+          actions={[
+            { label: "Open the hold", href: `/app/holds/${found.active_hold_id}`, primary: true },
+            { label: "Open the account", href: `/app/accounts/${found.account_number}` },
+          ]}
+        >
+          Work the hold&apos;s deadlines from its page. New flags on this account will appear here.
+        </Attention>
+      ) : open.length > 0 ? (
+        <Attention
+          tone={found.priority === "high" ? "urgent" : "action"}
+          title={`Decide: hold ${formatInr(Math.max(...open.map((f) => f.amount)))} or dismiss`}
+          actions={[
+            { label: "Place a temporary debit hold", href: "#hold", primary: true },
+            { label: "Dismiss with a reason", href: "#dismiss" },
+            { label: "Open the account", href: `/app/accounts/${found.account_number}` },
+          ]}
+          facts={[
+            { label: "Priority", value: <Priority level={found.priority} /> },
+            { label: "Open flags", value: open.length },
+            { label: "Flagged amount", value: <Money paise={found.flagged_amount} /> },
+            { label: "Last activity", value: formatIst(found.last_at) },
+          ]}
+        >
+          {found.priority_reason} Money that has already left cannot be held, so act while it is still in the
+          account.
+        </Attention>
+      ) : (
+        <Attention
+          tone="done"
+          title="Every flag on this account is closed"
+          actions={[{ label: "Open the account", href: `/app/accounts/${found.account_number}` }]}
+        />
+      )}
+      {flow && flow.inflows.length > 0 && (
+        <FlowGraph
+          title="The flagged credits, and what left in the next two days"
+          centre={{ label: found.holder_name ?? found.account_number, sub: found.account_number }}
+          inflows={flow.inflows}
+          outflows={flow.outflows}
+        />
+      )}
 
       <section aria-labelledby="flags" className="mb-10">
         <h2 id="flags" className="pixel mb-4 text-lg">
@@ -81,8 +127,8 @@ export default async function FlagPage({
         </p>
       ) : open.length > 0 ? (
         <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-          <section aria-labelledby="hold" className="border-line border p-5">
-            <h2 id="hold" className="pixel mb-1 text-lg">
+          <section id="hold" aria-labelledby="hold-title" className="border-line scroll-mt-6 border p-5">
+            <h2 id="hold-title" className="pixel mb-1 text-lg">
               Place a temporary debit hold
             </h2>
             <p className="text-muted mb-5 text-[13px]">
@@ -104,8 +150,12 @@ export default async function FlagPage({
               }))}
             />
           </section>
-          <section aria-labelledby="dismiss" className="border-line border p-5">
-            <h2 id="dismiss" className="pixel mb-1 text-lg">
+          <section
+            id="dismiss"
+            aria-labelledby="dismiss-title"
+            className="border-line scroll-mt-6 border p-5"
+          >
+            <h2 id="dismiss-title" className="pixel mb-1 text-lg">
               Dismiss the flags
             </h2>
             <p className="text-muted mb-5 text-[13px]">
@@ -135,6 +185,20 @@ export default async function FlagPage({
       ) : (
         <p className="text-muted text-sm">Every flag on this account is closed.</p>
       )}
+      <Explainer title="The rules behind these flags">
+        <p>
+          Only credits of ₹1,000 or more are flagged (RBI draft, Annex III 3(8)). Each flag cites the
+          transactions behind it.
+        </p>
+        <p>
+          Priority is high when the account is linked to a CFCFRMS notice or three or more rules fire, medium
+          for two, low for one. The thresholds are this bank&apos;s own, set on the Detection page.
+        </p>
+        <p>
+          A hold covers the flagged amount only. Holding the whole account needs a written reason of at least
+          30 characters (Annex III para 6(ii)).
+        </p>
+      </Explainer>
     </>
   );
 }

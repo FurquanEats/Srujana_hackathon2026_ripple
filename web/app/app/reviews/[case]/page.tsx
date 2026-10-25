@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { Attention, Explainer } from "@/components/workspace/attention";
+import { PrintButton } from "@/components/workspace/print-button";
 import { Money, Notice, PageHeader, Stat } from "@/components/workspace/ui";
 import { formatInr, formatIst } from "@/lib/format";
-import { reviews } from "@/lib/gateway/source";
+import { filedGrievances, now, reviews } from "@/lib/gateway/source";
 import { requireRole, type Outcome } from "@/lib/guard";
 import { ACTION, CHECKS, VERDICT } from "@/lib/review/labels";
 import type { Quoted } from "@/lib/review/types";
 
-import { verdictAction } from "../../actions";
+import { fileGrievanceAction, verdictAction } from "../../actions";
+
+const DAY = 86_400_000;
 
 export const metadata: Metadata = { title: "Evidence pack" };
 
@@ -49,12 +53,19 @@ export default async function ReviewPage({
   params: Promise<{ case: string }>;
   searchParams: Outcome;
 }) {
-  await requireRole("grievance_officer");
+  const session = await requireRole("grievance_officer");
   const { case: id } = await params;
   const { error, done } = await searchParams;
   const pack = (await reviews()).find((p) => p.case_id === id);
   if (!pack) notFound();
   const kyc = pack.holder.kyc;
+  const filed = (await filedGrievances()).get(pack.case_id);
+  const clock = await now(session);
+  const undecided = pack.credits.filter((c) => !pack.decisions[c.credit_id]).length;
+  const explained = pack.verdicts
+    .filter((v) => v.verdict === "explained")
+    .reduce((s, v) => s + v.explained_amount, 0);
+  const keep = pack.verdicts.reduce((s, v) => s + v.hold_after, 0);
   const declared = kyc.declared_annual_turnover ?? kyc.declared_annual_income;
   return (
     <>
@@ -65,6 +76,52 @@ export default async function ReviewPage({
       />
       {error && <Notice kind="error">{error}</Notice>}
       {done && <Notice kind="done">{done}</Notice>}
+      {!pack.read ? (
+        <Attention tone="info" title="Waiting for Gemini to read every document" />
+      ) : filed ? (
+        <Attention
+          tone="info"
+          title={`Grievance filed ${formatIst(filed)}: the investigating officer decides by ${formatIst(new Date(new Date(filed).getTime() + 15 * DAY).toISOString())}`}
+          facts={[
+            { label: "Explained", value: <Money paise={explained} /> },
+            { label: "Proposed to stay on hold", value: <Money paise={keep} /> },
+            {
+              label: "Days since filing",
+              value: Math.max(0, Math.round((new Date(clock).getTime() - new Date(filed).getTime()) / DAY)),
+            },
+            { label: "If no decision", value: "Escalate to the district grievance officer" },
+          ]}
+        >
+          The SOP gives the investigating officer 15 days to decide on a grievance; without a decision, it
+          goes to the district grievance officer (H5).
+        </Attention>
+      ) : undecided > 0 ? (
+        <Attention
+          tone="action"
+          title={`Confirm or overrule ${undecided} verdict${undecided === 1 ? "" : "s"}`}
+          actions={[{ label: "Go to the verdicts", href: "#verdicts", primary: true }]}
+        >
+          Nothing is filed until you have decided every held credit (G4). The bank must file within 7 days of
+          receiving the holder&apos;s explanation.
+        </Attention>
+      ) : (
+        <Attention
+          tone="action"
+          title="Every verdict decided: file the grievance"
+          facts={[
+            { label: "Explained", value: <Money paise={explained} /> },
+            { label: "Proposed to stay on hold", value: <Money paise={keep} /> },
+          ]}
+        >
+          <form action={fileGrievanceAction} className="mt-3 flex flex-wrap gap-2">
+            <input type="hidden" name="case" value={pack.case_id} />
+            <button className="button button-solid">File the grievance with this evidence pack</button>
+          </form>
+        </Attention>
+      )}
+      <div className="no-print mb-6 flex justify-end">
+        <PrintButton label="Print the evidence pack" />
+      </div>
       <div className="mb-8 grid gap-3 sm:grid-cols-3">
         <Stat label="Declared at account opening">
           <span className="text-base">
@@ -88,7 +145,7 @@ export default async function ReviewPage({
         </section>
       )}
 
-      <section className="mb-10">
+      <section id="verdicts" className="mb-10 scroll-mt-6">
         <h2 className="pixel mb-4 text-lg">Held credits and verdicts</h2>
         {!pack.read && (
           <Notice kind="error">
@@ -223,6 +280,21 @@ export default async function ReviewPage({
           rules decide.
         </p>
       </section>
+      <Explainer>
+        <p>
+          Gemini only fills fixed fields, quoting the words on the page behind each one; a field with no quote
+          is unverified and can never support an explained verdict (G2).
+        </p>
+        <p>
+          Fixed rules decide each credit: amount, date, payer, GSTIN, reuse and fit with the declared business
+          (G3). Text inside a document cannot change a verdict.
+        </p>
+        <p>
+          The evidence pack goes to the investigating officer through the CFCFRMS grievance module (SOP
+          10.1(a)). Verdicts say the documents agree with the bank&apos;s records, never that they are
+          genuine.
+        </p>
+      </Explainer>
     </>
   );
 }

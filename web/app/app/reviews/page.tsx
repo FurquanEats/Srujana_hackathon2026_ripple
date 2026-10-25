@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Notice, PageHeader } from "@/components/workspace/ui";
 import { formatInr } from "@/lib/format";
-import { reviews } from "@/lib/gateway/source";
+import { filedGrievances, reviews } from "@/lib/gateway/source";
 import { requireRole, type Outcome } from "@/lib/guard";
 import { VERDICT } from "@/lib/review/labels";
 
@@ -13,6 +13,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Outc
   await requireRole("grievance_officer");
   const { error } = await searchParams;
   const packs = await reviews();
+  const filed = await filedGrievances();
   const confirmed = packs.reduce((s, p) => s + Object.keys(p.decisions).length, 0);
   const credits = packs.reduce((s, p) => s + p.credits.length, 0);
   return (
@@ -65,9 +66,11 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Outc
                   )}
                 </td>
                 <td className="text-xs">
-                  {Object.keys(p.decisions).length === p.credits.length
-                    ? "Decided"
-                    : `${Object.keys(p.decisions).length} of ${p.credits.length}`}
+                  {filed.has(p.case_id)
+                    ? "Grievance filed"
+                    : Object.keys(p.decisions).length === p.credits.length
+                      ? "Ready to file"
+                      : `${Object.keys(p.decisions).length} of ${p.credits.length} decided`}
                 </td>
                 <td aria-hidden className="text-right">
                   <span className="go">→</span>

@@ -1,17 +1,32 @@
 {
  "/v1/notices": [
   {
-   "account_number": "9124511006",
-   "ack_number": "36512145633292",
+   "account_number": "6957795103",
+   "ack_number": "39577951100000",
+   "exit_count": 0,
+   "held": 6000000,
+   "holder_name": "Exchange X customer",
+   "layer": 2,
+   "lien_id": "LF7472C80A02C4B48",
+   "notice_id": "39577951100000-003",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:49:56.008096Z",
+   "status": "matched",
+   "traced_in": 6000000
+  },
+  {
+   "account_number": "9243795006",
+   "ack_number": "39826521718778",
    "exit_count": 0,
    "held": 10000000,
    "holder_name": "Exchange X customer",
    "layer": 3,
-   "lien_id": "LEA3C537022099746",
-   "notice_id": "36512145633292-005",
+   "lien_id": "LC1B456F4B6700A63",
+   "notice_id": "39826521718778-005",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:54.365036Z",
+   "received_at": "2026-10-25T19:49:52.844779Z",
    "status": "matched",
    "traced_in": 10000000
   },
@@ -22,11 +37,11 @@
    "held": 10000000,
    "holder_name": "Bikash Shaw",
    "layer": 3,
-   "lien_id": "L451A1A23C545AF9E",
+   "lien_id": "LFF439F5CD6E72610",
    "notice_id": "30391446601247-005",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:50.316535Z",
+   "received_at": "2026-10-25T19:49:47.335656Z",
    "status": "matched",
    "traced_in": 10000000
   },
@@ -41,17 +56,62 @@
    "notice_id": "25925884038089-004",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:50.185788Z",
+   "received_at": "2026-10-25T19:49:47.098558Z",
    "status": "matched",
    "traced_in": 2450000
   }
  ],
- "/v1/notices/36512145633292-005": {
+ "/v1/notices/39577951100000-003": {
+  "credit": {
+   "amount": 6000000,
+   "at": "2026-10-25T19:35:54.998256Z",
+   "rail": "imps",
+   "reference": "957795100002"
+  },
+  "exits": [],
+  "legal_basis": "BNSS s.168 read with s.94",
+  "onward": [],
+  "statement": [
+   {
+    "amount": 6000000,
+    "at": "2026-10-25T19:35:54.998256Z",
+    "counterparty": {
+     "account_number": "6957795101",
+     "ifsc": "BKDD0000002",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "957795100002",
+    "txn_id": "C957795100002",
+    "victim_money": {
+     "39577951100000": 6000000
+    }
+   }
+  ],
+  "summary": {
+   "account_number": "6957795103",
+   "ack_number": "39577951100000",
+   "exit_count": 0,
+   "held": 6000000,
+   "holder_name": "Exchange X customer",
+   "layer": 2,
+   "lien_id": "LF7472C80A02C4B48",
+   "notice_id": "39577951100000-003",
+   "onward_count": 0,
+   "reason": null,
+   "received_at": "2026-10-25T19:49:56.008096Z",
+   "status": "matched",
+   "traced_in": 6000000
+  }
+ },
+ "/v1/notices/39826521718778-005": {
   "credit": {
    "amount": 10000000,
-   "at": "2026-10-25T19:30:51.227948Z",
+   "at": "2026-10-25T19:43:48.080480Z",
    "rail": "imps",
-   "reference": "124511000007"
+   "reference": "243795000007"
   },
   "exits": [],
   "legal_basis": "BNSS s.168 read with s.94",
@@ -59,34 +119,34 @@
   "statement": [
    {
     "amount": 10000000,
-    "at": "2026-10-25T19:30:51.227948Z",
+    "at": "2026-10-25T19:43:48.080480Z",
     "counterparty": {
-     "account_number": "5124511002",
+     "account_number": "5243795002",
      "ifsc": "BKCC0000001",
      "vpa": null
     },
     "direction": "credit",
     "exit": null,
     "rail": "imps",
-    "reference": "124511000007",
-    "txn_id": "C124511000007",
+    "reference": "243795000007",
+    "txn_id": "C243795000007",
     "victim_money": {
-     "36512145633292": 10000000
+     "39826521718778": 10000000
     }
    }
   ],
   "summary": {
-   "account_number": "9124511006",
-   "ack_number": "36512145633292",
+   "account_number": "9243795006",
+   "ack_number": "39826521718778",
    "exit_count": 0,
    "held": 10000000,
    "holder_name": "Exchange X customer",
    "layer": 3,
-   "lien_id": "LEA3C537022099746",
-   "notice_id": "36512145633292-005",
+   "lien_id": "LC1B456F4B6700A63",
+   "notice_id": "39826521718778-005",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:54.365036Z",
+   "received_at": "2026-10-25T19:49:52.844779Z",
    "status": "matched",
    "traced_in": 10000000
   }
@@ -127,11 +187,11 @@
    "held": 10000000,
    "holder_name": "Bikash Shaw",
    "layer": 3,
-   "lien_id": "L451A1A23C545AF9E",
+   "lien_id": "LFF439F5CD6E72610",
    "notice_id": "30391446601247-005",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:50.316535Z",
+   "received_at": "2026-10-25T19:49:47.335656Z",
    "status": "matched",
    "traced_in": 10000000
   }
@@ -281,20 +341,34 @@
    "notice_id": "25925884038089-004",
    "onward_count": 0,
    "reason": null,
-   "received_at": "2026-10-25T19:36:50.185788Z",
+   "received_at": "2026-10-25T19:49:47.098558Z",
    "status": "matched",
    "traced_in": 2450000
   }
  },
  "/v1/liens": [
   {
-   "account_number": "9124511006",
-   "ack_number": "36512145633292",
+   "account_number": "6957795103",
+   "ack_number": "39577951100000",
+   "amount": 6000000,
+   "basis": "BNSS s.168 read with s.94",
+   "holder_name": "Exchange X customer",
+   "lien_id": "LF7472C80A02C4B48",
+   "placed_at": "2026-10-25T19:49:56.008096Z",
+   "release_authority": null,
+   "release_order": null,
+   "release_reason": null,
+   "released_at": null,
+   "returned_to_victim": false
+  },
+  {
+   "account_number": "9243795006",
+   "ack_number": "39826521718778",
    "amount": 10000000,
    "basis": "BNSS s.168 read with s.94",
    "holder_name": "Exchange X customer",
-   "lien_id": "LEA3C537022099746",
-   "placed_at": "2026-10-25T19:36:54.365036Z",
+   "lien_id": "LC1B456F4B6700A63",
+   "placed_at": "2026-10-25T19:49:52.844779Z",
    "release_authority": null,
    "release_order": null,
    "release_reason": null,
@@ -307,8 +381,8 @@
    "amount": 10000000,
    "basis": "BNSS s.168 read with s.94",
    "holder_name": "Bikash Shaw",
-   "lien_id": "L451A1A23C545AF9E",
-   "placed_at": "2026-10-25T19:36:50.316535Z",
+   "lien_id": "LFF439F5CD6E72610",
+   "placed_at": "2026-10-25T19:49:47.335656Z",
    "release_authority": null,
    "release_order": null,
    "release_reason": null,
@@ -317,6 +391,40 @@
   }
  ],
  "/v1/mule-cases": [
+  {
+   "account_number": "6957795103",
+   "active_hold_id": null,
+   "declared_annual_income": null,
+   "declared_profile": "",
+   "first_at": "2026-10-25T19:35:54.998256Z",
+   "flagged_amount": 6000000,
+   "flags": [
+    {
+     "amount": 6000000,
+     "at": "2026-10-25T19:35:54.998256Z",
+     "cited_txns": [
+      "C957795100002"
+     ],
+     "credit_txns": [
+      "C957795100002"
+     ],
+     "dismissed_reason": null,
+     "key": "dormant_then_busy:6957795103:C957795100002",
+     "reason": "The account had no transactions for 200 days, then received ₹60,000 on 26 Oct 2026, 01:05 AM IST.",
+     "rule": "dormant_then_busy",
+     "status": "open",
+     "title": "Dormant, then busy"
+    }
+   ],
+   "holder_name": "Exchange X customer",
+   "last_at": "2026-10-25T19:35:54.998256Z",
+   "priority": "high",
+   "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+   "reported": true,
+   "rules": [
+    "dormant_then_busy"
+   ]
+  },
   {
    "account_number": "91804205117543",
    "active_hold_id": null,
@@ -499,10 +607,10 @@
   "profile_multiple": 3.0
  },
  "/v1/detection/shadow-run": {
-  "accounts": 1,
+  "accounts": 2,
   "budget_per_day": 5.0,
-  "expected_flags_per_day": 0.03,
-  "known_bad": 3,
+  "expected_flags_per_day": 0.07,
+  "known_bad": 4,
   "proposal": {
    "cash_out_minutes": 180,
    "dormant_days": 30,
@@ -608,27 +716,27 @@
     "chosen": 30,
     "rows": [
      {
-      "accounts_flagged": 0,
-      "flags_per_day": 0.0,
-      "known_bad_flagged": 0,
+      "accounts_flagged": 1,
+      "flags_per_day": 0.03,
+      "known_bad_flagged": 1,
       "value": 180
-     },
-     {
-      "accounts_flagged": 0,
-      "flags_per_day": 0.0,
-      "known_bad_flagged": 0,
-      "value": 90
-     },
-     {
-      "accounts_flagged": 0,
-      "flags_per_day": 0.0,
-      "known_bad_flagged": 0,
-      "value": 60
      },
      {
       "accounts_flagged": 1,
       "flags_per_day": 0.03,
       "known_bad_flagged": 1,
+      "value": 90
+     },
+     {
+      "accounts_flagged": 1,
+      "flags_per_day": 0.03,
+      "known_bad_flagged": 1,
+      "value": 60
+     },
+     {
+      "accounts_flagged": 2,
+      "flags_per_day": 0.07,
+      "known_bad_flagged": 2,
       "value": 30
      }
     ],
@@ -667,8 +775,8 @@
     "title": "Quick cash-out"
    }
   ],
-  "since": "2026-09-25T19:37:13.198777+00:00",
-  "until": "2026-10-25T19:37:13.198777+00:00",
+  "since": "2026-09-25T19:50:14.568806+00:00",
+  "until": "2026-10-25T19:50:14.568806+00:00",
   "within_budget": true
  },
  "/v1/detection/history": [],
@@ -754,7 +862,7 @@
     "notice_id": "25925884038089-004",
     "onward_count": 0,
     "reason": null,
-    "received_at": "2026-10-25T19:36:50.185788Z",
+    "received_at": "2026-10-25T19:49:47.098558Z",
     "status": "matched",
     "traced_in": 2450000
    }
@@ -953,6 +1061,109 @@
   ],
   "vpa": null
  },
+ "/v1/accounts/6957795103": {
+  "account_number": "6957795103",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 6000000,
+  "counterparties_30d": 1,
+  "credits_30d": 6000000,
+  "debits_30d": 0,
+  "declared_annual_income": null,
+  "declared_profile": "",
+  "flags": [
+   {
+    "account_number": "6957795103",
+    "active_hold_id": null,
+    "declared_annual_income": null,
+    "declared_profile": "",
+    "first_at": "2026-10-25T19:35:54.998256Z",
+    "flagged_amount": 6000000,
+    "flags": [
+     {
+      "amount": 6000000,
+      "at": "2026-10-25T19:35:54.998256Z",
+      "cited_txns": [
+       "C957795100002"
+      ],
+      "credit_txns": [
+       "C957795100002"
+      ],
+      "dismissed_reason": null,
+      "key": "dormant_then_busy:6957795103:C957795100002",
+      "reason": "The account had no transactions for 200 days, then received ₹60,000 on 26 Oct 2026, 01:05 AM IST.",
+      "rule": "dormant_then_busy",
+      "status": "open",
+      "title": "Dormant, then busy"
+     }
+    ],
+    "holder_name": "Exchange X customer",
+    "last_at": "2026-10-25T19:35:54.998256Z",
+    "priority": "high",
+    "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+    "reported": true,
+    "rules": [
+     "dormant_then_busy"
+    ]
+   }
+  ],
+  "holder_name": "Exchange X customer",
+  "holds": [],
+  "ifsc": "XCHX0000002",
+  "liened": 6000000,
+  "liens": [
+   {
+    "account_number": "6957795103",
+    "ack_number": "39577951100000",
+    "amount": 6000000,
+    "basis": "BNSS s.168 read with s.94",
+    "holder_name": "Exchange X customer",
+    "lien_id": "LF7472C80A02C4B48",
+    "placed_at": "2026-10-25T19:49:56.008096Z",
+    "release_authority": null,
+    "release_order": null,
+    "release_reason": null,
+    "released_at": null,
+    "returned_to_victim": false
+   }
+  ],
+  "notices": [
+   {
+    "account_number": "6957795103",
+    "ack_number": "39577951100000",
+    "exit_count": 0,
+    "held": 6000000,
+    "holder_name": "Exchange X customer",
+    "layer": 2,
+    "lien_id": "LF7472C80A02C4B48",
+    "notice_id": "39577951100000-003",
+    "onward_count": 0,
+    "reason": null,
+    "received_at": "2026-10-25T19:49:56.008096Z",
+    "status": "matched",
+    "traced_in": 6000000
+   }
+  ],
+  "on_hold": 0,
+  "opened_at": "2026-04-08T19:29:54.998256Z",
+  "statement": [
+   {
+    "amount": 6000000,
+    "at": "2026-10-25T19:35:54.998256Z",
+    "counterparty": {
+     "account_number": "6957795101",
+     "ifsc": "BKDD0000002",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "957795100002",
+    "txn_id": "C957795100002"
+   }
+  ],
+  "vpa": null
+ },
  "/v1/accounts/88522562974498": {
   "account_number": "88522562974498",
   "account_type": "regular",
@@ -1040,74 +1251,6 @@
   ],
   "vpa": null
  },
- "/v1/accounts/9124511006": {
-  "account_number": "9124511006",
-  "account_type": "regular",
-  "available": 0,
-  "balance": 10000000,
-  "counterparties_30d": 1,
-  "credits_30d": 10000000,
-  "debits_30d": 0,
-  "declared_annual_income": null,
-  "declared_profile": "",
-  "flags": [],
-  "holder_name": "Exchange X customer",
-  "holds": [],
-  "ifsc": "XCHX0000001",
-  "liened": 10000000,
-  "liens": [
-   {
-    "account_number": "9124511006",
-    "ack_number": "36512145633292",
-    "amount": 10000000,
-    "basis": "BNSS s.168 read with s.94",
-    "holder_name": "Exchange X customer",
-    "lien_id": "LEA3C537022099746",
-    "placed_at": "2026-10-25T19:36:54.365036Z",
-    "release_authority": null,
-    "release_order": null,
-    "release_reason": null,
-    "released_at": null,
-    "returned_to_victim": false
-   }
-  ],
-  "notices": [
-   {
-    "account_number": "9124511006",
-    "ack_number": "36512145633292",
-    "exit_count": 0,
-    "held": 10000000,
-    "holder_name": "Exchange X customer",
-    "layer": 3,
-    "lien_id": "LEA3C537022099746",
-    "notice_id": "36512145633292-005",
-    "onward_count": 0,
-    "reason": null,
-    "received_at": "2026-10-25T19:36:54.365036Z",
-    "status": "matched",
-    "traced_in": 10000000
-   }
-  ],
-  "on_hold": 0,
-  "opened_at": "2026-09-25T19:24:51.227948Z",
-  "statement": [
-   {
-    "amount": 10000000,
-    "at": "2026-10-25T19:30:51.227948Z",
-    "counterparty": {
-     "account_number": "5124511002",
-     "ifsc": "BKCC0000001",
-     "vpa": null
-    },
-    "direction": "credit",
-    "exit": null,
-    "rail": "imps",
-    "reference": "124511000007",
-    "txn_id": "C124511000007"
-   }
-  ],
-  "vpa": null
- },
  "/v1/accounts/91804205117543": {
   "account_number": "91804205117543",
   "account_type": "regular",
@@ -1182,8 +1325,8 @@
     "amount": 10000000,
     "basis": "BNSS s.168 read with s.94",
     "holder_name": "Bikash Shaw",
-    "lien_id": "L451A1A23C545AF9E",
-    "placed_at": "2026-10-25T19:36:50.316535Z",
+    "lien_id": "LFF439F5CD6E72610",
+    "placed_at": "2026-10-25T19:49:47.335656Z",
     "release_authority": null,
     "release_order": null,
     "release_reason": null,
@@ -1199,11 +1342,11 @@
     "held": 10000000,
     "holder_name": "Bikash Shaw",
     "layer": 3,
-    "lien_id": "L451A1A23C545AF9E",
+    "lien_id": "LFF439F5CD6E72610",
     "notice_id": "30391446601247-005",
     "onward_count": 0,
     "reason": null,
-    "received_at": "2026-10-25T19:36:50.316535Z",
+    "received_at": "2026-10-25T19:49:47.335656Z",
     "status": "matched",
     "traced_in": 10000000
    }
@@ -1228,19 +1371,101 @@
   ],
   "vpa": "bikashshaw7743@xchx"
  },
+ "/v1/accounts/9243795006": {
+  "account_number": "9243795006",
+  "account_type": "regular",
+  "available": 0,
+  "balance": 10000000,
+  "counterparties_30d": 1,
+  "credits_30d": 10000000,
+  "debits_30d": 0,
+  "declared_annual_income": null,
+  "declared_profile": "",
+  "flags": [],
+  "holder_name": "Exchange X customer",
+  "holds": [],
+  "ifsc": "XCHX0000001",
+  "liened": 10000000,
+  "liens": [
+   {
+    "account_number": "9243795006",
+    "ack_number": "39826521718778",
+    "amount": 10000000,
+    "basis": "BNSS s.168 read with s.94",
+    "holder_name": "Exchange X customer",
+    "lien_id": "LC1B456F4B6700A63",
+    "placed_at": "2026-10-25T19:49:52.844779Z",
+    "release_authority": null,
+    "release_order": null,
+    "release_reason": null,
+    "released_at": null,
+    "returned_to_victim": false
+   }
+  ],
+  "notices": [
+   {
+    "account_number": "9243795006",
+    "ack_number": "39826521718778",
+    "exit_count": 0,
+    "held": 10000000,
+    "holder_name": "Exchange X customer",
+    "layer": 3,
+    "lien_id": "LC1B456F4B6700A63",
+    "notice_id": "39826521718778-005",
+    "onward_count": 0,
+    "reason": null,
+    "received_at": "2026-10-25T19:49:52.844779Z",
+    "status": "matched",
+    "traced_in": 10000000
+   }
+  ],
+  "on_hold": 0,
+  "opened_at": "2026-09-25T19:37:48.080480Z",
+  "statement": [
+   {
+    "amount": 10000000,
+    "at": "2026-10-25T19:43:48.080480Z",
+    "counterparty": {
+     "account_number": "5243795002",
+     "ifsc": "BKCC0000001",
+     "vpa": null
+    },
+    "direction": "credit",
+    "exit": null,
+    "rail": "imps",
+    "reference": "243795000007",
+    "txn_id": "C243795000007"
+   }
+  ],
+  "vpa": null
+ },
  "/v1/audit": {
   "broken_at": null,
   "entries": [
    {
     "action": "notice_answered",
     "actor": "cfcfrms",
-    "at": "2026-10-25T19:36:54.365036+00:00",
-    "hash": "37da55b187656d0d3e7aabcae2e44424be59d4442d99f7256f95f1e5a282d109",
+    "at": "2026-10-25T19:49:56.008096+00:00",
+    "hash": "4252c47bad6188214c0e80b372f5cbe236ee3d80e10745ccedf4a520d36502ba",
     "record": {
-     "ack_number": "36512145633292",
+     "ack_number": "39577951100000",
+     "held": 6000000,
+     "lien_id": "LF7472C80A02C4B48",
+     "notice_id": "39577951100000-003",
+     "status": "matched"
+    },
+    "seq": 4
+   },
+   {
+    "action": "notice_answered",
+    "actor": "cfcfrms",
+    "at": "2026-10-25T19:49:52.844779+00:00",
+    "hash": "63c825465720162f574d9fcc126d9bdfdec61498852995761237ec46d6de021a",
+    "record": {
+     "ack_number": "39826521718778",
      "held": 10000000,
-     "lien_id": "LEA3C537022099746",
-     "notice_id": "36512145633292-005",
+     "lien_id": "LC1B456F4B6700A63",
+     "notice_id": "39826521718778-005",
      "status": "matched"
     },
     "seq": 3
@@ -1248,12 +1473,12 @@
    {
     "action": "notice_answered",
     "actor": "cfcfrms",
-    "at": "2026-10-25T19:36:50.316535+00:00",
-    "hash": "646944c6b7841f1727e108aac56af7478fef6393349ffc866d49ac8a22fc774d",
+    "at": "2026-10-25T19:49:47.335656+00:00",
+    "hash": "869e7666f2af2ddf1ff4d28817ce44a6f045905598f951ba427d41c14d996474",
     "record": {
      "ack_number": "30391446601247",
      "held": 10000000,
-     "lien_id": "L451A1A23C545AF9E",
+     "lien_id": "LFF439F5CD6E72610",
      "notice_id": "30391446601247-005",
      "status": "matched"
     },
@@ -1262,8 +1487,8 @@
    {
     "action": "notice_answered",
     "actor": "cfcfrms",
-    "at": "2026-10-25T19:36:50.185788+00:00",
-    "hash": "fc13383a58d63687599f15a3955895016d51dd616b5c8a7cdfe721f7a3054149",
+    "at": "2026-10-25T19:49:47.098558+00:00",
+    "hash": "f40bd41c3b2df5be03c349f5ffd4e1ec0693486dbe898033af9ea62608411d62",
     "record": {
      "ack_number": "25925884038089",
      "held": 0,

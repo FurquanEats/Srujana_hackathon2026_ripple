@@ -16,6 +16,10 @@ export const TERMS = {
     label: "Layer",
     text: "How many transfers away from the victim an account is. The account that received the victim's payment is layer 1.",
   },
+  priority: {
+    label: "Priority",
+    text: "How urgently a flagged account needs review. High: the account is linked to a CFCFRMS notice, or three or more rules fired. Medium: two rules. Low: one rule.",
+  },
   tracedAmount: {
     label: "Traced amount",
     text: "How much of the money in an account is the victim's, worked out from the order of credits and debits under the rule in the MHA SOP: victims' money leaves before the account holder's own.",

@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Term } from "@/components/term";
+import { Filters } from "@/components/workspace/filters";
 import { Empty, Money, Notice, PageHeader, Priority } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
 import { muleCases } from "@/lib/gateway/source";
-import { requireRole, type Outcome } from "@/lib/guard";
+import { requireRole } from "@/lib/guard";
 
 export const metadata: Metadata = { title: "Mule flags" };
 
 const ORDER = { high: 0, medium: 1, low: 2 } as const;
 
-export default async function FlagsPage({ searchParams }: { searchParams: Outcome }) {
+type Search = Promise<{ error?: string; done?: string; priority?: string; rule?: string; q?: string }>;
+
+export default async function FlagsPage({ searchParams }: { searchParams: Search }) {
   const session = await requireRole("frm_analyst");
-  const { error, done } = await searchParams;
-  const list = (await muleCases(session)).filter(
+  const { error, done, priority, rule, q } = await searchParams;
+  const all = (await muleCases(session)).filter(
     (c) => c.flags.some((f) => f.status === "open") || c.active_hold_id,
   );
+  const needle = (q ?? "").trim().toLowerCase();
+  const list = all.filter(
+    (c) =>
+      (!priority || c.priority === priority) &&
+      (!rule || c.rules.includes(rule)) &&
+      (!needle || `${c.holder_name} ${c.account_number}`.toLowerCase().includes(needle)),
+  );
+  const rules = [...new Map(all.flatMap((c) => c.flags.map((f) => [f.rule, f.title] as const))).entries()];
   list.sort((a, b) => ORDER[a.priority] - ORDER[b.priority] || b.last_at.localeCompare(a.last_at));
   return (
     <>
@@ -25,6 +37,24 @@ export default async function FlagsPage({ searchParams }: { searchParams: Outcom
       />
       {error && <Notice kind="error">{error}</Notice>}
       {done && <Notice kind="done">{done}</Notice>}
+      <Filters
+        values={{ priority, rule, q }}
+        total={all.length}
+        shown={list.length}
+        fields={[
+          {
+            name: "priority",
+            label: "Priority",
+            options: [
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ],
+          },
+          { name: "rule", label: "Rule", options: rules.map(([value, label]) => ({ value, label })) },
+          { name: "q", label: "Holder or account", placeholder: "Search" },
+        ]}
+      />
       {list.length === 0 ? (
         <Empty>No open flags. Every flag has been held or dismissed.</Empty>
       ) : (
@@ -32,7 +62,9 @@ export default async function FlagsPage({ searchParams }: { searchParams: Outcom
           <table className="table min-w-[720px]">
             <thead>
               <tr>
-                <th>Priority</th>
+                <th>
+                  <Term name="priority" />
+                </th>
                 <th>Account</th>
                 <th>Why it was flagged</th>
                 <th className="text-right">Flagged amount</th>

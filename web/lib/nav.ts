@@ -30,6 +30,7 @@ export const NAV: Record<WorkspaceRole, NavItem[]> = {
   demo: [
     { href: "/app/simulation", label: "Simulation", hint: "Play the demo story on the network" },
     { href: "/app/cases", label: "Cases", hint: "Complaints and their money trails" },
+    { href: "/app/results", label: "Results", hint: "What Ripple measured on the simulated network" },
   ],
   account_holder: [{ href: "/app/my-hold", label: "My hold", hint: "The hold on your account" }],
   victim: [{ href: "/app/my-complaint", label: "My complaint", hint: "What is held and where" }],

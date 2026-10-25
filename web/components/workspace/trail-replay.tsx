@@ -149,7 +149,9 @@ export function TrailReplay({ trail, institutions }: { trail: Trail; institution
         </svg>
       </div>
 
-      <h3 className="pixel mt-10 mb-3 text-base">Exits for the police</h3>
+      <h3 id="exits" className="pixel mt-10 mb-3 scroll-mt-6 text-base">
+        Exits for the police
+      </h3>
       {trail.accounts.flatMap((a) => a.exits).length === 0 ? (
         <p className="text-faint text-sm">No money left the banking system on this trail.</p>
       ) : (

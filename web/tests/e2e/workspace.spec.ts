@@ -21,8 +21,8 @@ const ROLES: { role: string; member?: string; pages: string[] }[] = [
     ],
   },
   { role: "grievance_officer", member: "bank-a", pages: ["/app/reviews", "/app/reviews/D05"] },
-  { role: "police_officer", pages: ["/app/overview", "/app/cases", "/app/hold-reports"] },
-  { role: "demo", pages: ["/app/simulation", "/app/cases"] },
+  { role: "police_officer", pages: ["/app/overview", "/app/cases", "/app/hold-reports", "/app/cases/new"] },
+  { role: "demo", pages: ["/app/simulation", "/app/cases", "/app/results"] },
   { role: "account_holder", pages: ["/app/my-hold"] },
   { role: "victim", pages: ["/app/my-complaint"] },
 ];
@@ -117,4 +117,46 @@ test("the home page and sign-in have no serious accessibility problems", async (
     const serious = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
     expect(serious.map((v) => `${path}: ${v.id}`)).toEqual([]);
   }
+});
+
+test("a nodal officer opens a notice, sees the next step and records a release order", async ({ page }) => {
+  await signIn(page, "nodal_officer", "bank-c");
+  await page.goto("/app/notices?status=held");
+  await page.locator("tbody tr a").first().click();
+  await expect(page.getByText("Next step").first()).toBeVisible();
+  await page.getByLabel("Ordered by (police station, officer or court)").fill("Cyber Crime PS, Hyderabad");
+  await page.getByLabel("Order reference").fill("CCPS/106/2026/41");
+  await page.getByLabel("Reason").fill("Interim custody to the victim");
+  await page.getByRole("button", { name: "Record the release" }).click();
+  await expect(page.getByRole("status")).toContainText("Lien released");
+});
+
+test("the police return held money to the victim, and the victim sees it", async ({ page }) => {
+  await signIn(page, "police_officer");
+  await page.goto("/app/cases?q=Meena");
+  await page.locator("tbody tr a").first().click();
+  await page.getByText("Order the bank to return it").first().click();
+  await page.getByLabel("Order reference").first().fill("CCPS/106/2026/42");
+  await page.getByRole("button", { name: "Send the release order" }).first().click();
+  await expect(page.getByRole("status")).toContainText("return the money");
+  await page.goto("/sign-in");
+  await page.check('input[value="victim"]');
+  const option = page.locator("#complaint option", { hasText: "Meena" });
+  await page.selectOption("#complaint", (await option.getAttribute("value")) ?? "");
+  await Promise.all([page.waitForURL(/\/app\//), page.getByRole("button", { name: "Continue" }).click()]);
+  await expect(page.getByText(/on its way back to you/)).toBeVisible();
+});
+
+test("an FRM analyst notes a hold, and a grievance officer files a grievance", async ({ page }) => {
+  await signIn(page, "frm_analyst", "bank-b");
+  await page.goto("/app/holds");
+  await page.locator("tbody tr a").first().click();
+  await page.getByLabel("Note").fill("Called the customer; no answer.");
+  await page.getByRole("button", { name: "Add note" }).click();
+  await expect(page.getByText("Called the customer; no answer.")).toBeVisible();
+  await signIn(page, "grievance_officer", "bank-a");
+  await page.goto("/app/reviews/D01");
+  await page.getByRole("button", { name: "Confirm verdict" }).click();
+  await page.getByRole("button", { name: "File the grievance with this evidence pack" }).click();
+  await expect(page.getByText(/Grievance filed/).first()).toBeVisible();
 });
