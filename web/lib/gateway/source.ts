@@ -60,6 +60,8 @@ import type {
 export const LIVE = process.env.RIPPLE_GATEWAY === "live";
 
 const CHANGES_COOKIE = "ripple_demo_changes";
+/** Changes in a visitor's cookie are kept only while the saved run they were made on is the one being served. */
+const DATA_VERSION = clockFixture["/v1/clock"].now;
 type Saved = Record<string, unknown>;
 const BANKS: Record<string, Saved> = {
   "bank-a": bankA,
@@ -85,7 +87,7 @@ function saved<T>(s: DemoSession, route: string): T {
 }
 
 async function changes(): Promise<Change[]> {
-  return parseChanges((await cookies()).get(CHANGES_COOKIE)?.value);
+  return parseChanges((await cookies()).get(CHANGES_COOKIE)?.value, DATA_VERSION);
 }
 
 function savedFor<T>(member: string, route: string): T {
@@ -163,7 +165,7 @@ async function record(s: DemoSession, change: Change, route: string, body: unkno
   }
   const list = [...(await changes()), change];
   try {
-    if (change.k === "lien") applyLiens(change.m, savedFor(change.m, "/v1/liens"), list);
+    if (change.k === "lien") applyLiens(change.m, savedFor(change.m, "/v1/liens"), list, true);
     else if (change.k !== "verdict" && change.k !== "grievance")
       apply(
         change.m,
@@ -171,13 +173,14 @@ async function record(s: DemoSession, change: Change, route: string, body: unkno
         savedFor(change.m, "/v1/mule-cases"),
         savedFor(change.m, "/v1/holds"),
         list,
+        true,
       );
   } catch (error) {
     if (error instanceof DemoConflict)
       throw new GatewayFailure(409, { error: "conflict", message: error.message });
     throw error;
   }
-  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list), {
+  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list, DATA_VERSION), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -428,7 +431,7 @@ export async function decideVerdict(
     at: await now(s),
   };
   const list = [...(await changes()), change];
-  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list), {
+  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list, DATA_VERSION), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -549,7 +552,7 @@ export async function filedGrievances(): Promise<Map<string, string>> {
 export async function fileGrievance(s: DemoSession, caseId: string): Promise<void> {
   const change: Change = { k: "grievance", m: s.member ?? "", c: caseId, at: await now(s) };
   const list = [...(await changes()), change];
-  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list), {
+  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list, DATA_VERSION), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

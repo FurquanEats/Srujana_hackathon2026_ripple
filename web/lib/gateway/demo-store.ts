@@ -100,18 +100,27 @@ function isChange(value: unknown): value is Change {
   }
 }
 
-export function parseChanges(value: string | undefined): Change[] {
+/**
+ * The cookie holds the changes with the version of the saved data they were made on (the run's clock). When the
+ * saved data is refreshed, older changes refer to holds and liens that no longer exist, so they are dropped.
+ */
+export function parseChanges(value: string | undefined, version = ""): Change[] {
   if (!value) return [];
   try {
-    const parsed: unknown = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
-    return Array.isArray(parsed) ? parsed.filter(isChange).slice(-MAX_CHANGES) : [];
+    const parsed = JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as unknown;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return [];
+    const { v, c } = parsed as { v?: unknown; c?: unknown };
+    if (v !== version || !Array.isArray(c)) return [];
+    return c.filter(isChange).slice(-MAX_CHANGES);
   } catch {
     return [];
   }
 }
 
-export function encodeChanges(changes: Change[]): string {
-  return Buffer.from(JSON.stringify(changes.slice(-MAX_CHANGES)), "utf8").toString("base64url");
+export function encodeChanges(changes: Change[], version = ""): string {
+  return Buffer.from(JSON.stringify({ v: version, c: changes.slice(-MAX_CHANGES) }), "utf8").toString(
+    "base64url",
+  );
 }
 
 function deadlines(hold: Hold): HoldDeadline[] {
@@ -216,95 +225,102 @@ export function apply(
   savedCases: MuleCase[],
   savedHolds: Hold[],
   changes: Change[],
+  strict = false,
 ): Applied {
   let cases = structuredClone(savedCases);
   let holds = structuredClone(savedHolds);
   let thresholds: Thresholds | null = null;
-  for (const change of changes) {
+  for (const [index, change] of changes.entries()) {
     if (change.m !== member) continue;
-    if (change.k === "dismiss") {
-      cases = cases.map((c) =>
-        c.account_number === change.a
-          ? {
-              ...c,
-              flags: c.flags.map((f) =>
-                f.status === "open" ? { ...f, status: "dismissed", dismissed_reason: change.r } : f,
-              ),
-            }
-          : c,
-      );
-    } else if (change.k === "thresholds") {
-      thresholds = change.t;
-    } else if (change.k === "verdict" || change.k === "lien" || change.k === "grievance") {
-      continue; // read through `verdictDecisions`, `applyLiens` and `grievancesFiled`
-    } else if (change.k === "note") {
-      const index = holds.findIndex((h) => h.hold_id === change.id);
-      const current = holds[index];
-      if (!current) throw new DemoConflict("No such hold at this bank.");
-      holds[index] = {
-        ...current,
-        notes: [...(current.notes ?? []), { at: change.at, actor: change.by, note: change.n }],
-      };
-    } else if (change.k === "hold") {
-      const c = cases.find((x) => x.account_number === change.a);
-      if (!c) throw new DemoConflict("This account has no open flags.");
-      if (c.active_hold_id)
-        throw new DemoConflict("This account already has an active temporary debit hold.");
-      const flags = c.flags.filter((f) => change.keys.includes(f.key) && f.status === "open");
-      if (flags.length === 0) throw new DemoConflict("Choose at least one open flag to hold.");
-      const amount = flags.reduce((sum, f) => Math.max(sum, f.amount), 0);
-      const reasons = flags.map((f) => f.reason);
-      const hold: Hold = {
-        hold_id: change.id,
-        account_number: c.account_number,
-        holder_name: c.holder_name,
-        amount,
-        whole_account: change.w,
-        account_level_reason: change.wr,
-        credit_txns: [...new Set(flags.flatMap((f) => f.credit_txns))],
-        reasons,
-        contact: change.c,
-        customer_notice: notice(bankName, c, amount, change.at, reasons, change.c),
-        placed_at: change.at,
-        placed_by: "demo-frm_analyst",
-        status: "awaiting_explanation",
-        deadlines: [],
-        next_deadline: null,
-        expires_at: plus(change.at, 60),
-        explanation: null,
-        explanation_at: null,
-        decision: null,
-        decision_reason: null,
-        reported_at: null,
-        instruction: null,
-        released_at: null,
-        release_reason: null,
-        mule_confirmed_at: null,
-        str_due: null,
-        str_draft: null,
-        str_filed_at: null,
-        str_reference: null,
-        compliance_breach: null,
-      };
-      holds = [refresh(hold), ...holds];
-      cases = cases.map((x) =>
-        x.account_number === c.account_number
-          ? {
-              ...x,
-              active_hold_id: change.id,
-              flags: x.flags.map((f) => (change.keys.includes(f.key) ? { ...f, status: "held" } : f)),
-            }
-          : x,
-      );
-    } else {
-      const index = holds.findIndex((h) => h.hold_id === change.id);
-      const current = holds[index];
-      if (!current) throw new DemoConflict("No such hold at this bank.");
-      const next = step(current, change.s, change.b, change.at);
-      holds[index] = refresh(next);
-      if (next.released_at) {
-        cases = cases.map((x) => (x.active_hold_id === next.hold_id ? { ...x, active_hold_id: null } : x));
+    try {
+      if (change.k === "dismiss") {
+        cases = cases.map((c) =>
+          c.account_number === change.a
+            ? {
+                ...c,
+                flags: c.flags.map((f) =>
+                  f.status === "open" ? { ...f, status: "dismissed", dismissed_reason: change.r } : f,
+                ),
+              }
+            : c,
+        );
+      } else if (change.k === "thresholds") {
+        thresholds = change.t;
+      } else if (change.k === "verdict" || change.k === "lien" || change.k === "grievance") {
+        continue; // read through `verdictDecisions`, `applyLiens` and `grievancesFiled`
+      } else if (change.k === "note") {
+        const index = holds.findIndex((h) => h.hold_id === change.id);
+        const current = holds[index];
+        if (!current) throw new DemoConflict("No such hold at this bank.");
+        holds[index] = {
+          ...current,
+          notes: [...(current.notes ?? []), { at: change.at, actor: change.by, note: change.n }],
+        };
+      } else if (change.k === "hold") {
+        const c = cases.find((x) => x.account_number === change.a);
+        if (!c) throw new DemoConflict("This account has no open flags.");
+        if (c.active_hold_id)
+          throw new DemoConflict("This account already has an active temporary debit hold.");
+        const flags = c.flags.filter((f) => change.keys.includes(f.key) && f.status === "open");
+        if (flags.length === 0) throw new DemoConflict("Choose at least one open flag to hold.");
+        const amount = flags.reduce((sum, f) => Math.max(sum, f.amount), 0);
+        const reasons = flags.map((f) => f.reason);
+        const hold: Hold = {
+          hold_id: change.id,
+          account_number: c.account_number,
+          holder_name: c.holder_name,
+          amount,
+          whole_account: change.w,
+          account_level_reason: change.wr,
+          credit_txns: [...new Set(flags.flatMap((f) => f.credit_txns))],
+          reasons,
+          contact: change.c,
+          customer_notice: notice(bankName, c, amount, change.at, reasons, change.c),
+          placed_at: change.at,
+          placed_by: "demo-frm_analyst",
+          status: "awaiting_explanation",
+          deadlines: [],
+          next_deadline: null,
+          expires_at: plus(change.at, 60),
+          explanation: null,
+          explanation_at: null,
+          decision: null,
+          decision_reason: null,
+          reported_at: null,
+          instruction: null,
+          released_at: null,
+          release_reason: null,
+          mule_confirmed_at: null,
+          str_due: null,
+          str_draft: null,
+          str_filed_at: null,
+          str_reference: null,
+          compliance_breach: null,
+        };
+        holds = [refresh(hold), ...holds];
+        cases = cases.map((x) =>
+          x.account_number === c.account_number
+            ? {
+                ...x,
+                active_hold_id: change.id,
+                flags: x.flags.map((f) => (change.keys.includes(f.key) ? { ...f, status: "held" } : f)),
+              }
+            : x,
+        );
+      } else {
+        const index = holds.findIndex((h) => h.hold_id === change.id);
+        const current = holds[index];
+        if (!current) throw new DemoConflict("No such hold at this bank.");
+        const next = step(current, change.s, change.b, change.at);
+        holds[index] = refresh(next);
+        if (next.released_at) {
+          cases = cases.map((x) => (x.active_hold_id === next.hold_id ? { ...x, active_hold_id: null } : x));
+        }
       }
+    } catch (error) {
+      // A change saved against an earlier copy of the data may no longer fit it: skip it rather than break the
+      // page. Only the change being made now (the last one, when strict) is refused.
+      if (!(error instanceof DemoConflict) || (strict && index === changes.length - 1)) throw error;
     }
   }
   return { cases, holds, thresholds };
@@ -381,13 +397,21 @@ export function verdictDecisions(
 }
 
 /** Liens with a visitor's releases applied; throws DemoConflict for a lien already released. */
-export function applyLiens(member: string, saved: Lien[], changes: Change[]): Lien[] {
+export function applyLiens(member: string, saved: Lien[], changes: Change[], strict = false): Lien[] {
   const liens = structuredClone(saved);
-  for (const c of changes) {
+  for (const [index, c] of changes.entries()) {
     if (c.k !== "lien" || c.m !== member) continue;
     const lien = liens.find((l) => l.lien_id === c.id);
-    if (!lien) throw new DemoConflict(`No lien ${c.id} at this bank.`);
-    if (lien.released_at) throw new DemoConflict("This lien is already released.");
+    const problem = !lien
+      ? `No lien ${c.id} at this bank.`
+      : lien.released_at
+        ? "This lien is already released."
+        : null;
+    if (problem) {
+      if (strict && index === changes.length - 1) throw new DemoConflict(problem);
+      continue; // saved against an earlier copy of the data
+    }
+    if (!lien) continue;
     Object.assign(lien, {
       released_at: c.at,
       release_authority: c.a,
