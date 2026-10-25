@@ -57,6 +57,17 @@ def onward(engine: Engine, trail: list[ScoredTransaction], max_hops: int = 3) ->
     return found
 
 
+def own_funds(engine: Engine, accounts: set[str]) -> list[tuple[datetime, str, float, str]]:
+    """Every payment into these accounts within the engine's window, as (time, account, amount, txn id). Those not on
+    the traced trail are the accounts' own money mixed in with the traced money (see ripple.interdiction)."""
+    out = []
+    for account in accounts:
+        state = engine.store.get(account)
+        if state is not None:
+            out.extend((e.ts, account, e.amount, e.txn_id) for e in state.incoming)
+    return out
+
+
 def trace(engine: Engine, account: str, from_ts: datetime, amount: float | None = None, max_hops: int = 6,
           window: timedelta = timedelta(hours=72)) -> InterdictionPlan | None:
     start = engine.store.get(account)
@@ -89,4 +100,4 @@ def trace(engine: Engine, account: str, from_ts: datetime, amount: float | None 
         return None
     accounts = {t.dst_account for t in trail.values()} - {account}
     profiles = [p for p in (engine._profile(a) for a in sorted(accounts)) if p]
-    return plan_trail(f"trace-{account}", list(trail.values()), profiles, engine.store.now)
+    return plan_trail(f"trace-{account}", list(trail.values()), profiles, engine.store.now, own_funds(engine, accounts))

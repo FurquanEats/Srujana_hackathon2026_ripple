@@ -93,3 +93,42 @@ def test_digital_arrest_case_treats_the_customer_as_victim_and_counts_cash_outs(
     assert p.victims == [victim] and victim not in {f.account_id for f in p.freeze}
     assert p.stolen == 750000 + 390000
     assert p.escaped == 95000 + 245000 + 150000  # ATM withdrawal and two crypto purchases
+
+
+def _txn(i, minute, src, dst, amount):
+    from datetime import datetime
+
+    from ripple.schema import Layer, Rail, ScoredTransaction
+
+    return ScoredTransaction(txn_id=f"R{i}", ts=datetime(2026, 10, 20, 12, minute), src_account=src, dst_account=dst,
+                             amount=amount, rail=Rail.IMPS, probability=0.9, confidence=1.0,
+                             layer_scores={layer: 0.0 for layer in Layer}, is_alert=True)
+
+
+def test_three_tracing_rules_give_a_hold_range_when_own_money_is_mixed_in():
+    """A mule receives Rs 50,000 stolen, then Rs 20,000 of its own salary, then withdraws Rs 30,000."""
+    from datetime import datetime
+
+    from ripple.interdiction import plan_trail
+
+    trail = [_txn(1, 0, "VICTIM", "MULE", 50_000), _txn(2, 20, "MULE", "ATM-1", 30_000)]
+    salary = [(datetime(2026, 10, 20, 12, 10), "MULE", 20_000.0, "SAL1")]
+    p = plan_trail("T", trail, [], own_funds=salary)
+    mule = next(f for f in p.freeze if f.account_id == "MULE")
+    # Haircut: 30,000 leaves carrying 50/70 of it. FIFO: the stolen money arrived first, so it leaves first.
+    # LIBR: the salary is spent first, so 40,000 of the stolen money is still there.
+    assert mule.by_rule == {"haircut": 28_571.43, "fifo": 20_000.0, "libr": 40_000.0}
+    assert (mule.hold_low, mule.hold_high) == (20_000.0, 40_000.0)
+    assert mule.recoverable == 28_571.43 and p.recoverable_low == 20_000.0 and p.recoverable_high == 40_000.0
+
+
+def test_libr_never_refills_traced_money_from_later_deposits():
+    from datetime import datetime
+
+    from ripple.interdiction import plan_trail
+
+    trail = [_txn(1, 0, "VICTIM", "MULE", 50_000), _txn(2, 10, "MULE", "ATM-1", 45_000)]
+    later = [(datetime(2026, 10, 20, 12, 30), "MULE", 20_000.0, "SAL1")]
+    p = plan_trail("T", trail, [], datetime(2026, 10, 20, 13, 0), own_funds=later)
+    mule = next(f for f in p.freeze if f.account_id == "MULE")
+    assert mule.by_rule["libr"] == 5_000.0 and mule.hold_low == mule.hold_high == 5_000.0

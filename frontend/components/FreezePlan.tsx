@@ -3,11 +3,17 @@
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { money, moneyShort, pct, time, type InterdictionPlan } from "@/lib/api";
+import { money, moneyShort, pct, time, type FreezeAction, type InterdictionPlan } from "@/lib/api";
 
 import { Button, Card, Dialog, EmptyState, Icon, Notice, ShowMore, Stat } from "./ui";
 
 const TOP_FREEZES = 5;
+
+const RULE_LABEL = { haircut: "Haircut (pro rata)", fifo: "First in, first out", libr: "Lowest intermediate balance" } as const;
+
+/** True when the tracing rules disagree by at least a rupee, so a range is worth showing. */
+const hasRange = (low?: number | null, high?: number | null): low is number =>
+  low != null && high != null && high - low >= 1;
 
 /** The four headline figures: traced, recoverable now, escaped, recoverable at first alert. */
 export function RecoveryMetrics({ plan, currency = "INR" }: { plan: InterdictionPlan; currency?: string }) {
@@ -17,7 +23,9 @@ export function RecoveryMetrics({ plan, currency = "INR" }: { plan: Interdiction
       <Stat icon="search" label="Traced from victims" value={money(plan.stolen, currency)}
             hint={`from ${plan.victims.length} source account${plan.victims.length === 1 ? "" : "s"}`} />
       <Stat icon="lock" label="Recoverable now" value={money(plan.recoverable_now, currency)} tone="good" emphasis
-            hint={`${pct(share)} of traced money, held by the recommended accounts`} />
+            hint={hasRange(plan.recoverable_low, plan.recoverable_high)
+              ? `${money(plan.recoverable_low, currency)} to ${money(plan.recoverable_high!, currency)} across three tracing rules`
+              : `${pct(share)} of traced money, held by the recommended accounts`} />
       <Stat icon="critical" label="Already escaped" value={money(plan.escaped, currency)} tone={plan.escaped > 0 ? "bad" : "default"}
             hint="to cash, crypto or out of Ripple's view" />
       <Stat icon="clock" label="Recoverable at first alert"
@@ -79,7 +87,12 @@ export function RecoveryChart({ plan, currency = "INR", embedded = false }: { pl
   );
 }
 
-function holdRequest(plan: InterdictionPlan, account: string, amount: number, currency: string) {
+function holdRequest(plan: InterdictionPlan, f: FreezeAction, currency: string) {
+  const account = f.account_id;
+  const amount = f.hold_low ?? f.recoverable;
+  const range = hasRange(f.hold_low, f.hold_high)
+    ? [`Traced amount under three accepted tracing rules: ${money(f.hold_low, currency)} to ${money(f.hold_high!, currency)} (haircut ${money(f.by_rule?.haircut ?? f.recoverable, currency)}, first in first out ${money(f.by_rule?.fifo ?? 0, currency)}, lowest intermediate balance ${money(f.by_rule?.libr ?? 0, currency)}). The hold requested is the lowest of these, which every rule supports.`]
+    : [];
   return [
     "DRAFT FOR OFFICER REVIEW - NOT SENT",
     "",
@@ -88,6 +101,7 @@ function holdRequest(plan: InterdictionPlan, account: string, amount: number, cu
     "",
     `Funds traceable to reported fraud against ${plan.victims.join(", ")} are held in account ${account}.`,
     `Amount traced to the victims and still held: ${money(amount, currency)} as of ${time(plan.as_of)}.`,
+    ...range,
     `Total traced from the victims: ${money(plan.stolen, currency)}; already moved to cash or crypto: ${money(plan.escaped, currency)}.`,
     "",
     "Please place a hold on the traced amount pending investigation and confirm the action taken.",
@@ -140,16 +154,32 @@ export function FreezeList({ plan, currency = "INR" }: { plan: InterdictionPlan;
                         <dt className="text-xs text-subtle">Amount held</dt>
                         <dd className="font-semibold tabular-nums text-recover">{money(f.recoverable, currency)}</dd>
                       </div>
+                      {hasRange(f.hold_low, f.hold_high) && (
+                        <div>
+                          <dt className="text-xs text-subtle">Across three tracing rules</dt>
+                          <dd className="tabular-nums text-ink"
+                              title={(Object.keys(RULE_LABEL) as (keyof typeof RULE_LABEL)[]).map((r) => `${RULE_LABEL[r]}: ${money(f.by_rule?.[r] ?? 0, currency)}`).join(" · ")}>
+                            {money(f.hold_low, currency)} to {money(f.hold_high!, currency)}
+                          </dd>
+                        </div>
+                      )}
                       <div>
                         <dt className="text-xs text-subtle">Disruption score</dt>
                         <dd className="tabular-nums text-ink">{f.collateral_cost.toFixed(1)} <span className="text-xs text-subtle">lower is less disruptive</span></dd>
                       </div>
                     </dl>
                     <p className="mt-2 text-sm text-muted">{f.reason}</p>
+                    {hasRange(f.hold_low, f.hold_high) && (
+                      <p className="mt-1 text-xs text-subtle">
+                        This account mixed its own money with the traced money, so the rules disagree: haircut {money(f.by_rule?.haircut ?? 0, currency)},
+                        first in first out {money(f.by_rule?.fifo ?? 0, currency)}, lowest intermediate balance {money(f.by_rule?.libr ?? 0, currency)}.
+                        The draft asks for the lowest, which every rule supports.
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="mt-3 flex justify-end">
-                  <Button size="sm" variant="secondary" onClick={() => setDraft({ account: f.account_id, text: holdRequest(plan, f.account_id, f.recoverable, currency) })}
+                  <Button size="sm" variant="secondary" onClick={() => setDraft({ account: f.account_id, text: holdRequest(plan, f, currency) })}
                           aria-label={`Draft hold request for ${f.account_id}`}>
                     <Icon name="draft" className="h-4 w-4" /> Draft hold request
                   </Button>

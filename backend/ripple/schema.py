@@ -224,6 +224,9 @@ class FreezeAction(BaseModel):
     recoverable: float  # tainted funds a freeze would hold now
     collateral_cost: float  # how disruptive a freeze is: higher for accounts with more ordinary activity
     reason: str
+    by_rule: dict[str, float] = Field(default_factory=dict)  # traced money held under haircut, FIFO and LIBR
+    hold_low: float | None = None  # the lowest of the three: the amount every tracing rule supports
+    hold_high: float | None = None
 
 
 class RecoveryPoint(BaseModel):
@@ -240,6 +243,8 @@ class InterdictionPlan(BaseModel):
     holdings: list[TaintHolding]
     freeze: list[FreezeAction]  # the recommended freeze set, a minimum cut between victims and exits
     recoverable_now: float  # tainted funds held by the freeze set
+    recoverable_low: float | None = None  # the same, summing each freeze's lowest figure across tracing rules
+    recoverable_high: float | None = None
     escaped: float  # tainted funds already outside the trail
     first_alert_at: datetime | None = None
     recoverable_at_first_alert: float | None = None  # how much a freeze at Ripple's first alert would have held

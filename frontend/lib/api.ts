@@ -103,6 +103,9 @@ export interface FreezeAction {
   recoverable: number;
   collateral_cost: number;
   reason: string;
+  by_rule?: Partial<Record<"haircut" | "fifo" | "libr", number>>;
+  hold_low?: number | null;
+  hold_high?: number | null;
 }
 
 export interface RecoveryPoint {
@@ -119,6 +122,8 @@ export interface InterdictionPlan {
   holdings: TaintHolding[];
   freeze: FreezeAction[];
   recoverable_now: number;
+  recoverable_low?: number | null;
+  recoverable_high?: number | null;
   escaped: number;
   first_alert_at?: string | null;
   recoverable_at_first_alert?: number | null;

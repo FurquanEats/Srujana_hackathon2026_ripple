@@ -110,7 +110,9 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         evidence = interdiction.plan(case)  # first pass: which accounts hold traced money
         holders = {h.account_id for h in evidence.holdings}
         trail = [t for t in case.timeline if t.dst_account in holders or t.src_account in holders]
-        return interdiction.plan(case, onward=trace.onward(engine, trail))
+        onward = trace.onward(engine, trail)
+        accounts = {t.dst_account for t in case.timeline + onward}
+        return interdiction.plan(case, onward=onward, own_funds=trace.own_funds(engine, accounts))
 
     @app.post("/cases/{case_id}/feedback")
     def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:

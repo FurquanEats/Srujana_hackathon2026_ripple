@@ -16,12 +16,26 @@ the case (a mule's ordinary daily income, say) are not traced. A closed loop suc
 so its first payment is where the traced money starts.
 
 The trail only shows what the bank can see; an account's own funds from before the trail are unknown, so held
-amounts are what flowed in minus what flowed out, never below zero.
+amounts are what flowed in minus what flowed out, never below zero. A holder's other payments in (`own_funds`: its
+salary, say, within the engine's window) are its own money mixed in with the traced money.
+
+Once traced and own money are mixed, which rupees left is a convention, and accepted conventions disagree. Every
+holder's traced balance is therefore computed under three rules over the same payments, and each freeze shows the
+range they give:
+
+- haircut (pro rata): every rupee sent carries the account's traced share at that moment;
+- FIFO (first in, first out): money leaves in the order it arrived;
+- LIBR (lowest intermediate balance): the account's own money is spent first, so traced money stays as long as the
+  balance allows; once the balance dips, later deposits never refill what was traced.
+
+Money an account sends beyond everything seen coming in is its own earlier money under every rule. The haircut figure
+drives the freeze set, the timeline and "recoverable now"; the lowest of the three is the amount every rule supports.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -43,6 +57,8 @@ from ripple.schema import (
 
 DIRECT_FREEZE_SHARE = 0.05  # freeze any holder sitting on at least this share of the traced money
 EXIT = "__exit__"
+RULES = ("haircut", "fifo", "libr")
+OwnFunds = Sequence[tuple[datetime, str, float, str]]  # (time, holder, amount, txn id) paid in from outside the trail
 SOURCE = "__source__"
 
 
@@ -54,7 +70,8 @@ class _Account:
     tainted: float = 0.0
 
 
-def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredTransaction] = ()) -> InterdictionPlan:
+def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredTransaction] = (),
+         own_funds: OwnFunds = ()) -> InterdictionPlan:
     """Freeze plan for a case, tracing its evidence (alerts and the transactions their detector reasons cite) plus any
     `onward` payments its holders made later, such as a cash withdrawal after the last alert.
 
@@ -72,11 +89,11 @@ def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredT
     seen = {t.txn_id for t in trail}
     trail += [t for t in onward if t.txn_id not in seen and t.dst_account not in coerced]
     end = as_of or (max(t.ts for t in trail) if trail else detail.updated_at)
-    return plan_trail(detail.case_id, trail, detail.profiles, end)
+    return plan_trail(detail.case_id, trail, detail.profiles, end, own_funds)
 
 
 def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[AccountProfile],
-               as_of: datetime | None = None) -> InterdictionPlan:
+               as_of: datetime | None = None, own_funds: OwnFunds = ()) -> InterdictionPlan:
     """Freeze plan for any money trail: a case's evidence, or the hops followed forward from a victim's report."""
     txns = sorted(trail, key=lambda t: t.ts)
     as_of = as_of or (txns[-1].ts if txns else datetime.now())
@@ -98,8 +115,15 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
     timeline: list[RecoveryPoint] = []
     first_alert = next((t.ts for t in txns if t.is_alert), None)
     recoverable_at_first_alert = None
+    on_trail = {t.txn_id for t in txns}
+    own = sorted((f for f in own_funds if f[1] in holders and f[0] <= as_of and f[3] not in on_trail),
+                 key=lambda f: f[0])
+    events = _merge(txns, own)
 
-    for t in txns:
+    for t in events:
+        if isinstance(t, tuple):  # a holder's own money arriving: it dilutes the traced share
+            accounts[t[1]].held += t[2]
+            continue
         dst = accounts.get(t.dst_account)
         if t.txn_id in entry_ids:
             stolen += t.amount
@@ -136,12 +160,16 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
     freeze_ids = set(cut) | {a for a, s in accounts.items() if stolen and s.tainted >= DIRECT_FREEZE_SHARE * stolen}
 
     currency = txns[0].currency if txns else "INR"
+    by_rule = _taint_by_rule(events, holders, entry_ids)
     freeze = sorted(
         (FreezeAction(
             account_id=a,
             recoverable=round(accounts[a].tainted, 2),
             collateral_cost=round(costs[a], 2),
             reason=_reason(a, accounts[a].tainted, a in cut, a in collectors, currency),
+            by_rule={r: round(v, 2) for r, v in by_rule[a].items()},
+            hold_low=round(min(by_rule[a].values()), 2),
+            hold_high=round(max(by_rule[a].values()), 2),
         ) for a in freeze_ids),
         key=lambda f: -f.recoverable,
     )
@@ -163,6 +191,8 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
         holdings=holdings,
         freeze=freeze,
         recoverable_now=round(sum(f.recoverable for f in freeze), 2),
+        recoverable_low=round(sum(f.hold_low for f in freeze), 2),
+        recoverable_high=round(sum(f.hold_high for f in freeze), 2),
         escaped=round(escaped, 2),
         first_alert_at=first_alert,
         recoverable_at_first_alert=recoverable_at_first_alert,
@@ -171,9 +201,81 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
         timeline=timeline,
         edges=[GraphEdge(txn_id=t.txn_id, source=t.src_account, target=t.dst_account, amount=t.amount, ts=t.ts)
                for t in txns],
-        method="haircut taint tracking over the case's money trail; freeze set = minimum vertex cut weighted by "
-        "collateral cost, plus any holder with at least 5% of the traced money",
+        method="haircut taint tracking over the case's money trail, with FIFO and lowest-intermediate-balance figures "
+        "for each hold; freeze set = minimum vertex cut weighted by collateral cost, plus any holder with at least 5% "
+        "of the traced money",
     )
+
+
+def _merge(txns: list[ScoredTransaction], own: list[tuple[datetime, str, float, str]]) -> list:
+    """Trail payments and own-money arrivals in one time order; at equal times own money arrives first."""
+    out, i = [], 0
+    for t in txns:
+        while i < len(own) and own[i][0] <= t.ts:
+            out.append(own[i])
+            i += 1
+        out.append(t)
+    return out + own[i:]
+
+
+def _taint_by_rule(events: list, holders: set[str], entry_ids: set[str]) -> dict[str, dict[str, float]]:
+    """Traced money each holder still holds at the end, under each rule in RULES.
+
+    Each account keeps its money as lots of (amount, traced amount) in arrival order. Haircut and LIBR only need the
+    totals; FIFO spends the lots oldest first. A payment carries its traced part onward to the next holder, so the
+    rules can disagree more with every hop.
+    """
+    held: dict[str, dict[str, float]] = {a: {} for a in holders}
+    for rule in RULES:
+        lots: dict[str, list[list[float]]] = {a: [] for a in holders}
+        for e in events:
+            if isinstance(e, tuple):
+                lots[e[1]].append([e[2], 0.0])
+                continue
+            dst = lots.get(e.dst_account)
+            if e.txn_id in entry_ids:
+                dst.append([e.amount, e.amount])
+                continue
+            if e.src_account not in lots or is_cash_deposit(e):
+                continue
+            traced = _spend(lots[e.src_account], e.amount, rule)
+            if dst is not None:
+                dst.append([e.amount, traced])
+        for a in holders:
+            held[a][rule] = sum(lot[1] for lot in lots[a])
+    return held
+
+
+def _spend(lots: list[list[float]], amount: float, rule: str) -> float:
+    """Removes `amount` from an account's lots under `rule` and returns the traced part of what left. Anything beyond
+    what was seen coming in is the account's own earlier money and carries nothing traced."""
+    total = sum(lot[0] for lot in lots)
+    traced = sum(lot[1] for lot in lots)
+    out = min(amount, total)
+    if out <= 0:
+        return 0.0
+    if rule == "haircut":
+        keep = 1 - out / total
+        for lot in lots:
+            lot[0] *= keep
+            lot[1] *= keep
+        return traced * out / total
+    if rule == "libr":  # own money first, then traced
+        from_traced = max(0.0, out - (total - traced))
+        lots[:] = [[total - out, traced - from_traced]]
+        return from_traced
+    moved = 0.0  # fifo
+    while out > 1e-9 and lots:
+        lot = lots[0]
+        take = min(out, lot[0])
+        part = lot[1] * take / lot[0] if lot[0] else 0.0
+        lot[0] -= take
+        lot[1] -= part
+        moved += part
+        out -= take
+        if lot[0] <= 1e-9:
+            lots.pop(0)
+    return moved
 
 
 def _collateral_cost(profile: AccountProfile | None) -> float:
