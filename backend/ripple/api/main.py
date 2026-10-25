@@ -72,6 +72,11 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
 
             world = World()
             world.simulate()
+            if os.environ.get("RIPPLE_WALKTHROUGH", "1") == "1":
+                # Two fixed cases for a walkthrough, identical on every start because the simulator is seeded: a digital
+                # arrest that has fully played out, and a mule ring whose mules mix their own money with stolen money.
+                world.inject("digital_arrest", START + timedelta(days=17, hours=10))
+                world.inject("mule_ring", START + timedelta(days=18, hours=15))
             feed.add(row.txn for row in world.sorted_rows())
             fast_until = START + timedelta(days=float(os.environ.get("RIPPLE_HISTORY_DAYS", "20")))
             sim_end = START + timedelta(days=DAYS)
@@ -138,7 +143,8 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         trail = [t for t in case.timeline if t.dst_account in holders or t.src_account in holders]
         onward = trace.onward(engine, trail)
         accounts = {t.dst_account for t in case.timeline + onward}
-        return interdiction.plan(case, onward=onward, own_funds=trace.own_funds(engine, accounts))
+        return interdiction.plan(case, onward=onward, own_funds=trace.own_funds(engine, accounts),
+                                 merchants=trace.merchants(engine, accounts))
 
     @app.post("/cases/{case_id}/feedback")
     def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:

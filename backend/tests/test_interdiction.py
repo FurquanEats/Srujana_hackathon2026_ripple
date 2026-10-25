@@ -132,3 +132,12 @@ def test_libr_never_refills_traced_money_from_later_deposits():
     p = plan_trail("T", trail, [], datetime(2026, 10, 20, 13, 0), own_funds=later)
     mule = next(f for f in p.freeze if f.account_id == "MULE")
     assert mule.by_rule["libr"] == 5_000.0 and mule.hold_low == mule.hold_high == 5_000.0
+
+
+def test_money_spent_at_a_shop_has_left_the_trail_and_the_shop_is_never_held():
+    from ripple.interdiction import plan_trail
+
+    trail = [_txn(1, 0, "VICTIM", "MULE", 50_000), _txn(2, 10, "MULE", "SHOP01", 2_000)]
+    p = plan_trail("T", trail, [], merchants=frozenset({"SHOP01"}))
+    assert "SHOP01" not in {f.account_id for f in p.freeze} | {h.account_id for h in p.holdings}
+    assert p.escaped == 2_000 and p.recoverable_now == 48_000

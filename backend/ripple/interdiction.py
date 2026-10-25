@@ -59,6 +59,7 @@ from ripple.schema import (
 )
 
 DIRECT_FREEZE_SHARE = 0.05  # freeze any holder sitting on at least this share of the traced money
+MIN_HOLD = 1000.0  # a lien must recover at least this much, or 1% of the traced money if that is smaller
 EXIT = "__exit__"
 RULES = ("haircut", "fifo", "libr")
 OwnFunds = Sequence[tuple[datetime, str, float, str]]  # (time, holder, amount, txn id) paid in from outside the trail
@@ -74,7 +75,7 @@ class _Account:
 
 
 def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredTransaction] = (),
-         own_funds: OwnFunds = ()) -> InterdictionPlan:
+         own_funds: OwnFunds = (), merchants: frozenset[str] = frozenset()) -> InterdictionPlan:
     """Freeze plan for a case, tracing its evidence (alerts and the transactions their detector reasons cite) plus any
     `onward` payments its holders made later, such as a cash withdrawal after the last alert.
 
@@ -92,19 +93,24 @@ def plan(detail: CaseDetail, as_of: datetime | None = None, onward: list[ScoredT
     seen = {t.txn_id for t in trail}
     trail += [t for t in onward if t.txn_id not in seen and t.dst_account not in coerced]
     end = as_of or (max(t.ts for t in trail) if trail else detail.updated_at)
-    return plan_trail(detail.case_id, trail, detail.profiles, end, own_funds)
+    return plan_trail(detail.case_id, trail, detail.profiles, end, own_funds, merchants)
 
 
 def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[AccountProfile],
-               as_of: datetime | None = None, own_funds: OwnFunds = ()) -> InterdictionPlan:
-    """Freeze plan for any money trail: a case's evidence, or the hops followed forward from a victim's report."""
+               as_of: datetime | None = None, own_funds: OwnFunds = (),
+               merchants: frozenset[str] = frozenset()) -> InterdictionPlan:
+    """Freeze plan for any money trail: a case's evidence, or the hops followed forward from a victim's report.
+
+    Money a holder spends at a merchant (an account paid by many different people) has left the trail like a
+    cash-out: it cannot be recovered from the shop, so shops are never proposed for a hold."""
     txns = sorted(trail, key=lambda t: t.ts)
     as_of = as_of or (txns[-1].ts if txns else datetime.now())
     txns = [t for t in txns if t.ts <= as_of]
     # Roles come from the evidence alone: whoever receives traced money holds it; whoever only sends is a source.
-    holders = {t.dst_account for t in txns if not is_cash_out(t)}
+    holders = {t.dst_account for t in txns if not is_cash_out(t)} - merchants
     senders = {t.src_account for t in txns if not is_cash_deposit(t)}
-    entries = [t for t in txns if (t.src_account not in holders or is_cash_deposit(t)) and t.dst_account in holders]
+    entries = [t for t in txns if (t.src_account not in holders or is_cash_deposit(t)) and t.dst_account in holders
+               and t.src_account not in merchants]
     if not entries and txns:  # a closed loop such as a cycle: the money starts with the first payment
         holders.add(txns[0].dst_account)
         entries = [txns[0]]
@@ -161,6 +167,8 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
     collectors = holders - senders
     cut = _minimum_cut(txns, accounts, costs, exits | collectors)
     freeze_ids = set(cut) | {a for a, s in accounts.items() if stolen and s.tainted >= DIRECT_FREEZE_SHARE * stolen}
+    floor = min(MIN_HOLD, 0.01 * stolen)  # a lien for pocket change is not worth an officer's request
+    freeze_ids = {a for a in freeze_ids if accounts[a].tainted >= floor}
 
     currency = txns[0].currency if txns else "INR"
     by_rule = _taint_by_rule(events, holders, entry_ids)
