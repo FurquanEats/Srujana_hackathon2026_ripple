@@ -12,33 +12,64 @@ export const INSTITUTIONS = [
 
 export type InstitutionId = (typeof INSTITUTIONS)[number]["id"];
 
-/** The roles the workspace offers today, with what each one does. Grievance, account holder and victim come later. */
+/** Every role in the PRD's users table, with what each one does and what it signs in as. */
 export const ROLES = [
   {
     role: "nodal_officer",
     label: "Nodal officer",
-    duty: "Answers CFCFRMS notices and manages liens on traced amounts.",
+    duty: "Answers CFCFRMS notices, manages liens and checks payments before they leave.",
     bank: true,
+    pick: "bank",
   },
   {
     role: "frm_analyst",
     label: "FRM analyst",
-    duty: "Reviews mule flags, places temporary debit holds and sets detection thresholds.",
+    duty: "Reviews mule flags, runs temporary debit holds and their deadlines, and sets detection thresholds.",
     bank: true,
+    pick: "bank",
+  },
+  {
+    role: "grievance_officer",
+    label: "Grievance officer",
+    duty: "Reviews the documents an account holder sends, with Gemini's reading and fixed rules, and confirms each verdict.",
+    bank: true,
+    pick: "bank",
   },
   {
     role: "police_officer",
     label: "Police officer",
-    duty: "Follows each complaint's money trail across every institution.",
+    duty: "Follows each complaint's money trail, and instructs banks on holds they report.",
     bank: false,
+    pick: null,
   },
   {
     role: "demo",
     label: "Demo operator",
     duty: "Sees every complaint's trail and plays the demo story on the network.",
     bank: false,
+    pick: null,
   },
-] as const satisfies readonly { role: Role; label: string; duty: string; bank: boolean }[];
+  {
+    role: "account_holder",
+    label: "Account holder",
+    duty: "A customer whose account has a hold: reads the notice and sends an explanation.",
+    bank: true,
+    pick: "holder",
+  },
+  {
+    role: "victim",
+    label: "Victim",
+    duty: "Someone who reported a scam: sees what is held, where, and how it can come back.",
+    bank: false,
+    pick: "complaint",
+  },
+] as const satisfies readonly {
+  role: Role;
+  label: string;
+  duty: string;
+  bank: boolean;
+  pick: "bank" | "holder" | "complaint" | null;
+}[];
 
 export type WorkspaceRole = (typeof ROLES)[number]["role"];
 
@@ -58,6 +89,10 @@ export function isInstitution(id: unknown): id is InstitutionId {
 
 export function isWorkspaceRole(role: unknown): role is WorkspaceRole {
   return ROLES.some((r) => r.role === role);
+}
+
+export function pickFor(role: WorkspaceRole): "bank" | "holder" | "complaint" | null {
+  return ROLES.find((r) => r.role === role)?.pick ?? null;
 }
 
 export function needsBank(role: WorkspaceRole): boolean {

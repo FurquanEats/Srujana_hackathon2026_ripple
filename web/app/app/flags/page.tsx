@@ -37,19 +37,17 @@ export default async function FlagsPage({ searchParams }: { searchParams: Outcom
                 <th>Why it was flagged</th>
                 <th className="text-right">Flagged amount</th>
                 <th>Last activity</th>
+                <th aria-hidden />
               </tr>
             </thead>
             <tbody>
               {list.map((c) => (
-                <tr key={c.account_number}>
+                <tr key={c.account_number} className="row-link">
                   <td>
                     <Priority level={c.priority} />
                   </td>
                   <td>
-                    <Link
-                      href={`/app/flags/${c.account_number}`}
-                      className="text-fg underline-offset-2 hover:underline"
-                    >
+                    <Link href={`/app/flags/${c.account_number}`} className="stretch link">
                       {c.holder_name ?? "Unnamed holder"}
                     </Link>
                     <span className="text-faint block font-mono text-xs">{c.account_number}</span>
@@ -70,6 +68,9 @@ export default async function FlagsPage({ searchParams }: { searchParams: Outcom
                     <Money paise={c.flagged_amount} />
                   </td>
                   <td className="text-muted whitespace-nowrap text-xs">{formatIst(c.last_at)}</td>
+                  <td aria-hidden className="text-right">
+                    <span className="go">→</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

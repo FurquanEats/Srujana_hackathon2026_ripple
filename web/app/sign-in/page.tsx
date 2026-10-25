@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { INSTITUTIONS, ROLES } from "@/lib/personas";
+import { holderPersonas, victimPersonas } from "@/lib/gateway/source";
+import { INSTITUTIONS, institutionName, ROLES } from "@/lib/personas";
 
 import { signIn } from "./actions";
 import { RolePicker } from "./role-picker";
@@ -12,13 +13,14 @@ const ERRORS: Record<string, string> = {
   disabled: "Demo sign-in is turned off on this server. Set RIPPLE_DEMO=1 to turn it on.",
   role: "Choose a role.",
   member: "Choose the institution you work for.",
+  holder: "Choose whose account you are.",
 };
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
     <main className="tone-light flex min-h-dvh items-center justify-center px-4 py-16">
-      <div className="w-full max-w-[440px]">
+      <div className="w-full max-w-[560px]">
         <Link href="/" className="pixel block text-center text-xl" aria-label="Ripple, home">
           Ripple
         </Link>
@@ -33,7 +35,18 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
           </p>
         )}
         <form action={signIn} className="mt-8 border border-line p-5 sm:p-6">
-          <RolePicker roles={ROLES} institutions={INSTITUTIONS} />
+          <RolePicker
+            roles={ROLES}
+            institutions={INSTITUTIONS}
+            holders={holderPersonas().map((h) => ({
+              value: `${h.member}:${h.account}`,
+              label: `${h.name}, ${institutionName(h.member, true)}`,
+            }))}
+            complaints={victimPersonas().map((v) => ({
+              value: v.ack,
+              label: `${v.name}, complaint ${v.ack}`,
+            }))}
+          />
           <button type="submit" className="button button-solid mt-6 w-full">
             Continue
           </button>

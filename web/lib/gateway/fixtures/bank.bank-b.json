@@ -1,32 +1,32 @@
 {
   "/v1/notices": [
     {
-      "account_number": "4539646006",
-      "ack_number": "31575867494554",
+      "account_number": "4846077006",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 5000000,
       "holder_name": "Galaxy Mobiles (phone shop)",
       "layer": 3,
-      "lien_id": "LD0C04C959C654855",
-      "notice_id": "31575867494554-007",
+      "lien_id": "LF8176A810235712A",
+      "notice_id": "37456153881292-007",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:34.194731Z",
+      "received_at": "2026-10-25T19:06:07.961305Z",
       "status": "matched",
       "traced_in": 5000000
     },
     {
-      "account_number": "3539646002",
-      "ack_number": "31575867494554",
+      "account_number": "3846077002",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 10000000,
       "holder_name": "M1 (mule)",
       "layer": 1,
-      "lien_id": "L8E3686BE3ADBC7AC",
-      "notice_id": "31575867494554-001",
+      "lien_id": "L96997EDCE4805270",
+      "notice_id": "37456153881292-001",
       "onward_count": 3,
       "reason": null,
-      "received_at": "2026-10-25T18:35:30.965423Z",
+      "received_at": "2026-10-25T19:06:07.228170Z",
       "status": "matched",
       "traced_in": 80000000
     },
@@ -37,11 +37,11 @@
       "held": 5000000,
       "holder_name": "Galaxy Mobiles",
       "layer": 3,
-      "lien_id": "L2A239CF547FF77DF",
+      "lien_id": "L779047A0B32ADE96",
       "notice_id": "30391446601247-007",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.919368Z",
+      "received_at": "2026-10-25T19:06:02.150435Z",
       "status": "matched",
       "traced_in": 5000000
     },
@@ -52,11 +52,11 @@
       "held": 12000000,
       "holder_name": "Deepak Rathore",
       "layer": 1,
-      "lien_id": "L7CD50E9054D1E670",
+      "lien_id": "L5C43937AF46396B9",
       "notice_id": "38069132210127-001",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.111267Z",
+      "received_at": "2026-10-25T19:06:01.507365Z",
       "status": "matched",
       "traced_in": 34000000
     },
@@ -71,7 +71,7 @@
       "notice_id": "25925884038089-002",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.397544Z",
+      "received_at": "2026-10-25T19:06:00.896251Z",
       "status": "matched",
       "traced_in": 2450000
     },
@@ -82,21 +82,21 @@
       "held": 10000000,
       "holder_name": "Arjun Mondal",
       "layer": 1,
-      "lien_id": "L0C8E62328279C6A9",
+      "lien_id": "L39B4E6AADCEB72E6",
       "notice_id": "30391446601247-001",
       "onward_count": 3,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.140498Z",
+      "received_at": "2026-10-25T19:06:00.614877Z",
       "status": "matched",
       "traced_in": 80000000
     }
   ],
-  "/v1/notices/31575867494554-007": {
+  "/v1/notices/37456153881292-007": {
     "credit": {
       "amount": 12000000,
-      "at": "2026-10-25T18:29:29.761079Z",
+      "at": "2026-10-25T19:00:02.201713Z",
       "rail": "imps",
-      "reference": "539646000008"
+      "reference": "846077000008"
     },
     "exits": [],
     "legal_basis": "BNSS s.168 read with s.94",
@@ -104,44 +104,44 @@
     "statement": [
       {
         "amount": 12000000,
-        "at": "2026-10-25T18:29:29.761079Z",
+        "at": "2026-10-25T19:00:02.201713Z",
         "counterparty": {
-          "account_number": "7539646002",
+          "account_number": "7846077002",
           "ifsc": "BKDD0000001",
           "vpa": null
         },
         "direction": "credit",
         "exit": null,
         "rail": "imps",
-        "reference": "539646000008",
-        "txn_id": "C539646000008",
+        "reference": "846077000008",
+        "txn_id": "C846077000008",
         "victim_money": {
-          "31575867494554": 5000000
+          "37456153881292": 5000000
         }
       }
     ],
     "summary": {
-      "account_number": "4539646006",
-      "ack_number": "31575867494554",
+      "account_number": "4846077006",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 5000000,
       "holder_name": "Galaxy Mobiles (phone shop)",
       "layer": 3,
-      "lien_id": "LD0C04C959C654855",
-      "notice_id": "31575867494554-007",
+      "lien_id": "LF8176A810235712A",
+      "notice_id": "37456153881292-007",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:34.194731Z",
+      "received_at": "2026-10-25T19:06:07.961305Z",
       "status": "matched",
       "traced_in": 5000000
     }
   },
-  "/v1/notices/31575867494554-001": {
+  "/v1/notices/37456153881292-001": {
     "credit": {
       "amount": 80000000,
-      "at": "2026-10-25T18:23:29.761079Z",
+      "at": "2026-10-25T18:54:02.201713Z",
       "rail": "rtgs",
-      "reference": "BKAAR53964600000000001"
+      "reference": "BKAAR84607700000000001"
     },
     "exits": [],
     "legal_basis": "BNSS s.168 read with s.94",
@@ -149,12 +149,12 @@
       {
         "payment": {
           "amount": 30000000,
-          "at": "2026-10-25T18:25:29.761079Z",
+          "at": "2026-10-25T18:56:02.201713Z",
           "rail": "imps",
-          "reference": "539646000002"
+          "reference": "846077000002"
         },
         "to": {
-          "account_number": "5539646002",
+          "account_number": "5846077002",
           "ifsc": "BKCC0000001",
           "vpa": null
         },
@@ -163,12 +163,12 @@
       {
         "payment": {
           "amount": 25000000,
-          "at": "2026-10-25T18:26:29.761079Z",
+          "at": "2026-10-25T18:57:02.201713Z",
           "rail": "imps",
-          "reference": "539646000003"
+          "reference": "846077000003"
         },
         "to": {
-          "account_number": "7539646002",
+          "account_number": "7846077002",
           "ifsc": "BKDD0000001",
           "vpa": null
         },
@@ -177,12 +177,12 @@
       {
         "payment": {
           "amount": 15000000,
-          "at": "2026-10-25T18:27:29.761079Z",
+          "at": "2026-10-25T18:58:02.201713Z",
           "rail": "imps",
-          "reference": "539646000004"
+          "reference": "846077000004"
         },
         "to": {
-          "account_number": "8539646006",
+          "account_number": "8846077006",
           "ifsc": "WLTW0000001",
           "vpa": null
         },
@@ -192,85 +192,85 @@
     "statement": [
       {
         "amount": 80000000,
-        "at": "2026-10-25T18:23:29.761079Z",
+        "at": "2026-10-25T18:54:02.201713Z",
         "counterparty": {
-          "account_number": "1539646006",
+          "account_number": "1846077006",
           "ifsc": "BKAA0000001",
           "vpa": null
         },
         "direction": "credit",
         "exit": null,
         "rail": "rtgs",
-        "reference": "BKAAR53964600000000001",
-        "txn_id": "CBKAAR53964600000000001",
+        "reference": "BKAAR84607700000000001",
+        "txn_id": "CBKAAR84607700000000001",
         "victim_money": {
-          "31575867494554": 80000000
+          "37456153881292": 80000000
         }
       },
       {
         "amount": 30000000,
-        "at": "2026-10-25T18:25:29.761079Z",
+        "at": "2026-10-25T18:56:02.201713Z",
         "counterparty": {
-          "account_number": "5539646002",
+          "account_number": "5846077002",
           "ifsc": "BKCC0000001",
           "vpa": null
         },
         "direction": "debit",
         "exit": null,
         "rail": "imps",
-        "reference": "539646000002",
-        "txn_id": "D539646000002",
+        "reference": "846077000002",
+        "txn_id": "D846077000002",
         "victim_money": {
-          "31575867494554": 30000000
+          "37456153881292": 30000000
         }
       },
       {
         "amount": 25000000,
-        "at": "2026-10-25T18:26:29.761079Z",
+        "at": "2026-10-25T18:57:02.201713Z",
         "counterparty": {
-          "account_number": "7539646002",
+          "account_number": "7846077002",
           "ifsc": "BKDD0000001",
           "vpa": null
         },
         "direction": "debit",
         "exit": null,
         "rail": "imps",
-        "reference": "539646000003",
-        "txn_id": "D539646000003",
+        "reference": "846077000003",
+        "txn_id": "D846077000003",
         "victim_money": {
-          "31575867494554": 25000000
+          "37456153881292": 25000000
         }
       },
       {
         "amount": 15000000,
-        "at": "2026-10-25T18:27:29.761079Z",
+        "at": "2026-10-25T18:58:02.201713Z",
         "counterparty": {
-          "account_number": "8539646006",
+          "account_number": "8846077006",
           "ifsc": "WLTW0000001",
           "vpa": null
         },
         "direction": "debit",
         "exit": null,
         "rail": "imps",
-        "reference": "539646000004",
-        "txn_id": "D539646000004",
+        "reference": "846077000004",
+        "txn_id": "D846077000004",
         "victim_money": {
-          "31575867494554": 15000000
+          "37456153881292": 15000000
         }
       }
     ],
     "summary": {
-      "account_number": "3539646002",
-      "ack_number": "31575867494554",
+      "account_number": "3846077002",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 10000000,
       "holder_name": "M1 (mule)",
       "layer": 1,
-      "lien_id": "L8E3686BE3ADBC7AC",
-      "notice_id": "31575867494554-001",
+      "lien_id": "L96997EDCE4805270",
+      "notice_id": "37456153881292-001",
       "onward_count": 3,
       "reason": null,
-      "received_at": "2026-10-25T18:35:30.965423Z",
+      "received_at": "2026-10-25T19:06:07.228170Z",
       "status": "matched",
       "traced_in": 80000000
     }
@@ -311,11 +311,11 @@
       "held": 5000000,
       "holder_name": "Galaxy Mobiles",
       "layer": 3,
-      "lien_id": "L2A239CF547FF77DF",
+      "lien_id": "L779047A0B32ADE96",
       "notice_id": "30391446601247-007",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.919368Z",
+      "received_at": "2026-10-25T19:06:02.150435Z",
       "status": "matched",
       "traced_in": 5000000
     }
@@ -470,11 +470,11 @@
       "held": 12000000,
       "holder_name": "Deepak Rathore",
       "layer": 1,
-      "lien_id": "L7CD50E9054D1E670",
+      "lien_id": "L5C43937AF46396B9",
       "notice_id": "38069132210127-001",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.111267Z",
+      "received_at": "2026-10-25T19:06:01.507365Z",
       "status": "matched",
       "traced_in": 34000000
     }
@@ -791,7 +791,7 @@
       "notice_id": "25925884038089-002",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.397544Z",
+      "received_at": "2026-10-25T19:06:00.896251Z",
       "status": "matched",
       "traced_in": 2450000
     }
@@ -926,34 +926,34 @@
       "held": 10000000,
       "holder_name": "Arjun Mondal",
       "layer": 1,
-      "lien_id": "L0C8E62328279C6A9",
+      "lien_id": "L39B4E6AADCEB72E6",
       "notice_id": "30391446601247-001",
       "onward_count": 3,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.140498Z",
+      "received_at": "2026-10-25T19:06:00.614877Z",
       "status": "matched",
       "traced_in": 80000000
     }
   },
   "/v1/liens": [
     {
-      "account_number": "4539646006",
-      "ack_number": "31575867494554",
+      "account_number": "4846077006",
+      "ack_number": "37456153881292",
       "amount": 5000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Galaxy Mobiles (phone shop)",
-      "lien_id": "LD0C04C959C654855",
-      "placed_at": "2026-10-25T18:35:34.194731Z",
+      "lien_id": "LF8176A810235712A",
+      "placed_at": "2026-10-25T19:06:07.961305Z",
       "released_at": null
     },
     {
-      "account_number": "3539646002",
-      "ack_number": "31575867494554",
+      "account_number": "3846077002",
+      "ack_number": "37456153881292",
       "amount": 10000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "M1 (mule)",
-      "lien_id": "L8E3686BE3ADBC7AC",
-      "placed_at": "2026-10-25T18:35:30.965423Z",
+      "lien_id": "L96997EDCE4805270",
+      "placed_at": "2026-10-25T19:06:07.228170Z",
       "released_at": null
     },
     {
@@ -962,8 +962,8 @@
       "amount": 5000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Galaxy Mobiles",
-      "lien_id": "L2A239CF547FF77DF",
-      "placed_at": "2026-10-25T18:35:29.919368Z",
+      "lien_id": "L779047A0B32ADE96",
+      "placed_at": "2026-10-25T19:06:02.150435Z",
       "released_at": null
     },
     {
@@ -972,8 +972,8 @@
       "amount": 12000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Deepak Rathore",
-      "lien_id": "L7CD50E9054D1E670",
-      "placed_at": "2026-10-25T18:35:29.111267Z",
+      "lien_id": "L5C43937AF46396B9",
+      "placed_at": "2026-10-25T19:06:01.507365Z",
       "released_at": null
     },
     {
@@ -982,47 +982,47 @@
       "amount": 10000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Arjun Mondal",
-      "lien_id": "L0C8E62328279C6A9",
-      "placed_at": "2026-10-25T18:35:28.140498Z",
+      "lien_id": "L39B4E6AADCEB72E6",
+      "placed_at": "2026-10-25T19:06:00.614877Z",
       "released_at": null
     }
   ],
   "/v1/mule-cases": [
     {
-      "account_number": "3539646002",
+      "account_number": "3846077002",
       "active_hold_id": null,
       "declared_annual_income": 0,
       "declared_profile": "individual; student; declared annual income Rs 0",
-      "first_at": "2026-10-25T18:23:29.761079Z",
+      "first_at": "2026-10-25T18:54:02.201713Z",
       "flagged_amount": 80000000,
       "flags": [
         {
           "amount": 80000000,
-          "at": "2026-10-25T18:23:29.761079Z",
-          "cited_txns": ["CBKAAR53964600000000001"],
-          "credit_txns": ["CBKAAR53964600000000001"],
+          "at": "2026-10-25T18:54:02.201713Z",
+          "cited_txns": ["CBKAAR84607700000000001"],
+          "credit_txns": ["CBKAAR84607700000000001"],
           "dismissed_reason": null,
-          "key": "out_of_profile:3539646002:CBKAAR53964600000000001",
-          "reason": "Credits of ₹8,00,000 arrived in the 30 days to 25 Oct 2026, 11:53 PM IST, and the customer declared no income or turnover at account opening.",
+          "key": "out_of_profile:3846077002:CBKAAR84607700000000001",
+          "reason": "Credits of ₹8,00,000 arrived in the 30 days to 26 Oct 2026, 12:24 AM IST, and the customer declared no income or turnover at account opening.",
           "rule": "out_of_profile",
           "status": "open",
           "title": "Out of profile"
         },
         {
           "amount": 80000000,
-          "at": "2026-10-25T18:27:29.761079Z",
-          "cited_txns": ["CBKAAR53964600000000001", "D539646000002", "D539646000003", "D539646000004"],
-          "credit_txns": ["CBKAAR53964600000000001"],
+          "at": "2026-10-25T18:58:02.201713Z",
+          "cited_txns": ["CBKAAR84607700000000001", "D846077000002", "D846077000003", "D846077000004"],
+          "credit_txns": ["CBKAAR84607700000000001"],
           "dismissed_reason": null,
-          "key": "pass_through:3539646002:CBKAAR53964600000000001",
-          "reason": "₹8,00,000 arrived on 25 Oct 2026, 11:53 PM IST, and 87% of it left the account within 4 minutes in 3 debits.",
+          "key": "pass_through:3846077002:CBKAAR84607700000000001",
+          "reason": "₹8,00,000 arrived on 26 Oct 2026, 12:24 AM IST, and 87% of it left the account within 4 minutes in 3 debits.",
           "rule": "pass_through",
           "status": "open",
           "title": "Pass-through"
         }
       ],
       "holder_name": "M1 (mule)",
-      "last_at": "2026-10-25T18:27:29.761079Z",
+      "last_at": "2026-10-25T18:58:02.201713Z",
       "priority": "high",
       "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
       "reported": true,
@@ -1058,7 +1058,7 @@
     },
     {
       "account_number": "97748343517098",
-      "active_hold_id": "H32D5498E322DF503",
+      "active_hold_id": "H5BC04E70181C45DA",
       "declared_annual_income": 0,
       "declared_profile": "individual; Student; declared annual income ₹0",
       "first_at": "2026-09-18T05:32:00Z",
@@ -1953,40 +1953,40 @@
       "account_number": "97748343517098",
       "amount": 124000,
       "compliance_breach": null,
-      "contact": "SMS and email to the registered mobile number and email",
+      "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "credit_txns": ["BKBB-7-000003853"],
-      "customer_notice": "Dear Arjun Mondal,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,240 from your account ending 7098, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹8,00,000 arrived in the 30 days to 18 Sep 2026, 11:02 AM IST, and the customer declared no income or turnover at account opening. The account had no transactions for 200 days, then received ₹8,00,000 on 18 Sep 2026, 11:02 AM IST. ₹8,00,000 arrived on 18 Sep 2026, 11:02 AM IST, and 87% of it left the account within 4 minutes in 3 debits.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
+      "customer_notice": "Dear Arjun Mondal,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,240 from your account ending 7098, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹8,00,000 arrived in the 30 days to 18 Sep 2026, 11:02 AM IST, and the customer declared no income or turnover at account opening. The account had no transactions for 200 days, then received ₹8,00,000 on 18 Sep 2026, 11:02 AM IST. ₹8,00,000 arrived on 18 Sep 2026, 11:02 AM IST, and 87% of it left the account within 4 minutes in 3 debits.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "deadlines": [
         {
-          "due": "2026-10-25T18:36:11.629130Z",
-          "met_at": "2026-10-25T18:36:11.629130Z",
+          "due": "2026-10-25T19:06:12.908758Z",
+          "met_at": "2026-10-25T19:06:12.908758Z",
           "name": "Customer notified",
           "rule": "Annex III Step 2: at once when the customer is reached digitally",
           "state": "met"
         },
         {
-          "due": "2026-11-14T18:36:11.629130Z",
+          "due": "2026-11-14T19:06:12.908758Z",
           "met_at": null,
           "name": "Customer explanation",
           "rule": "Annex III Step 3: 20 days from the hold",
           "state": "open"
         },
         {
-          "due": "2026-11-24T18:36:11.629130Z",
+          "due": "2026-11-24T19:06:12.908758Z",
           "met_at": null,
           "name": "Bank decision",
           "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
           "state": "open"
         },
         {
-          "due": "2026-12-24T18:36:11.629130Z",
+          "due": "2026-12-24T19:06:12.908758Z",
           "met_at": null,
           "name": "Maximum duration",
           "rule": "Annex III: no temporary debit hold lasts more than 60 days",
           "state": "open"
         },
         {
-          "due": "2026-11-03T18:36:32.356217Z",
+          "due": "2026-11-03T19:06:12.973840Z",
           "met_at": null,
           "name": "STR filed with FIU-IND",
           "rule": "PML Rules, rule 8(3): 7 working days from forming the suspicion",
@@ -1995,15 +1995,15 @@
       ],
       "decision": null,
       "decision_reason": null,
-      "expires_at": "2026-12-24T18:36:11.629130Z",
+      "expires_at": "2026-12-24T19:06:12.908758Z",
       "explanation": null,
       "explanation_at": null,
-      "hold_id": "H32D5498E322DF503",
+      "hold_id": "H5BC04E70181C45DA",
       "holder_name": "Arjun Mondal",
       "instruction": null,
-      "mule_confirmed_at": "2026-10-25T18:36:32.356217Z",
-      "next_deadline": "2026-11-03T18:36:32.356217Z",
-      "placed_at": "2026-10-25T18:36:11.629130Z",
+      "mule_confirmed_at": "2026-10-25T19:06:12.973840Z",
+      "next_deadline": "2026-11-03T19:06:12.973840Z",
+      "placed_at": "2026-10-25T19:06:12.908758Z",
       "placed_by": "demo-frm_analyst",
       "reasons": [
         "Credits of ₹8,00,000 arrived in the 30 days to 18 Sep 2026, 11:02 AM IST, and the customer declared no income or turnover at account opening.",
@@ -2024,12 +2024,12 @@
           "type": "regular"
         },
         "branch_ifsc": "BKBB0723143",
-        "due_by": "2026-11-03T18:36:32.356217+00:00",
+        "due_by": "2026-11-03T19:06:12.973840+00:00",
         "grounds_of_suspicion": [
           "Credits of ₹8,00,000 arrived in the 30 days to 18 Sep 2026, 11:02 AM IST, and the customer declared no income or turnover at account opening.",
           "The account had no transactions for 200 days, then received ₹8,00,000 on 18 Sep 2026, 11:02 AM IST.",
           "₹8,00,000 arrived on 18 Sep 2026, 11:02 AM IST, and 87% of it left the account within 4 minutes in 3 debits.",
-          "The account is on a CFCFRMS notice for the same money: a digital-arrest scam reported on the 1930 helpline."
+          "The account is on a CFCFRMS notice for the same money, reported on the 1930 helpline."
         ],
         "linked_ncrp_acknowledgements": ["30391446601247"],
         "report_type": "STR",
@@ -2037,16 +2037,16 @@
           "bank_code": "BKBB",
           "name": "Bank B, a private bank"
         },
-        "suspicion_formed_at": "2026-10-25T18:36:32.356217+00:00",
+        "suspicion_formed_at": "2026-10-25T19:06:12.973840+00:00",
         "temporary_debit_hold": {
           "amount": 124000,
-          "hold_id": "H32D5498E322DF503",
-          "placed_at": "2026-10-25T18:36:11.629130+00:00",
+          "hold_id": "H5BC04E70181C45DA",
+          "placed_at": "2026-10-25T19:06:12.908758+00:00",
           "whole_account": false
         },
         "transactions": []
       },
-      "str_due": "2026-11-03T18:36:32.356217Z",
+      "str_due": "2026-11-03T19:06:12.973840Z",
       "str_filed_at": null,
       "str_reference": null,
       "whole_account": false
@@ -2056,49 +2056,49 @@
       "account_number": "68021018459754",
       "amount": 12000000,
       "compliance_breach": null,
-      "contact": "SMS and email to the registered mobile number and email",
+      "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "credit_txns": ["BKBB-7-000003859"],
-      "customer_notice": "Dear Galaxy Mobiles,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,20,000 from your account ending 9754, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹1,20,000 on 18 Sep 2026, 11:08 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
+      "customer_notice": "Dear Galaxy Mobiles,\n\nBank B, a private bank has placed a temporary hold on debits of ₹1,20,000 from your account ending 9754, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹1,20,000 on 18 Sep 2026, 11:08 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "deadlines": [
         {
-          "due": "2026-10-25T18:36:11.582140Z",
-          "met_at": "2026-10-25T18:36:11.582140Z",
+          "due": "2026-10-25T19:06:12.620233Z",
+          "met_at": "2026-10-25T19:06:12.620233Z",
           "name": "Customer notified",
           "rule": "Annex III Step 2: at once when the customer is reached digitally",
           "state": "met"
         },
         {
-          "due": "2026-11-14T18:36:11.582140Z",
-          "met_at": "2026-10-25T18:36:32.051913Z",
+          "due": "2026-11-14T19:06:12.620233Z",
+          "met_at": "2026-10-25T19:06:12.688846Z",
           "name": "Customer explanation",
           "rule": "Annex III Step 3: 20 days from the hold",
           "state": "met"
         },
         {
-          "due": "2026-11-04T18:36:32.051913Z",
-          "met_at": "2026-10-25T18:36:32.129434Z",
+          "due": "2026-11-04T19:06:12.688846Z",
+          "met_at": "2026-10-25T19:06:12.743748Z",
           "name": "Bank decision",
           "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
           "state": "met"
         }
       ],
       "decision": "release",
-      "decision_reason": "The invoice and purchase order match the credit; the account sells phones and the sale fits its business.",
-      "expires_at": "2026-12-24T18:36:11.582140Z",
-      "explanation": "The customer sent a GST tax invoice for 12 phones sold to a corporate buyer on 18 Sep 2026, with the buyer's purchase order.",
-      "explanation_at": "2026-10-25T18:36:32.051913Z",
-      "hold_id": "HB1251A3BD0DFA815",
+      "decision_reason": "The invoice and purchase order match the credit, and selling phones fits the declared business.",
+      "expires_at": "2026-12-24T19:06:12.620233Z",
+      "explanation": "GST tax invoice for 12 phones sold to a corporate buyer, with the buyer's purchase order.",
+      "explanation_at": "2026-10-25T19:06:12.688846Z",
+      "hold_id": "H521651C249B1F30E",
       "holder_name": "Galaxy Mobiles",
       "instruction": null,
       "mule_confirmed_at": null,
       "next_deadline": null,
-      "placed_at": "2026-10-25T18:36:11.582140Z",
+      "placed_at": "2026-10-25T19:06:12.620233Z",
       "placed_by": "demo-frm_analyst",
       "reasons": [
         "The account had no transactions for 200 days, then received ₹1,20,000 on 18 Sep 2026, 11:08 AM IST."
       ],
       "release_reason": "The bank was satisfied with the explanation (Annex III Step 4(a)).",
-      "released_at": "2026-10-25T18:36:32.129434Z",
+      "released_at": "2026-10-25T19:06:12.743748Z",
       "reported_at": null,
       "status": "released",
       "str_draft": null,
@@ -2284,8 +2284,167 @@
         "title": "Quick cash-out"
       }
     ],
-    "since": "2026-09-25T18:36:43.382586+00:00",
-    "until": "2026-10-25T18:36:43.382586+00:00",
+    "since": "2026-09-25T19:06:16.235748+00:00",
+    "until": "2026-10-25T19:06:16.235748+00:00",
     "within_budget": true
-  }
+  },
+  "/v1/audit": {
+    "broken_at": null,
+    "entries": [
+      {
+        "action": "hold.confirm_mule",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.973840+00:00",
+        "hash": "62571094b2816399877d50bacb1a2d001aa4d8241ddb3bfb8bd7e0f2b1eddd59",
+        "record": {
+          "account": "97748343517098",
+          "hold_id": "H5BC04E70181C45DA",
+          "status": "awaiting_explanation",
+          "str_due": "2026-11-03T19:06:12.973840+00:00"
+        },
+        "seq": 11
+      },
+      {
+        "action": "hold.place",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.908758+00:00",
+        "hash": "579914fa6394758f6844c78d7c7db447cb50918af8419ae215cfcf7d7e1f5fd9",
+        "record": {
+          "account": "97748343517098",
+          "amount": 124000,
+          "credits": ["BKBB-7-000003853"],
+          "hold_id": "H5BC04E70181C45DA",
+          "status": "awaiting_explanation",
+          "whole_account": false
+        },
+        "seq": 10
+      },
+      {
+        "action": "hold.decide.release",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.743748+00:00",
+        "hash": "14ba8fa924833d8c652a35a1e212dfbc9b4230291c86bfa360a292b143727e74",
+        "record": {
+          "account": "68021018459754",
+          "hold_id": "H521651C249B1F30E",
+          "reason": "The invoice and purchase order match the credit, and selling phones fits the declared business.",
+          "status": "released"
+        },
+        "seq": 9
+      },
+      {
+        "action": "hold.explanation",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.688846+00:00",
+        "hash": "3f6774eea5a7d11ab1287bcea4ff72b7bec18e5a2ac0571413fcfd982f8261ab",
+        "record": {
+          "account": "68021018459754",
+          "decision_due": "2026-11-04T19:06:12.688846+00:00",
+          "hold_id": "H521651C249B1F30E",
+          "status": "explanation_received"
+        },
+        "seq": 8
+      },
+      {
+        "action": "hold.place",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.620233+00:00",
+        "hash": "ab73dcf4c4696e18278bff1b03aaa1a06eb53cf113f7e07b8c9cc125efd6f28a",
+        "record": {
+          "account": "68021018459754",
+          "amount": 12000000,
+          "credits": ["BKBB-7-000003859"],
+          "hold_id": "H521651C249B1F30E",
+          "status": "awaiting_explanation",
+          "whole_account": false
+        },
+        "seq": 7
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:07.961305+00:00",
+        "hash": "b0466fb80558da3d270485154cd584ab16c21a962bcaf4679b9a910664508b72",
+        "record": {
+          "ack_number": "37456153881292",
+          "held": 5000000,
+          "lien_id": "LF8176A810235712A",
+          "notice_id": "37456153881292-007",
+          "status": "matched"
+        },
+        "seq": 6
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:07.228170+00:00",
+        "hash": "aa7804d98e9b11e1d94cfbcd86da3e5ad6b7b0eafc4f0b2cf59ab3b7d87c8fc8",
+        "record": {
+          "ack_number": "37456153881292",
+          "held": 10000000,
+          "lien_id": "L96997EDCE4805270",
+          "notice_id": "37456153881292-001",
+          "status": "matched"
+        },
+        "seq": 5
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:02.150435+00:00",
+        "hash": "aedaa95368a8845be6aa24debfac3b8d625b2c8567729235a2d3ae3228b024fe",
+        "record": {
+          "ack_number": "30391446601247",
+          "held": 5000000,
+          "lien_id": "L779047A0B32ADE96",
+          "notice_id": "30391446601247-007",
+          "status": "matched"
+        },
+        "seq": 4
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:01.507365+00:00",
+        "hash": "f4fe686937d4bfadd4e1e49e764f286ec6162000155f7203698c55fa673ab07c",
+        "record": {
+          "ack_number": "38069132210127",
+          "held": 12000000,
+          "lien_id": "L5C43937AF46396B9",
+          "notice_id": "38069132210127-001",
+          "status": "matched"
+        },
+        "seq": 3
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:00.896251+00:00",
+        "hash": "eb558a1e95a39837b251cb308a5adee2174f504fd520b0230ab5fe12e7f57b9c",
+        "record": {
+          "ack_number": "25925884038089",
+          "held": 0,
+          "lien_id": null,
+          "notice_id": "25925884038089-002",
+          "status": "matched"
+        },
+        "seq": 2
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:00.614877+00:00",
+        "hash": "a3390a32893e992e25d370fdcbd0c4ee59645a36245eb0483d03fabf21dfdc17",
+        "record": {
+          "ack_number": "30391446601247",
+          "held": 10000000,
+          "lien_id": "L39B4E6AADCEB72E6",
+          "notice_id": "30391446601247-001",
+          "status": "matched"
+        },
+        "seq": 1
+      }
+    ]
+  },
+  "payment-checks": []
 }

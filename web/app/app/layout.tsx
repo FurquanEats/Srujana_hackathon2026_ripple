@@ -28,7 +28,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     clock = "Network not reachable";
   }
   return (
-    <div className={`${theme} min-h-dvh`}>
+    <div className={`${theme} workspace min-h-dvh`}>
       <div className="flex min-h-dvh flex-col md:flex-row">
         <aside className="border-line md:w-60 md:shrink-0 md:border-r">
           <div className="flex h-14 items-center justify-between px-4 md:px-5">

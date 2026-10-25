@@ -31,16 +31,14 @@ export default async function CasesPage() {
                 <th className="text-right">Cashed out</th>
                 <th>Trail</th>
                 <th>Filed</th>
+                <th aria-hidden />
               </tr>
             </thead>
             <tbody>
               {list.map((c) => (
-                <tr key={c.ack_number}>
+                <tr key={c.ack_number} className="row-link">
                   <td>
-                    <Link
-                      href={`/app/cases/${c.ack_number}`}
-                      className="text-fg font-mono underline-offset-2 hover:underline"
-                    >
+                    <Link href={`/app/cases/${c.ack_number}`} className="stretch link font-mono">
                       {c.ack_number}
                     </Link>
                   </td>
@@ -58,6 +56,9 @@ export default async function CasesPage() {
                     {c.complete ? "Complete" : <span className="text-muted">Tracing</span>}
                   </td>
                   <td className="text-muted text-xs whitespace-nowrap">{formatIst(c.filed_at)}</td>
+                  <td aria-hidden className="text-right">
+                    <span className="go">→</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

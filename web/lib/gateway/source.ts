@@ -6,7 +6,18 @@ import { institutionName } from "@/lib/personas";
 import type { DemoSession } from "@/lib/session";
 
 import { gatewayFetch, GatewayFailure } from "./client";
-import { apply, DemoConflict, encodeChanges, parseChanges, type Change, type HoldStep } from "./demo-store";
+import reviewPacks from "@/lib/review/reviews.json";
+import type { ReviewPack } from "@/lib/review/types";
+
+import {
+  apply,
+  DemoConflict,
+  encodeChanges,
+  parseChanges,
+  verdictDecisions,
+  type Change,
+  type HoldStep,
+} from "./demo-store";
 import bankA from "./fixtures/bank.bank-a.json";
 import bankB from "./fixtures/bank.bank-b.json";
 import bankC from "./fixtures/bank.bank-c.json";
@@ -14,9 +25,18 @@ import bankD from "./fixtures/bank.bank-d.json";
 import exchangeX from "./fixtures/bank.exchange-x.json";
 import walletW from "./fixtures/bank.wallet-w.json";
 import clockFixture from "./fixtures/clock.json";
+import holdersFixture from "./fixtures/holders.json";
+import victimsFixture from "./fixtures/victims.json";
 import police from "./fixtures/police.json";
 import type {
+  AuditLog,
   CaseSummary,
+  CustomerHold,
+  HoldReport,
+  PaymentCheckRequest,
+  PaymentCheckResult,
+  SavedCheck,
+  VictimStatus,
   Hold,
   Lien,
   MuleCase,
@@ -48,7 +68,7 @@ const BANKS: Record<string, Saved> = {
 export { GatewayFailure };
 
 function caller(s: DemoSession) {
-  return { sub: `demo-${s.role}`, role: s.role, member: s.member };
+  return { sub: s.subject ?? `demo-${s.role}`, role: s.role, member: s.member };
 }
 
 function saved<T>(s: DemoSession, route: string): T {
@@ -63,13 +83,19 @@ async function changes(): Promise<Change[]> {
   return parseChanges((await cookies()).get(CHANGES_COOKIE)?.value);
 }
 
-async function bankState(s: DemoSession) {
-  const member = s.member ?? "";
+function savedFor<T>(member: string, route: string): T {
+  const value = BANKS[member]?.[route];
+  if (value === undefined)
+    throw new GatewayFailure(404, { error: "not_found", message: "Nothing is on record for this." });
+  return value as T;
+}
+
+async function bankState(s: DemoSession, member = s.member ?? "") {
   return apply(
     member,
     institutionName(member),
-    saved<MuleCase[]>(s, "/v1/mule-cases"),
-    saved<Hold[]>(s, "/v1/holds"),
+    savedFor<MuleCase[]>(member, "/v1/mule-cases"),
+    savedFor<Hold[]>(member, "/v1/holds"),
     await changes(),
   );
 }
@@ -131,7 +157,14 @@ async function record(s: DemoSession, change: Change, route: string, body: unkno
   }
   const list = [...(await changes()), change];
   try {
-    apply(s.member ?? "", institutionName(s.member), saved(s, "/v1/mule-cases"), saved(s, "/v1/holds"), list);
+    if (change.k !== "verdict")
+      apply(
+        change.m,
+        institutionName(change.m),
+        savedFor(change.m, "/v1/mule-cases"),
+        savedFor(change.m, "/v1/holds"),
+        list,
+      );
   } catch (error) {
     if (error instanceof DemoConflict)
       throw new GatewayFailure(409, { error: "conflict", message: error.message });
@@ -205,4 +238,173 @@ export async function playDemoStory(s: DemoSession): Promise<string> {
 /** Drop the visitor's changes so the saved data shows as it was taken. */
 export async function resetDemo(): Promise<void> {
   (await cookies()).delete(CHANGES_COOKIE);
+}
+
+export async function audit(s: DemoSession): Promise<AuditLog> {
+  return LIVE ? gatewayFetch(caller(s), "/v1/audit?limit=300") : saved(s, "/v1/audit");
+}
+
+/** Payments checked on the saved run, to open without a live network. */
+export function savedChecks(s: DemoSession): SavedCheck[] {
+  return LIVE ? [] : (saved<SavedCheck[] | undefined>(s, "payment-checks") ?? []);
+}
+
+export async function checkPayment(s: DemoSession, body: PaymentCheckRequest): Promise<PaymentCheckResult> {
+  if (!LIVE)
+    throw new GatewayFailure(409, {
+      error: "conflict",
+      message:
+        "This copy runs on saved data, so it can only show the payments checked on the saved run. Start the network and set RIPPLE_GATEWAY=live to check any payment.",
+    });
+  return gatewayFetch(caller(s), "/v1/payment-check", body);
+}
+
+const CUSTOMER_KEYS = [
+  "hold_id",
+  "account_number",
+  "holder_name",
+  "amount",
+  "whole_account",
+  "reasons",
+  "contact",
+  "customer_notice",
+  "placed_at",
+  "status",
+  "deadlines",
+  "next_deadline",
+  "expires_at",
+  "explanation",
+  "explanation_at",
+  "decision",
+  "decision_reason",
+  "released_at",
+  "release_reason",
+  "reported_at",
+] as const;
+
+function customer(h: Hold): CustomerHold {
+  return Object.fromEntries(CUSTOMER_KEYS.map((k) => [k, h[k]])) as CustomerHold;
+}
+
+export async function holdReports(s: DemoSession): Promise<HoldReport[]> {
+  if (LIVE) return gatewayFetch(caller(s), "/v1/hold-reports");
+  const reports: HoldReport[] = [];
+  for (const member of Object.keys(BANKS)) {
+    for (const h of (await bankState(s, member)).holds) {
+      if (!h.reported_at) continue;
+      reports.push({
+        ...customer(h),
+        member,
+        member_name: institutionName(member),
+        instruction: h.instruction,
+        str_filed_at: h.str_filed_at,
+        mule_confirmed_at: h.mule_confirmed_at,
+      });
+    }
+  }
+  return reports;
+}
+
+export async function policeInstruction(
+  s: DemoSession,
+  member: string,
+  holdId: string,
+  body: Record<string, string>,
+) {
+  const change: Change = {
+    k: "step",
+    m: member,
+    id: holdId,
+    s: "police-instruction",
+    b: body,
+    at: await now(s),
+  };
+  await record(s, change, `/v1/hold-reports/${member}/${holdId}/instruction`, body);
+}
+
+export async function myHolds(s: DemoSession): Promise<CustomerHold[]> {
+  if (LIVE) return gatewayFetch(caller(s), "/v1/my-holds");
+  return (await bankState(s)).holds.filter((h) => h.account_number === s.subject).map(customer);
+}
+
+export async function myExplanation(s: DemoSession, holdId: string, summary: string): Promise<void> {
+  const change: Change = {
+    k: "step",
+    m: s.member ?? "",
+    id: holdId,
+    s: "explanation",
+    b: { summary },
+    at: await now(s),
+  };
+  await record(s, change, `/v1/my-holds/${holdId}/explanation`, { summary });
+}
+
+export async function myComplaint(s: DemoSession): Promise<VictimStatus> {
+  if (LIVE) {
+    const status = await gatewayFetch<Omit<VictimStatus, "victim_name" | "filed_at">>(
+      caller(s),
+      "/v1/my-complaint",
+    );
+    return { victim_name: "", filed_at: "", ...status };
+  }
+  const found = (victimsFixture as Record<string, VictimStatus>)[s.subject ?? ""];
+  if (!found)
+    throw new GatewayFailure(404, { error: "not_found", message: "No complaint with that acknowledgement." });
+  return found;
+}
+
+/** Who can sign in as an account holder or a victim on this data. */
+export function holderPersonas(): { member: string; account: string; name: string }[] {
+  return Object.entries(holdersFixture as Record<string, { holder_name: string | null }>).map(([key, v]) => {
+    const [member = "", account = ""] = key.split(":");
+    return { member, account, name: v.holder_name ?? account };
+  });
+}
+
+export function victimPersonas(): { ack: string; name: string }[] {
+  return Object.entries(victimsFixture as Record<string, { victim_name: string }>).map(([ack, v]) => ({
+    ack,
+    name: v.victim_name,
+  }));
+}
+
+export async function reviews(): Promise<
+  (ReviewPack & { decisions: Record<string, { d: string; n: string; at: string }> })[]
+> {
+  const decided = verdictDecisions(await changes());
+  return (reviewPacks as ReviewPack[]).map((p) => ({
+    ...p,
+    decisions: Object.fromEntries(
+      p.credits.flatMap((c) => {
+        const d = decided.get(`${p.case_id}:${c.credit_id}`);
+        return d ? [[c.credit_id, d]] : [];
+      }),
+    ),
+  }));
+}
+
+/** The officer confirms or overrules a verdict (PRD G4). It is kept in this browser; nothing is sent. */
+export async function decideVerdict(
+  s: DemoSession,
+  caseId: string,
+  creditId: string,
+  d: "confirmed" | "overruled",
+  note: string,
+) {
+  const change: Change = {
+    k: "verdict",
+    m: s.member ?? "",
+    c: caseId,
+    cr: creditId,
+    d,
+    n: note,
+    at: await now(s),
+  };
+  const list = [...(await changes()), change];
+  (await cookies()).set(CHANGES_COOKIE, encodeChanges(list), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
 }

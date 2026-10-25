@@ -1,17 +1,17 @@
 {
   "/v1/notices": [
     {
-      "account_number": "2539646004",
-      "ack_number": "31575867494554",
+      "account_number": "2846077004",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 20000000,
       "holder_name": "Ravi Traders (cement supplier)",
       "layer": 3,
-      "lien_id": "L634FE91AC7683678",
-      "notice_id": "31575867494554-006",
+      "lien_id": "LB05B8EF0E5DBA0EE",
+      "notice_id": "37456153881292-006",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:34.029748Z",
+      "received_at": "2026-10-25T19:06:07.800563Z",
       "status": "matched",
       "traced_in": 20000000
     },
@@ -26,7 +26,7 @@
       "notice_id": "38069132210127-002",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.901944Z",
+      "received_at": "2026-10-25T19:06:02.053224Z",
       "status": "matched",
       "traced_in": 19000000
     },
@@ -37,11 +37,11 @@
       "held": 20000000,
       "holder_name": "Ravi Traders",
       "layer": 3,
-      "lien_id": "L3E039EB079942EB8",
+      "lien_id": "LBFD7AFC8ED6AF2FB",
       "notice_id": "30391446601247-006",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.049945Z",
+      "received_at": "2026-10-25T19:06:01.426765Z",
       "status": "matched",
       "traced_in": 20000000
     },
@@ -56,17 +56,17 @@
       "notice_id": "25925884038089-001",
       "onward_count": 2,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.193016Z",
+      "received_at": "2026-10-25T19:06:00.667097Z",
       "status": "matched",
       "traced_in": 2500000
     }
   ],
-  "/v1/notices/31575867494554-006": {
+  "/v1/notices/37456153881292-006": {
     "credit": {
       "amount": 20000000,
-      "at": "2026-10-25T18:28:29.761079Z",
+      "at": "2026-10-25T18:59:02.201713Z",
       "rail": "neft",
-      "reference": "BKDDN53964600006"
+      "reference": "BKDDN84607700006"
     },
     "exits": [],
     "legal_basis": "BNSS s.168 read with s.94",
@@ -74,34 +74,34 @@
     "statement": [
       {
         "amount": 20000000,
-        "at": "2026-10-25T18:28:29.761079Z",
+        "at": "2026-10-25T18:59:02.201713Z",
         "counterparty": {
-          "account_number": "7539646002",
+          "account_number": "7846077002",
           "ifsc": "BKDD0000001",
           "vpa": null
         },
         "direction": "credit",
         "exit": null,
         "rail": "neft",
-        "reference": "BKDDN53964600006",
-        "txn_id": "CBKDDN53964600006",
+        "reference": "BKDDN84607700006",
+        "txn_id": "CBKDDN84607700006",
         "victim_money": {
-          "31575867494554": 20000000
+          "37456153881292": 20000000
         }
       }
     ],
     "summary": {
-      "account_number": "2539646004",
-      "ack_number": "31575867494554",
+      "account_number": "2846077004",
+      "ack_number": "37456153881292",
       "exit_count": 0,
       "held": 20000000,
       "holder_name": "Ravi Traders (cement supplier)",
       "layer": 3,
-      "lien_id": "L634FE91AC7683678",
-      "notice_id": "31575867494554-006",
+      "lien_id": "LB05B8EF0E5DBA0EE",
+      "notice_id": "37456153881292-006",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:34.029748Z",
+      "received_at": "2026-10-25T19:06:07.800563Z",
       "status": "matched",
       "traced_in": 20000000
     }
@@ -314,7 +314,7 @@
       "notice_id": "38069132210127-002",
       "onward_count": 1,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.901944Z",
+      "received_at": "2026-10-25T19:06:02.053224Z",
       "status": "matched",
       "traced_in": 19000000
     }
@@ -355,11 +355,11 @@
       "held": 20000000,
       "holder_name": "Ravi Traders",
       "layer": 3,
-      "lien_id": "L3E039EB079942EB8",
+      "lien_id": "LBFD7AFC8ED6AF2FB",
       "notice_id": "30391446601247-006",
       "onward_count": 0,
       "reason": null,
-      "received_at": "2026-10-25T18:35:29.049945Z",
+      "received_at": "2026-10-25T19:06:01.426765Z",
       "status": "matched",
       "traced_in": 20000000
     }
@@ -632,20 +632,20 @@
       "notice_id": "25925884038089-001",
       "onward_count": 2,
       "reason": null,
-      "received_at": "2026-10-25T18:35:28.193016Z",
+      "received_at": "2026-10-25T19:06:00.667097Z",
       "status": "matched",
       "traced_in": 2500000
     }
   },
   "/v1/liens": [
     {
-      "account_number": "2539646004",
-      "ack_number": "31575867494554",
+      "account_number": "2846077004",
+      "ack_number": "37456153881292",
       "amount": 20000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Ravi Traders (cement supplier)",
-      "lien_id": "L634FE91AC7683678",
-      "placed_at": "2026-10-25T18:35:34.029748Z",
+      "lien_id": "LB05B8EF0E5DBA0EE",
+      "placed_at": "2026-10-25T19:06:07.800563Z",
       "released_at": null
     },
     {
@@ -654,15 +654,15 @@
       "amount": 20000000,
       "basis": "BNSS s.168 read with s.94",
       "holder_name": "Ravi Traders",
-      "lien_id": "L3E039EB079942EB8",
-      "placed_at": "2026-10-25T18:35:29.049945Z",
+      "lien_id": "LBFD7AFC8ED6AF2FB",
+      "placed_at": "2026-10-25T19:06:01.426765Z",
       "released_at": null
     }
   ],
   "/v1/mule-cases": [
     {
       "account_number": "28684417143731",
-      "active_hold_id": "H05C55E9534C40B9A",
+      "active_hold_id": "H2CFF9113299EF831",
       "declared_annual_income": 3200000000,
       "declared_profile": "proprietorship; Electronics wholesale; declared annual turnover ₹3,20,00,000",
       "first_at": "2026-09-18T05:37:00Z",
@@ -690,7 +690,7 @@
     },
     {
       "account_number": "22489366128616",
-      "active_hold_id": "H8B10C54306180314",
+      "active_hold_id": null,
       "declared_annual_income": 18000000,
       "declared_profile": "individual; Labourer; declared annual income ₹1,80,000",
       "first_at": "2026-09-11T23:25:00Z",
@@ -705,7 +705,7 @@
           "key": "out_of_profile:22489366128616:BKAA-7-000002548",
           "reason": "Credits of ₹1,90,000 arrived in the 30 days to 12 Sep 2026, 04:55 AM IST, and that is 12.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
           "rule": "out_of_profile",
-          "status": "held",
+          "status": "open",
           "title": "Out of profile"
         },
         {
@@ -717,7 +717,7 @@
           "key": "dormant_then_busy:22489366128616:BKAA-7-000002548",
           "reason": "The account had no transactions for 193 days, then received ₹1,90,000 on 12 Sep 2026, 04:55 AM IST.",
           "rule": "dormant_then_busy",
-          "status": "held",
+          "status": "open",
           "title": "Dormant, then busy"
         }
       ],
@@ -1609,33 +1609,33 @@
       "account_number": "28684417143731",
       "amount": 20000000,
       "compliance_breach": null,
-      "contact": "SMS and email to the registered mobile number and email",
+      "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "credit_txns": ["BKAA-7-000003946"],
-      "customer_notice": "Dear Ravi Traders,\n\nBank A, a public sector bank has placed a temporary hold on debits of ₹2,00,000 from your account ending 3731, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹2,00,000 on 18 Sep 2026, 11:07 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
+      "customer_notice": "Dear Ravi Traders,\n\nBank A, a public sector bank has placed a temporary hold on debits of ₹2,00,000 from your account ending 3731, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: The account had no transactions for 200 days, then received ₹2,00,000 on 18 Sep 2026, 11:07 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
       "deadlines": [
         {
-          "due": "2026-10-25T18:36:11.340973Z",
-          "met_at": "2026-10-25T18:36:11.340973Z",
+          "due": "2026-10-25T19:06:12.395984Z",
+          "met_at": "2026-10-25T19:06:12.395984Z",
           "name": "Customer notified",
           "rule": "Annex III Step 2: at once when the customer is reached digitally",
           "state": "met"
         },
         {
-          "due": "2026-11-14T18:36:11.340973Z",
-          "met_at": "2026-10-25T18:36:32.575842Z",
+          "due": "2026-11-14T19:06:12.395984Z",
+          "met_at": "2026-10-25T19:06:12.476580Z",
           "name": "Customer explanation",
           "rule": "Annex III Step 3: 20 days from the hold",
           "state": "met"
         },
         {
-          "due": "2026-11-04T18:36:32.575842Z",
+          "due": "2026-11-04T19:06:12.476580Z",
           "met_at": null,
           "name": "Bank decision",
           "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
           "state": "open"
         },
         {
-          "due": "2026-12-24T18:36:11.340973Z",
+          "due": "2026-12-24T19:06:12.395984Z",
           "met_at": null,
           "name": "Maximum duration",
           "rule": "Annex III: no temporary debit hold lasts more than 60 days",
@@ -1644,15 +1644,15 @@
       ],
       "decision": null,
       "decision_reason": null,
-      "expires_at": "2026-12-24T18:36:11.340973Z",
-      "explanation": "Payment for 400 bags of cement delivered to the buyer's shop; delivery challan and tax invoice attached.",
-      "explanation_at": "2026-10-25T18:36:32.575842Z",
-      "hold_id": "H05C55E9534C40B9A",
+      "expires_at": "2026-12-24T19:06:12.395984Z",
+      "explanation": "Payment for 400 bags of cement delivered to the buyer's shop; tax invoice and delivery challan attached.",
+      "explanation_at": "2026-10-25T19:06:12.476580Z",
+      "hold_id": "H2CFF9113299EF831",
       "holder_name": "Ravi Traders",
       "instruction": null,
       "mule_confirmed_at": null,
-      "next_deadline": "2026-11-04T18:36:32.575842Z",
-      "placed_at": "2026-10-25T18:36:11.340973Z",
+      "next_deadline": "2026-11-04T19:06:12.476580Z",
+      "placed_at": "2026-10-25T19:06:12.395984Z",
       "placed_by": "demo-frm_analyst",
       "reasons": [
         "The account had no transactions for 200 days, then received ₹2,00,000 on 18 Sep 2026, 11:07 AM IST."
@@ -1661,70 +1661,6 @@
       "released_at": null,
       "reported_at": null,
       "status": "explanation_received",
-      "str_draft": null,
-      "str_due": null,
-      "str_filed_at": null,
-      "str_reference": null,
-      "whole_account": false
-    },
-    {
-      "account_level_reason": null,
-      "account_number": "22489366128616",
-      "amount": 90000,
-      "compliance_breach": null,
-      "contact": "SMS and email to the registered mobile number and email",
-      "credit_txns": ["BKAA-7-000002548"],
-      "customer_notice": "Dear Imran Sheikh,\n\nBank A, a public sector bank has placed a temporary hold on debits of ₹900 from your account ending 8616, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹1,90,000 arrived in the 30 days to 12 Sep 2026, 04:55 AM IST, and that is 12.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year). The account had no transactions for 193 days, then received ₹1,90,000 on 12 Sep 2026, 04:55 AM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
-      "deadlines": [
-        {
-          "due": "2026-10-25T18:36:11.396637Z",
-          "met_at": "2026-10-25T18:36:11.396637Z",
-          "name": "Customer notified",
-          "rule": "Annex III Step 2: at once when the customer is reached digitally",
-          "state": "met"
-        },
-        {
-          "due": "2026-11-14T18:36:11.396637Z",
-          "met_at": null,
-          "name": "Customer explanation",
-          "rule": "Annex III Step 3: 20 days from the hold",
-          "state": "open"
-        },
-        {
-          "due": "2026-11-24T18:36:11.396637Z",
-          "met_at": null,
-          "name": "Bank decision",
-          "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
-          "state": "open"
-        },
-        {
-          "due": "2026-12-24T18:36:11.396637Z",
-          "met_at": null,
-          "name": "Maximum duration",
-          "rule": "Annex III: no temporary debit hold lasts more than 60 days",
-          "state": "open"
-        }
-      ],
-      "decision": null,
-      "decision_reason": null,
-      "expires_at": "2026-12-24T18:36:11.396637Z",
-      "explanation": null,
-      "explanation_at": null,
-      "hold_id": "H8B10C54306180314",
-      "holder_name": "Imran Sheikh",
-      "instruction": null,
-      "mule_confirmed_at": null,
-      "next_deadline": "2026-11-14T18:36:11.396637Z",
-      "placed_at": "2026-10-25T18:36:11.396637Z",
-      "placed_by": "demo-frm_analyst",
-      "reasons": [
-        "Credits of ₹1,90,000 arrived in the 30 days to 12 Sep 2026, 04:55 AM IST, and that is 12.7 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
-        "The account had no transactions for 193 days, then received ₹1,90,000 on 12 Sep 2026, 04:55 AM IST."
-      ],
-      "release_reason": null,
-      "released_at": null,
-      "reported_at": null,
-      "status": "awaiting_explanation",
       "str_draft": null,
       "str_due": null,
       "str_filed_at": null,
@@ -1908,8 +1844,98 @@
         "title": "Quick cash-out"
       }
     ],
-    "since": "2026-09-25T18:36:42.632556+00:00",
-    "until": "2026-10-25T18:36:42.632556+00:00",
+    "since": "2026-09-25T19:06:15.303923+00:00",
+    "until": "2026-10-25T19:06:15.303923+00:00",
     "within_budget": true
-  }
+  },
+  "/v1/audit": {
+    "broken_at": null,
+    "entries": [
+      {
+        "action": "hold.explanation",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.476580+00:00",
+        "hash": "a5fecd8cc3a4d96b5ddde128813e41deda232186498bed3211061d16954c5114",
+        "record": {
+          "account": "28684417143731",
+          "decision_due": "2026-11-04T19:06:12.476580+00:00",
+          "hold_id": "H2CFF9113299EF831",
+          "status": "explanation_received"
+        },
+        "seq": 6
+      },
+      {
+        "action": "hold.place",
+        "actor": "demo-frm_analyst",
+        "at": "2026-10-25T19:06:12.395984+00:00",
+        "hash": "d232665564bd9fabdb5c1385274a70b856bcd9743c99860efc1358064956cc83",
+        "record": {
+          "account": "28684417143731",
+          "amount": 20000000,
+          "credits": ["BKAA-7-000003946"],
+          "hold_id": "H2CFF9113299EF831",
+          "status": "awaiting_explanation",
+          "whole_account": false
+        },
+        "seq": 5
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:07.800563+00:00",
+        "hash": "4f18a43c1adce0e5538eb57607d1593e259a073d1ca2acb8bd666b49ff080cc1",
+        "record": {
+          "ack_number": "37456153881292",
+          "held": 20000000,
+          "lien_id": "LB05B8EF0E5DBA0EE",
+          "notice_id": "37456153881292-006",
+          "status": "matched"
+        },
+        "seq": 4
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:02.053224+00:00",
+        "hash": "9c8a78999419e25e495286290826c03502a18ff619293a1b2c66a91e6e7f5443",
+        "record": {
+          "ack_number": "38069132210127",
+          "held": 0,
+          "lien_id": null,
+          "notice_id": "38069132210127-002",
+          "status": "matched"
+        },
+        "seq": 3
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:01.426765+00:00",
+        "hash": "2b30a8124b47cf67b91e4da3408ecd4322494b1f3ada217228e281530d2a911b",
+        "record": {
+          "ack_number": "30391446601247",
+          "held": 20000000,
+          "lien_id": "LBFD7AFC8ED6AF2FB",
+          "notice_id": "30391446601247-006",
+          "status": "matched"
+        },
+        "seq": 2
+      },
+      {
+        "action": "notice_answered",
+        "actor": "cfcfrms",
+        "at": "2026-10-25T19:06:00.667097+00:00",
+        "hash": "c555330edcaca75a4ae091c9860ad583ae04b2031209ea4a086132223eed6be7",
+        "record": {
+          "ack_number": "25925884038089",
+          "held": 0,
+          "lien_id": null,
+          "notice_id": "25925884038089-001",
+          "status": "matched"
+        },
+        "seq": 1
+      }
+    ]
+  },
+  "payment-checks": []
 }

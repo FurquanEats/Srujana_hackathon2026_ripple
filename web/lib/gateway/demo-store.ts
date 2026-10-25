@@ -22,7 +22,8 @@ export type Change =
       at: string;
     }
   | { k: "step"; m: string; id: string; s: HoldStep; b: Record<string, string>; at: string }
-  | { k: "thresholds"; m: string; t: Thresholds; at: string };
+  | { k: "thresholds"; m: string; t: Thresholds; at: string }
+  | { k: "verdict"; m: string; c: string; cr: string; d: "confirmed" | "overruled"; n: string; at: string };
 
 export type HoldStep = "explanation" | "decision" | "police-instruction" | "confirm-mule" | "str-filed";
 
@@ -81,6 +82,8 @@ function isChange(value: unknown): value is Change {
       return str(c.id) && STEPS.has(c.s as string) && typeof c.b === "object" && c.b !== null && str(c.at);
     case "thresholds":
       return typeof c.t === "object" && c.t !== null && str(c.at);
+    case "verdict":
+      return str(c.c) && str(c.cr) && (c.d === "confirmed" || c.d === "overruled") && str(c.n) && str(c.at);
     default:
       return false;
   }
@@ -221,6 +224,8 @@ export function apply(
       );
     } else if (change.k === "thresholds") {
       thresholds = change.t;
+    } else if (change.k === "verdict") {
+      continue; // read by the review pages through `verdictDecisions`
     } else if (change.k === "hold") {
       const c = cases.find((x) => x.account_number === change.a);
       if (!c) throw new DemoConflict("This account has no open flags.");
@@ -345,4 +350,13 @@ function step(h: Hold, s: HoldStep, b: Record<string, string>, at: string): Hold
       if (h.str_filed_at) throw new DemoConflict("The STR is already filed.");
       return { ...h, str_filed_at: at, str_reference: b.reference ?? "" };
   }
+}
+
+/** The grievance officer's confirmations, latest per credit: "D01:C1" -> decision. */
+export function verdictDecisions(
+  changes: Change[],
+): Map<string, { d: "confirmed" | "overruled"; n: string; at: string }> {
+  const out = new Map<string, { d: "confirmed" | "overruled"; n: string; at: string }>();
+  for (const c of changes) if (c.k === "verdict") out.set(`${c.c}:${c.cr}`, { d: c.d, n: c.n, at: c.at });
+  return out;
 }

@@ -229,3 +229,79 @@ export type ShadowRun = {
   note?: string | null;
   [extra: string]: unknown;
 };
+
+export type AuditEntry = {
+  seq: number;
+  at: string;
+  actor: string;
+  action: string;
+  record: Record<string, unknown>;
+  hash: string;
+};
+
+export type AuditLog = { entries: AuditEntry[]; broken_at: number | null };
+
+export type CheckReason = { source: "dpip" | "this_bank" | "sender"; text: string };
+
+export type PaymentCheckResult = {
+  decision: "allow" | "warn" | "cooling_hold" | "hold_and_call";
+  headline: string;
+  reasons: CheckReason[];
+  cooling_minutes: number | null;
+  payee_here: boolean;
+  dpip_level: "none" | "medium" | "high" | "very_high";
+  dpip_ms: number;
+};
+
+export type PaymentCheckRequest = { sender_account: string; payee: AccountRef; amount: number };
+
+export type SavedCheck = { label: string; request: PaymentCheckRequest; result: PaymentCheckResult };
+
+/** A hold as its account holder sees it: the notice, the deadlines, nothing internal. */
+export type CustomerHold = Pick<
+  Hold,
+  | "hold_id"
+  | "account_number"
+  | "holder_name"
+  | "amount"
+  | "whole_account"
+  | "reasons"
+  | "contact"
+  | "customer_notice"
+  | "placed_at"
+  | "status"
+  | "deadlines"
+  | "next_deadline"
+  | "expires_at"
+  | "explanation"
+  | "explanation_at"
+  | "decision"
+  | "decision_reason"
+  | "released_at"
+  | "release_reason"
+  | "reported_at"
+>;
+
+export type HoldReport = CustomerHold & {
+  member: string;
+  member_name: string;
+  instruction: string | null;
+  str_filed_at: string | null;
+  mule_confirmed_at: string | null;
+};
+
+export type VictimPlace = {
+  member: string | null;
+  institution: string;
+  layer: number;
+  held: number;
+  state: string;
+  cashed_out: number;
+};
+
+export type VictimStatus = CaseTotals & {
+  ack_number: string;
+  victim_name: string;
+  filed_at: string;
+  places: VictimPlace[];
+};

@@ -17,30 +17,34 @@ import { TraceYourself } from "./sections/trace-yourself";
 export default function HomePage() {
   return (
     <>
-      <GridLines />
       <SiteHeader />
       <main>
-        <div className="tone-dark">
+        <div className="tone-dark relative isolate">
+          <GridLines />
           <Hero />
         </div>
         <DitherEdge to="paper" />
-        <div className="tone-light">
+        <div className="tone-light relative isolate">
+          <GridLines />
           <Gap />
           <HowItWorks />
         </div>
         <DitherEdge to="ink" />
-        <div className="tone-dark">
+        <div className="tone-dark relative isolate">
+          <GridLines />
           <Showcase />
           <TraceYourself />
         </div>
         <DitherEdge to="paper" />
-        <div className="tone-light">
+        <div className="tone-light relative isolate">
+          <GridLines />
           <Fair />
           <Rules />
           <Security />
         </div>
         <DitherEdge to="ink" />
-        <div className="tone-dark">
+        <div className="tone-dark relative isolate">
+          <GridLines />
           <CallToAction />
           <SiteFooter />
         </div>

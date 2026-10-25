@@ -156,3 +156,56 @@ export async function playDemo(): Promise<void> {
   }
   redirect(`/app/cases/${ack}`);
 }
+
+export async function policeInstructionAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "police_officer") redirect("/sign-in");
+  const member = String(form.get("member") ?? "");
+  const id = String(form.get("hold_id") ?? "");
+  const instruction = String(form.get("instruction") ?? "");
+  const authority = text(form, "authority", 3, 200);
+  if (!/^[a-z]+-[a-z]$/.test(member) || !HOLD.test(id))
+    back("/app/hold-reports", { error: "That is not a reported hold." });
+  if (!["release", "continue"].includes(instruction) || !authority)
+    back("/app/hold-reports", { error: "Choose an instruction and name the police authority." });
+  await attempt("/app/hold-reports", "Instruction sent to the bank.", () =>
+    source.policeInstruction(session, member, id, { instruction, authority }),
+  );
+}
+
+export async function myExplanationAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "account_holder") redirect("/sign-in");
+  const id = String(form.get("hold_id") ?? "");
+  const summary = text(form, "summary", 10, 2000);
+  const documents = form
+    .getAll("documents")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .map((f) => f.name);
+  if (!HOLD.test(id)) back("/app/my-hold", { error: "That is not your hold." });
+  if (!summary) back("/app/my-hold", { error: "Explain the transactions in at least 10 characters." });
+  const full = documents.length ? `${summary} Documents: ${documents.join(", ")}.`.slice(0, 2000) : summary;
+  await attempt("/app/my-hold", "Your explanation reached the bank. It will decide within 10 days.", () =>
+    source.myExplanation(session, id, full),
+  );
+}
+
+export async function verdictAction(form: FormData): Promise<void> {
+  const session = await currentSession();
+  if (!session || session.role !== "grievance_officer") redirect("/sign-in");
+  const caseId = String(form.get("case") ?? "");
+  const credit = String(form.get("credit") ?? "");
+  const decision = String(form.get("decision") ?? "");
+  const note = text(form, "note", 0, 1000) ?? "";
+  const path = `/app/reviews/${caseId}`;
+  if (!/^D\d{2}$/.test(caseId) || !/^C\d{1,2}$/.test(credit))
+    back("/app/reviews", { error: "Unknown evidence pack." });
+  if (decision !== "confirmed" && decision !== "overruled")
+    back(path, { error: "Confirm or overrule the verdict." });
+  if (decision === "overruled" && note.length < 10)
+    back(path, { error: "Say why you overrule the verdict, in at least 10 characters." });
+  await source.decideVerdict(session, caseId, credit, decision, note);
+  back(path, {
+    done: decision === "confirmed" ? `Verdict for ${credit} confirmed.` : `Verdict for ${credit} overruled.`,
+  });
+}

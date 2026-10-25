@@ -39,18 +39,16 @@ export default async function HoldsPage({ searchParams }: { searchParams: Outcom
                 <th className="text-right">Held</th>
                 <th>Next deadline</th>
                 <th>Placed</th>
+                <th aria-hidden />
               </tr>
             </thead>
             <tbody>
               {list.map((h) => {
                 const next = h.deadlines.find((d) => d.due === h.next_deadline && d.state === "open");
                 return (
-                  <tr key={h.hold_id}>
+                  <tr key={h.hold_id} className="row-link">
                     <td>
-                      <Link
-                        href={`/app/holds/${h.hold_id}`}
-                        className="text-fg underline-offset-2 hover:underline"
-                      >
+                      <Link href={`/app/holds/${h.hold_id}`} className="stretch link">
                         {h.holder_name ?? h.account_number}
                       </Link>
                       <span className="text-faint block font-mono text-xs">{h.account_number}</span>
@@ -80,6 +78,9 @@ export default async function HoldsPage({ searchParams }: { searchParams: Outcom
                       )}
                     </td>
                     <td className="text-muted text-xs whitespace-nowrap">{formatIst(h.placed_at)}</td>
+                    <td aria-hidden className="text-right">
+                      <span className="go">→</span>
+                    </td>
                   </tr>
                 );
               })}

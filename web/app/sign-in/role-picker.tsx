@@ -2,28 +2,33 @@
 
 import { useState } from "react";
 
-type RoleOption = { role: string; label: string; duty: string; bank: boolean };
+type RoleOption = { role: string; label: string; duty: string; pick: "bank" | "holder" | "complaint" | null };
 type Institution = { id: string; name: string };
+type Choice = { value: string; label: string };
 
-/** The formal selector: a role, and the institution when the role belongs to one. */
+/** The formal selector: a role, then the institution, account or complaint it signs in as. */
 export function RolePicker({
   roles,
   institutions,
+  holders,
+  complaints,
 }: {
   roles: readonly RoleOption[];
   institutions: readonly Institution[];
+  holders: Choice[];
+  complaints: Choice[];
 }) {
   const [role, setRole] = useState(roles[0]?.role ?? "");
   const chosen = roles.find((r) => r.role === role);
   return (
     <>
       <fieldset>
-        <legend className="label">Role</legend>
-        <div className="grid gap-2">
+        <legend className="label">Who are you?</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
           {roles.map((r) => (
             <label
               key={r.role}
-              className={`flex cursor-pointer gap-3 border p-3 text-sm ${role === r.role ? "border-[var(--fg)]" : "border-line"}`}
+              className={`flex cursor-pointer gap-3 border p-3 text-sm transition-colors hover:border-[var(--fg)] ${role === r.role ? "border-[var(--fg)] bg-[var(--hover)]" : "border-line"}`}
             >
               <input
                 type="radio"
@@ -35,13 +40,13 @@ export function RolePicker({
               />
               <span>
                 <span className="block font-normal">{r.label}</span>
-                <span className="text-muted block text-[13px]">{r.duty}</span>
+                <span className="text-muted block text-[12.5px] leading-snug">{r.duty}</span>
               </span>
             </label>
           ))}
         </div>
       </fieldset>
-      {chosen?.bank && (
+      {chosen?.pick === "bank" && (
         <div className="mt-5">
           <label htmlFor="member" className="label">
             Institution
@@ -50,6 +55,34 @@ export function RolePicker({
             {institutions.map((i) => (
               <option key={i.id} value={i.id}>
                 {i.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {chosen?.pick === "holder" && (
+        <div className="mt-5">
+          <label htmlFor="holder" className="label">
+            Whose account
+          </label>
+          <select id="holder" name="holder" className="field">
+            {holders.map((h) => (
+              <option key={h.value} value={h.value}>
+                {h.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {chosen?.pick === "complaint" && (
+        <div className="mt-5">
+          <label htmlFor="complaint" className="label">
+            Your complaint
+          </label>
+          <select id="complaint" name="complaint" className="field">
+            {complaints.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
               </option>
             ))}
           </select>

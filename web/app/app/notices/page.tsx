@@ -31,16 +31,14 @@ export default async function NoticesPage() {
                 <th className="text-right">Lien</th>
                 <th>Onward</th>
                 <th>Received</th>
+                <th aria-hidden />
               </tr>
             </thead>
             <tbody>
               {list.map((n) => (
-                <tr key={n.notice_id}>
+                <tr key={n.notice_id} className="row-link">
                   <td>
-                    <Link
-                      href={`/app/notices/${n.notice_id}`}
-                      className="text-fg font-mono underline-offset-2 hover:underline"
-                    >
+                    <Link href={`/app/notices/${n.notice_id}`} className="stretch link font-mono">
                       {n.ack_number}
                     </Link>
                   </td>
@@ -59,6 +57,9 @@ export default async function NoticesPage() {
                     {n.onward_count} hops, {n.exit_count} exits
                   </td>
                   <td className="text-muted text-xs whitespace-nowrap">{formatIst(n.received_at)}</td>
+                  <td aria-hidden className="text-right">
+                    <span className="go">→</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

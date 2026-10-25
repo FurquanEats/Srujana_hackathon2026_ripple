@@ -195,3 +195,83 @@
     white-space: nowrap;
   }
 }
+
+@layer components {
+  /* Anything that navigates looks like it: underlined text links, and rows and cards that lift on hover with an
+     arrow. The whole row is the target, through the first link's stretched hit area. */
+  .link {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--faint);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 150ms;
+  }
+  .link:hover {
+    text-decoration-color: var(--color-accent);
+  }
+  .row-link {
+    position: relative;
+    cursor: pointer;
+  }
+  .row-link .stretch::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .row-link:hover .go,
+  .card-link:hover .go {
+    color: var(--color-accent);
+    transform: translateX(3px);
+  }
+  .go {
+    display: inline-block;
+    color: var(--faint);
+    transition:
+      transform 150ms,
+      color 150ms;
+  }
+  .card-link {
+    display: block;
+    border: 1px solid var(--line);
+    padding: 1rem;
+    transition:
+      border-color 150ms,
+      background-color 150ms;
+  }
+  .card-link:hover {
+    border-color: var(--fg);
+    background: var(--hover);
+  }
+}
+
+/* The workspace reads at a larger size with stronger greys than the marketing page. */
+@layer base {
+  .workspace {
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .workspace.tone-dark {
+    --muted: #c4c4c4;
+    --faint: #8f8f8f;
+    --line: #333333;
+  }
+  .workspace.tone-light {
+    --muted: #4b4b4b;
+    --faint: #6b6b6b;
+    --line: #dcdcdc;
+  }
+  .workspace .table {
+    font-size: 0.875rem;
+  }
+  .workspace .text-xs {
+    font-size: 0.8125rem;
+  }
+  .workspace .text-\[13px\],
+  .workspace .text-\[12\.5px\] {
+    font-size: 0.875rem;
+  }
+  .workspace .text-\[11px\] {
+    font-size: 0.75rem;
+  }
+}
