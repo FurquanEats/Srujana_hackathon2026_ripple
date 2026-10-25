@@ -1,51 +1,55 @@
 @import "tailwindcss";
 
 /*
- * Institutional Clarity: Ripple's design tokens.
- * Every text/background pair below is checked for WCAG AA (4.5:1 for body text). Ratios against white unless noted.
+ * Ripple design tokens: warm paper, near-black ink, one deep teal accent, red only for real risk.
+ * Text/background pairs meet WCAG AA (4.5:1 for body text). The names are kept from the first design so every
+ * component picks the new values up; "navy" is now the ink-black used for headings and primary surfaces.
  */
 @theme {
   --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Brand */
-  --color-navy: #0b1f3a;          /* navigation, headings */
-  --color-navy-800: #132c4f;
-  --color-navy-700: #1d3b63;
-  --color-navy-300: #9fb3cc;      /* text on navy: 7.7:1 */
-  --color-mist: #eaf1f8;
-  --color-teal: #087e8b;          /* primary accent; white on teal 4.8:1 */
-  --color-teal-strong: #06646f;   /* hover, text on mist: 6.0:1 */
-  --color-teal-soft: #e3f3f4;
-  --color-link: #1f5fad;          /* 6.4:1 */
+  --color-navy: #15171a;          /* headings, primary dark surfaces: 17:1 on white */
+  --color-navy-800: #2a2d31;
+  --color-navy-700: #3a3e44;
+  --color-navy-300: #b9bcc2;
+  --color-mist: #eef3f1;
+  --color-teal: #0b6e63;          /* the one accent; white on it 6.1:1 */
+  --color-teal-strong: #08574e;
+  --color-teal-soft: #e3f0ed;
+  --color-link: #0b6e63;
 
-  /* Workspace */
-  --color-canvas: #f5f8fb;
+  --color-canvas: #f6f5f1;        /* warm paper */
   --color-surface: #ffffff;
-  --color-sunken: #f1f5f9;
-  --color-line: #d6e0eb;
-  --color-line-strong: #b7c6d8;
-  --color-ink: #13233d;           /* body text: 15.7:1 */
-  --color-muted: #4a5b73;         /* secondary text: 6.9:1, 6.5:1 on canvas */
-  --color-subtle: #5d6d84;        /* captions: 5.3:1, 4.9:1 on canvas */
+  --color-sunken: #efede7;
+  --color-line: #e4e1d8;
+  --color-line-strong: #cfcabd;
+  --color-ink: #15171a;
+  --color-muted: #55585e;         /* 7.0:1 on white */
+  --color-subtle: #6d7076;        /* 4.9:1 on white, 4.6:1 on paper */
 
-  /* Severity: red only for Critical and urgent warnings */
-  --color-critical: #b42332;      /* 6.5:1 */
-  --color-critical-soft: #fbeaec; /* critical text on it: 5.6:1 */
-  --color-critical-line: #e8a9b0;
-  --color-review: #8a4b00;        /* 6.2:1 on review-soft */
-  --color-review-soft: #fff3e0;
-  --color-review-line: #e7b46a;
-  --color-watch: #4a5b73;
-  --color-watch-soft: #eef2f6;
+  --color-critical: #c2362b;      /* 5.2:1 */
+  --color-critical-soft: #fbecea;
+  --color-critical-line: #efb8b1;
+  --color-review: #8a5300;
+  --color-review-soft: #fbf1e1;
+  --color-review-line: #e8c48a;
+  --color-watch: #55585e;
+  --color-watch-soft: #efede7;
 
-  /* Outcomes */
-  --color-recover: #0f6b4f;       /* money still recoverable: 6.5:1 */
-  --color-recover-soft: #e5f4ee;
+  --color-recover: #0b6e63;
+  --color-recover-soft: #e3f0ed;
 
-  --radius-card: 0.75rem;
-  --shadow-card: 0 1px 2px rgb(11 31 58 / 0.06), 0 1px 1px rgb(11 31 58 / 0.03);
-  --shadow-pop: 0 12px 32px rgb(11 31 58 / 0.18), 0 2px 6px rgb(11 31 58 / 0.08);
+  --radius-card: 1rem;
+  --shadow-card: 0 1px 0 rgb(21 23 26 / 0.03);
+  --shadow-pop: 0 24px 48px -12px rgb(21 23 26 / 0.22), 0 2px 6px rgb(21 23 26 / 0.06);
+
+  --animate-rise: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 :root {
@@ -58,14 +62,35 @@ html {
 
 body {
   font-family: var(--font-sans);
-  font-feature-settings: "tnum" 0;
+  font-feature-settings: "tnum" 0, "ss02" 1;
+  letter-spacing: -0.003em;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+/* Smooth by default: every page section rises in, a beat apart. */
+main > * > * {
+  animation: var(--animate-rise);
+}
+main > * > *:nth-child(2) { animation-delay: 40ms; }
+main > * > *:nth-child(3) { animation-delay: 80ms; }
+main > * > *:nth-child(4) { animation-delay: 120ms; }
+main > * > *:nth-child(n + 5) { animation-delay: 160ms; }
+
+a, button {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 /* One focus treatment everywhere: a 2px teal ring offset from the control. */
 :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--color-teal);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 input[type="range"] {

@@ -90,7 +90,7 @@ export function ModelContributions({ shap }: { shap: ShapValue[] }) {
             <li key={s.feature} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 text-xs sm:grid-cols-[14rem_minmax(0,1fr)_4rem]">
               <span className="truncate font-mono text-muted" title={s.feature}>{s.feature} = {s.value}</span>
               <span className="col-span-2 row-start-2 h-2 rounded-full bg-sunken sm:col-span-1 sm:row-start-auto">
-                <span className="block h-full rounded-full" style={{ width: `${(Math.abs(s.contribution) / max) * 100}%`, background: s.contribution > 0 ? "#0b1f3a" : "#9fb0c4" }} />
+                <span className="block h-full rounded-full" style={{ width: `${(Math.abs(s.contribution) / max) * 100}%`, background: s.contribution > 0 ? "#15171a" : "#c2c4c8" }} />
               </span>
               <span className="text-right tabular-nums text-ink">{s.contribution > 0 ? "+" : "−"}{Math.abs(s.contribution).toFixed(2)}</span>
             </li>

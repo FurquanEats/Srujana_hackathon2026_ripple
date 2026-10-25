@@ -16,16 +16,16 @@ export interface GraphAccount {
 
 // Each role differs in shape as well as colour, so the graph reads without colour vision.
 const ROLE: Record<string, { color: string; shape: cytoscape.Css.NodeShape; label: string }> = {
-  victim: { color: "#1f5fad", shape: "round-rectangle", label: "Victim or source" },
-  mule: { color: "#0b1f3a", shape: "ellipse", label: "Mule account" },
+  victim: { color: "#0b6e63", shape: "round-rectangle", label: "Victim or source" },
+  mule: { color: "#15171a", shape: "ellipse", label: "Mule account" },
   collector: { color: "#6a4c93", shape: "diamond", label: "Collector" },
-  cashout: { color: "#7d8ca1", shape: "hexagon", label: "Cash-out (ATM, crypto)" },
-  other: { color: "#7d8ca1", shape: "ellipse", label: "Other" },
+  cashout: { color: "#9a9da3", shape: "hexagon", label: "Cash-out (ATM, crypto)" },
+  other: { color: "#9a9da3", shape: "ellipse", label: "Other" },
 };
 const roleOf = (r: string) => (r === "source" ? "victim" : ROLE[r] ? r : "other");
 
 const CASH_OUT = /^(ATM|P2P-|VDA-|CRYPTO)/i;
-const FREEZE = "#087e8b";
+const FREEZE = "#0b6e63";
 
 /**
  * Money-flow graph laid out hop by hop from left to right. `upTo` hides payments made after that time, so a slider
@@ -114,7 +114,7 @@ export function MoneyGraph({ edges, accounts = [], frozen = [], upTo, height = 4
             "background-color": (n: cytoscape.NodeSingular) => ROLE[n.data("role")].color,
             shape: (n: cytoscape.NodeSingular) => ROLE[n.data("role")].shape,
             label: "data(label)",
-            color: "#13233d",
+            color: "#15171a",
             "font-family": "IBM Plex Mono, ui-monospace, monospace",
             "font-size": 11,
             "font-weight": 500,
@@ -134,8 +134,8 @@ export function MoneyGraph({ edges, accounts = [], frozen = [], upTo, height = 4
           selector: "edge",
           style: {
             width: 2,
-            "line-color": "#9fb0c4",
-            "target-arrow-color": "#7d8ca1",
+            "line-color": "#c2c4c8",
+            "target-arrow-color": "#9a9da3",
             "target-arrow-shape": "triangle",
             "arrow-scale": 1.1,
             "curve-style": "bezier",
@@ -143,8 +143,8 @@ export function MoneyGraph({ edges, accounts = [], frozen = [], upTo, height = 4
             "font-family": "IBM Plex Sans Variable, system-ui, sans-serif",
             "font-size": 10,
             "font-weight": 600,
-            color: "#13233d",
-            "text-background-color": "#eaf1f8",
+            color: "#15171a",
+            "text-background-color": "#eef3f1",
             "text-background-opacity": 1,
             "text-background-padding": "3px",
             "text-background-shape": "roundrectangle",
@@ -201,7 +201,7 @@ export function MoneyGraph({ edges, accounts = [], frozen = [], upTo, height = 4
 
       {view === "graph" ? (
         <>
-          <div ref={box} style={{ height }} className="w-full rounded-lg border border-line bg-[#fbfcfe]" role="img"
+          <div ref={box} style={{ height }} className="w-full rounded-lg border border-line bg-[#fbfaf7]" role="img"
                aria-label={`Money-flow graph: ${shown.length} of ${edges.length} payments shown across ${roles.size} account roles. Use the payments list for a text version.`} />
           <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted" aria-label="Graph legend">
             {(["victim", "mule", "collector", "cashout"] as const).map((r) => (
@@ -214,7 +214,7 @@ export function MoneyGraph({ edges, accounts = [], frozen = [], upTo, height = 4
               Recommended hold (not yet placed)
             </li>
             <li className="flex items-center gap-1.5">
-              <span aria-hidden className="inline-block h-0.5 w-5 rounded" style={{ background: "#9fb0c4" }} />
+              <span aria-hidden className="inline-block h-0.5 w-5 rounded" style={{ background: "#c2c4c8" }} />
               Payment, labelled with amount
             </li>
           </ul>

@@ -12,11 +12,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Ripple", template: "%s · Ripple" },
-  description: "Stop the scam, then follow the money: scam interception and golden-hour tracing for Indian payments",
+  description: "Stop the scam. Follow the money. Scam interception and golden-hour tracing for Indian banks.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1f3a",
+  themeColor: "#f6f5f1",
   width: "device-width",
   initialScale: 1,
 };

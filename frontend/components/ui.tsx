@@ -52,7 +52,7 @@ export function Icon({ name, className = "h-4 w-4", label }: { name: IconName; c
 const tierStyle: Record<Tier, { cls: string; icon: IconName }> = {
   Critical: { cls: "bg-critical text-white ring-critical", icon: "critical" },
   Review: { cls: "bg-review-soft text-review ring-review-line", icon: "review" },
-  Watch: { cls: "bg-watch-soft text-watch ring-line", icon: "watch" },
+  Watch: { cls: "bg-sunken text-muted ring-line", icon: "watch" },
 };
 
 /** Severity is carried by icon shape and the word itself, never by colour alone. */
@@ -60,7 +60,7 @@ export function TierBadge({ tier, size = "md" }: { tier: Tier; size?: "sm" | "md
   const s = tierStyle[tier];
   const pad = size === "sm" ? "px-1.5 py-0.5 text-[11px]" : "px-2 py-0.5 text-xs";
   return (
-    <span className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md font-semibold ring-1 ring-inset ${pad} ${s.cls}`}>
+    <span className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold ring-1 ring-inset ${pad} ${s.cls}`}>
       <Icon name={s.icon} className="h-3.5 w-3.5" />
       {tier}
     </span>
@@ -69,10 +69,10 @@ export function TierBadge({ tier, size = "md" }: { tier: Tier; size?: "sm" | "md
 
 /** Thresholds mirror backend/ripple/packs/india.yaml tiers (alert 0.60, review 0.70, critical 0.85). */
 export function riskColor(p: number) {
-  if (p >= 0.85) return "#b42332";
-  if (p >= 0.7) return "#c87a12";
-  if (p >= 0.6) return "#7d8ca1";
-  return "#c5d1de";
+  if (p >= 0.85) return "#c2362b";
+  if (p >= 0.7) return "#b9770e";
+  if (p >= 0.6) return "#9a9da3";
+  return "#d9d7d0";
 }
 
 export function RiskDot({ p }: { p: number }) {
@@ -110,12 +110,12 @@ export function Card({ title, description, action, children, className = "", id,
   const headingId = useId();
   return (
     <section id={id} aria-labelledby={title ? headingId : undefined}
-             className={`print-break-avoid min-w-0 rounded-card border border-line bg-surface shadow-card ${padded ? "p-4 sm:p-5" : ""} ${className}`}>
+             className={`print-break-avoid min-w-0 rounded-card border border-line bg-surface shadow-card ${padded ? "p-5 sm:p-6" : ""} ${className}`}>
       {(title || action) && (
-        <header className={`flex flex-wrap items-start justify-between gap-x-4 gap-y-2 ${padded ? "mb-4" : "px-4 pt-4 pb-3 sm:px-5"}`}>
+        <header className={`flex flex-wrap items-start justify-between gap-x-4 gap-y-2 ${padded ? "mb-5" : "px-5 pt-5 pb-3 sm:px-6"}`}>
           <div className="min-w-0">
-            {title && <h2 id={headingId} className="text-base font-semibold text-navy">{title}</h2>}
-            {description && <div className="mt-0.5 text-sm text-muted">{description}</div>}
+            {title && <h2 id={headingId} className="text-[1.05rem] font-semibold text-navy">{title}</h2>}
+            {description && <div className="mt-1 text-sm text-muted">{description}</div>}
           </div>
           {action}
         </header>
@@ -143,13 +143,13 @@ export function Stat({ label, value, hint, tone = "default", icon, emphasis = fa
   emphasis?: boolean;
 }) {
   return (
-    <div className={`print-break-avoid min-w-0 rounded-card border bg-surface px-4 py-3 shadow-card ${emphasis ? "border-line-strong" : "border-line"}`}>
-      <div className="flex items-center gap-1.5 text-xs font-medium text-muted">
-        {icon && <Icon name={icon} className="h-3.5 w-3.5 text-subtle" />}
+    <div className={`print-break-avoid min-w-0 rounded-card border bg-surface px-5 py-4 shadow-card ${emphasis ? "border-line-strong" : "border-line"}`}>
+      <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle">
+        {icon && <Icon name={icon} className="h-3.5 w-3.5" />}
         <span>{label}</span>
       </div>
-      <div className={`mt-1 break-words font-semibold tabular-nums leading-tight ${emphasis ? "text-3xl" : "text-2xl"} ${toneText[tone]}`}>{value}</div>
-      {hint && <div className="mt-1 text-xs text-subtle">{hint}</div>}
+      <div className={`mt-2 break-words font-semibold tabular-nums leading-none tracking-tight ${emphasis ? "text-[2rem]" : "text-[1.65rem]"} ${toneText[tone]}`}>{value}</div>
+      {hint && <div className="mt-2 text-xs text-subtle">{hint}</div>}
     </div>
   );
 }
@@ -159,7 +159,7 @@ export const KpiTile = Stat;
 
 const noticeStyle = {
   info: { cls: "border-line bg-mist text-navy-700", icon: "info" as IconName },
-  success: { cls: "border-[#9fd2bd] bg-recover-soft text-recover", icon: "check" as IconName },
+  success: { cls: "border-[#a9d3c8] bg-recover-soft text-recover", icon: "check" as IconName },
   warning: { cls: "border-review-line bg-review-soft text-review", icon: "review" as IconName },
   error: { cls: "border-critical-line bg-critical-soft text-critical", icon: "critical" as IconName },
 };
@@ -174,7 +174,7 @@ export function Notice({ tone = "info", title, children, action, className = "" 
   const s = noticeStyle[tone];
   return (
     <div role={tone === "error" ? "alert" : "status"}
-         className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${s.cls} ${className}`}>
+         className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${s.cls} ${className}`}>
       <Icon name={s.icon} className="mt-0.5 h-4 w-4" />
       <div className="min-w-0 flex-1">
         {title && <p className="font-semibold">{title}</p>}
@@ -196,7 +196,7 @@ export function ErrorNote({ error, title = "Something went wrong", onRetry }: { 
 
 export function EmptyState({ icon = "info", title, children }: { icon?: IconName; title: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-canvas px-4 py-8 text-center">
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-canvas px-4 py-10 text-center">
       <Icon name={icon} className="h-6 w-6 text-subtle" />
       <p className="mt-2 text-sm font-semibold text-ink">{title}</p>
       {children && <div className="mt-1 max-w-sm text-sm text-muted">{children}</div>}
@@ -225,23 +225,24 @@ export function LoadingPanel({ label }: { label: string }) {
 /* ------------------------------------------------------------------ controls */
 
 const buttonVariant = {
-  primary: "bg-teal text-white hover:bg-teal-strong border border-teal",
+  primary: "bg-navy text-white hover:bg-navy-800 border border-navy",
   navy: "bg-navy text-white hover:bg-navy-800 border border-navy",
-  secondary: "bg-surface text-ink border border-line-strong hover:bg-sunken",
+  secondary: "bg-surface text-ink border border-line-strong hover:border-navy hover:bg-surface",
   ghost: "bg-transparent text-ink border border-transparent hover:bg-sunken",
-  danger: "bg-critical text-white border border-critical hover:bg-[#951c29]",
+  danger: "bg-critical text-white border border-critical hover:bg-[#9e2a21]",
+  accent: "bg-teal text-white hover:bg-teal-strong border border-teal",
 };
 const buttonSize = {
-  sm: "min-h-9 px-3 text-sm gap-1.5",
-  md: "min-h-11 px-4 text-sm gap-2",
-  lg: "min-h-12 px-5 text-base gap-2",
+  sm: "min-h-9 px-3.5 text-sm gap-1.5",
+  md: "min-h-11 px-5 text-sm gap-2",
+  lg: "min-h-12 px-6 text-base gap-2",
 };
 
 export function Button({ variant = "secondary", size = "md", className = "", children, ...rest }:
   ButtonHTMLAttributes<HTMLButtonElement> & { variant?: keyof typeof buttonVariant; size?: keyof typeof buttonSize }) {
   return (
     <button type="button" {...rest}
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${buttonVariant[variant]} ${buttonSize[size]} ${className}`}>
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-full font-semibold disabled:cursor-not-allowed disabled:opacity-55 ${buttonVariant[variant]} ${buttonSize[size]} ${className}`}>
       {children}
     </button>
   );
@@ -283,7 +284,7 @@ export function Field({ label, hint, error, optional, children, className = "" }
 }
 
 export const inputClass =
-  "block w-full min-h-11 rounded-md border border-line-strong bg-surface px-3 py-2 text-base text-ink placeholder:text-subtle " +
+  "block w-full min-h-11 rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-base text-ink placeholder:text-subtle transition-colors hover:border-navy-300 focus:border-navy " +
   "aria-[invalid=true]:border-critical aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-critical sm:text-sm";
 
 /**
@@ -314,7 +315,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
     <dialog ref={ref} aria-labelledby={titleId} aria-describedby={description ? descId : undefined}
             onClose={onClose} onCancel={(e) => { e.preventDefault(); onClose(); }}
             onClick={(e) => { if (e.target === ref.current) onClose(); }}
-            className={`m-auto w-[calc(100%-2rem)] ${size === "lg" ? "max-w-2xl" : "max-w-lg"} rounded-xl border border-line bg-surface p-0 text-ink shadow-pop backdrop:bg-navy/50`}>
+            className={`m-auto w-[calc(100%-2rem)] ${size === "lg" ? "max-w-2xl" : "max-w-lg"} rounded-2xl border border-line bg-surface p-0 text-ink shadow-pop backdrop:bg-navy/40 backdrop:backdrop-blur-[2px]`}>
       {open && (
         <div className="flex max-h-[85vh] flex-col">
           <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
@@ -328,7 +329,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
             </button>
           </header>
           <div className="min-h-0 overflow-y-auto px-5 py-4">{children}</div>
-          {footer && <footer className="flex flex-wrap justify-end gap-2 border-t border-line bg-canvas px-5 py-3">{footer}</footer>}
+          {footer && <footer className="flex flex-wrap justify-end gap-2 border-t border-line px-5 py-4">{footer}</footer>}
         </div>
       )}
     </dialog>
@@ -338,7 +339,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
 /** Marks synthetic demonstration values and controls so they are never mistaken for live bank data. */
 export function DemoBadge({ children = "Demo" }: { children?: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-dashed border-line-strong bg-canvas px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-dashed border-line-strong px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-subtle">
       <Icon name="flask" className="h-3 w-3" />{children}
     </span>
   );
@@ -348,7 +349,7 @@ export function ConnectionStatus({ connected, warmingUp, updatedAt }: { connecte
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm" role="status" aria-live="polite">
       {connected ? (
-        <span className="inline-flex items-center gap-2 rounded-full border border-[#9fd2bd] bg-recover-soft px-3 py-1 font-semibold text-recover">
+        <span className="inline-flex items-center gap-2 rounded-full bg-recover-soft px-3 py-1 font-semibold text-recover">
           <span className="relative flex h-2 w-2" aria-hidden>
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-recover opacity-60 motion-reduce:hidden" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-recover" />
@@ -392,11 +393,11 @@ export function PageHeader({ title, description, eyebrow, actions }: {
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 pb-2">
       <div className="min-w-0">
-        {eyebrow && <div className="mb-1 text-sm">{eyebrow}</div>}
-        <h1 className="text-2xl font-semibold tracking-tight text-navy sm:text-[1.75rem]">{title}</h1>
-        {description && <p className="mt-1 max-w-3xl text-sm text-muted sm:text-base">{description}</p>}
+        {eyebrow && <div className="mb-2 text-sm">{eyebrow}</div>}
+        <h1 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[2.4rem]">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-muted sm:text-base">{description}</p>}
       </div>
       {actions}
     </div>

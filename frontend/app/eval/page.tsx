@@ -6,10 +6,10 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, R
 import { Button, Card, EmptyState, ErrorNote, Icon, LoadingPanel, Notice, PageHeader, Stat } from "@/components/ui";
 import { api, money, pct, time, type ConsortiumReport, type EvalReport, type MetricRow, type OneShotIbmReport, type OneShotReport, type RedTeamRun } from "@/lib/api";
 
-const AXIS = { stroke: "#5d6d84", fontSize: 11 };
-const GRID = "#e3eaf2";
-const tooltip = { contentStyle: { background: "#fff", border: "1px solid #d6e0eb", borderRadius: 8, fontSize: 12, color: "#13233d" } };
-const C = { precision: "#1d3b63", recall: "#087e8b", value: "#a35f00" };
+const AXIS = { stroke: "#6d7076", fontSize: 11 };
+const GRID = "#ece9e1";
+const tooltip = { contentStyle: { background: "#fff", border: "1px solid #e4e1d8", borderRadius: 8, fontSize: 12, color: "#15171a" } };
+const C = { precision: "#3a3e44", recall: "#0b6e63", value: "#a35f00" };
 
 // Notes that say the figures are not final measured results. Matched, never invented: the note text is shown verbatim.
 const WIP = /\b(illustrative|sample data|not measured|preliminary|work in progress|placeholder)\b/i;
@@ -55,7 +55,7 @@ function Headline({ o, b, report }: { o: MetricRow; b: MetricRow; report: EvalRe
 function RedTeam({ redteam }: { redteam: { latest: RedTeamRun; before: RedTeamRun | null } }) {
   const r = redteam.latest;
   return (
-    <Card title="Red team: an adaptive attacker searching for plans Ripple misses"
+    <Card title="Red team: an attacker that learns"
           description={`Run ${time(r.generated_at)} · ${r.plans_tried} laundering plans tried`}>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {redteam.before && <Stat label="Evading plans before the fix" value={redteam.before.evading_plans} hint={`of ${redteam.before.plans_tried} tried`} />}
@@ -83,7 +83,7 @@ function OneShot({ r }: { r: OneShotReport }) {
   const a = r.adaptive_red_team;
   const u = r.unseen_bank;
   return (
-    <Card title="One-shot learning: a new detector from one missed scam"
+    <Card title="One-shot learning: one missed scam in, one new detector out"
           description={`One trail the engine let through (${r.example.plan}; top score ${r.example.peak_probability.toFixed(2)}, below Review) was the only example. Run ${time(r.generated_at)}.`}>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Stat label="Missed plans now caught" value={`${g.of_missed_caught_with} of ${g.missed_without}`} tone="good"
@@ -178,7 +178,7 @@ export default function Evaluation() {
 
   return (
     <article className="space-y-6">
-      <PageHeader title="Evaluation"
+      <PageHeader title="Does it work? The numbers."
                   description={<>{report.dataset} · {report.split}</>}
                   eyebrow={<span className="text-subtle">Report generated {time(report.generated_at)}</span>}
                   actions={
@@ -195,7 +195,7 @@ export default function Evaluation() {
 
       <Headline o={o} b={b} report={report} />
 
-      <Card title="Money still recoverable when the system first alerts"
+      <Card title="Money still there at the first alert"
             description="Share of each laundering attempt's money still in the trail at the first alert. Never-alerted attempts count as zero.">
         {report.money_recoverable && report.money_recoverable.length > 0 ? (
           <Table caption="Money recoverable at first alert, by system"
@@ -225,7 +225,7 @@ export default function Evaluation() {
                 <BarChart data={report.ablation} layout="vertical" margin={{ left: 0, right: 16 }} barGap={2}>
                   <CartesianGrid stroke={GRID} horizontal={false} />
                   <XAxis type="number" domain={[0, 1]} tickFormatter={(v) => pct(v)} {...AXIS} />
-                  <YAxis type="category" dataKey="name" width={150} {...AXIS} tick={{ fontSize: 11, fill: "#13233d" }} />
+                  <YAxis type="category" dataKey="name" width={150} {...AXIS} tick={{ fontSize: 11, fill: "#15171a" }} />
                   <Tooltip formatter={(v) => pct(Number(v), 1)} {...tooltip} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar isAnimationActive={false} dataKey="precision" name="Precision" fill={C.precision} radius={[0, 3, 3, 0]} />
@@ -246,12 +246,12 @@ export default function Evaluation() {
                 <LineChart data={report.budget_curve} margin={{ top: 16, right: 16, bottom: 16 }}>
                   <CartesianGrid stroke={GRID} />
                   <XAxis dataKey="alerts_per_day" type="number" domain={["dataMin", "dataMax"]} {...AXIS}
-                         label={{ value: "Alerts per day", position: "insideBottom", offset: -10, fill: "#4a5b73", fontSize: 11 }} />
+                         label={{ value: "Alerts per day", position: "insideBottom", offset: -10, fill: "#55585e", fontSize: 11 }} />
                   <YAxis domain={[0, 1]} tickFormatter={(v) => pct(v)} {...AXIS} width={44} />
                   <Tooltip formatter={(v) => pct(Number(v), 1)} labelFormatter={(l) => `${l} alerts per day`} {...tooltip} />
                   <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
-                  <ReferenceLine x={report.suggested_budget} stroke="#0b1f3a" strokeDasharray="4 4"
-                                 label={{ value: "Suggested", fill: "#0b1f3a", fontSize: 11, fontWeight: 600, position: "insideTopRight" }} />
+                  <ReferenceLine x={report.suggested_budget} stroke="#15171a" strokeDasharray="4 4"
+                                 label={{ value: "Suggested", fill: "#15171a", fontSize: 11, fontWeight: 600, position: "insideTopRight" }} />
                   <Line isAnimationActive={false} dataKey="recall" name="Laundering caught" stroke={C.recall} strokeWidth={2.5} dot={{ r: 3, strokeDasharray: "0" }} />
                   <Line isAnimationActive={false} dataKey="value_caught_share" name="Value caught" stroke={C.value} strokeWidth={2.5} strokeDasharray="6 3" dot={{ r: 3, strokeDasharray: "0" }} />
                   <Line isAnimationActive={false} dataKey="precision" name="Precision" stroke={C.precision} strokeWidth={2.5} strokeDasharray="2 3" dot={{ r: 3, strokeDasharray: "0" }} />
@@ -305,7 +305,7 @@ export default function Evaluation() {
         </Table>
       </Card>
 
-      <Card title="Notes, limits and context">
+      <Card title="Limits, stated plainly">
         {report.notes.length > 0 ? (
           <ul className="list-disc space-y-1 pl-5 text-sm text-ink">{report.notes.map((n) => <li key={n}>{n}</li>)}</ul>
         ) : <p className="text-sm text-muted">No notes were attached to this report.</p>}

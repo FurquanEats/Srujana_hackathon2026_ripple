@@ -56,19 +56,19 @@ export function RecoveryChart({ plan, currency = "INR", embedded = false }: { pl
       <div className="h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 24, right: 12, bottom: 4, left: 0 }}>
-            <CartesianGrid stroke="#e3eaf2" vertical={false} />
+            <CartesianGrid stroke="#ece9e1" vertical={false} />
             <XAxis dataKey="t" type="number" domain={["dataMin", "dataMax"]} scale="time" tickFormatter={tick}
-                   stroke="#5d6d84" fontSize={11} tickMargin={6} minTickGap={40} />
-            <YAxis stroke="#5d6d84" fontSize={11} tickFormatter={(v) => moneyShort(Number(v), currency)} width={64} />
+                   stroke="#6d7076" fontSize={11} tickMargin={6} minTickGap={40} />
+            <YAxis stroke="#6d7076" fontSize={11} tickFormatter={(v) => moneyShort(Number(v), currency)} width={64} />
             <Tooltip labelFormatter={(t) => time(new Date(Number(t)).toISOString())}
                      formatter={(v) => money(Number(v), currency)}
-                     contentStyle={{ background: "#fff", border: "1px solid #d6e0eb", borderRadius: 8, fontSize: 12, color: "#13233d" }} />
-            <Legend wrapperStyle={{ fontSize: 12, color: "#4a5b73" }} />
-            <Area isAnimationActive={false} type="stepAfter" dataKey="recoverable" name="Still in the trail (recoverable)" stroke="#0f6b4f" strokeWidth={2} fill="#0f6b4f" fillOpacity={0.14} />
-            <Area isAnimationActive={false} type="stepAfter" dataKey="escaped" name="Escaped to cash or crypto" stroke="#b42332" strokeWidth={2} strokeDasharray="6 3" fill="#b42332" fillOpacity={0.08} />
+                     contentStyle={{ background: "#fff", border: "1px solid #e4e1d8", borderRadius: 8, fontSize: 12, color: "#15171a" }} />
+            <Legend wrapperStyle={{ fontSize: 12, color: "#55585e" }} />
+            <Area isAnimationActive={false} type="stepAfter" dataKey="recoverable" name="Still in the trail (recoverable)" stroke="#0b6e63" strokeWidth={2} fill="#0b6e63" fillOpacity={0.14} />
+            <Area isAnimationActive={false} type="stepAfter" dataKey="escaped" name="Escaped to cash or crypto" stroke="#c2362b" strokeWidth={2} strokeDasharray="6 3" fill="#c2362b" fillOpacity={0.08} />
             {plan.first_alert_at && (
-              <ReferenceLine x={new Date(plan.first_alert_at).getTime()} stroke="#0b1f3a" strokeDasharray="4 4"
-                             label={{ value: "Ripple alert", fill: "#0b1f3a", fontSize: 11, fontWeight: 600, position: "insideTopLeft" }} />
+              <ReferenceLine x={new Date(plan.first_alert_at).getTime()} stroke="#15171a" strokeDasharray="4 4"
+                             label={{ value: "Ripple alert", fill: "#15171a", fontSize: 11, fontWeight: 600, position: "insideTopLeft" }} />
             )}
           </AreaChart>
         </ResponsiveContainer>
@@ -81,7 +81,7 @@ export function RecoveryChart({ plan, currency = "INR", embedded = false }: { pl
   );
 
   return embedded ? chart : (
-    <Card title="Recoverable money over time" description="Every minute counts: money leaves the trail as mules cash out.">
+    <Card title="The race to the cash-out" description="Money still in the trail, against money already gone.">
       {chart}
     </Card>
   );

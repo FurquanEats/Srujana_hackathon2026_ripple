@@ -38,22 +38,18 @@ function validate(account: string, date: string, clock: string, amount: string):
 
 function GoldenHour() {
   return (
-    <aside aria-labelledby="golden-hour" className="rounded-card border border-line bg-mist p-4 sm:p-5">
-      <h2 id="golden-hour" className="flex items-center gap-2 text-base font-semibold text-navy">
-        <Icon name="clock" className="h-4 w-4 text-teal-strong" /> Why the golden hour matters
-      </h2>
-      <p className="mt-2 text-sm text-ink">
-        Stolen money usually passes through two or three mule accounts within minutes, and some of it reaches an ATM or a
-        crypto off-ramp soon after. Once it leaves the bank as cash or crypto it is very hard to recover.
+    <aside aria-labelledby="golden-hour" className="rounded-card bg-navy p-6 text-white">
+      <h2 id="golden-hour" className="text-[1.05rem] font-semibold">Minutes matter.</h2>
+      <p className="mt-2 text-sm leading-relaxed text-navy-300">
+        Stolen money crosses two or three mule accounts within minutes. Once it becomes cash or crypto, it is gone.
       </p>
-      <p className="mt-2 text-sm text-ink">
-        Tracing straight from the report shows where the money sits <em>now</em> and the fewest accounts to hold to recover
-        the most of it.
+      <p className="mt-2 text-sm leading-relaxed text-navy-300">
+        Ripple shows where it sits <em className="not-italic text-white">now</em>, and the fewest liens that hold the most.
       </p>
-      <ul className="mt-3 space-y-1.5 text-sm text-muted">
-        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-strong" />For complaints from the 1930 helpline or the cybercrime portal.</li>
-        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-strong" />Ripple drafts hold requests; an officer reviews and sends them.</li>
-        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-strong" />Only payments inside this bank&apos;s view are traced.</li>
+      <ul className="mt-4 space-y-2 text-sm text-white">
+        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-soft" />Built for 1930 and cybercrime-portal complaints.</li>
+        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-soft" />Your accounts: place the lien. Other banks: export for CFCFRMS.</li>
+        <li className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-teal-soft" />Tracing reads payments. It moves nothing.</li>
       </ul>
     </aside>
   );
@@ -121,11 +117,11 @@ function ReportForm() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Report a scam"
-                  description="For the officer handling a 1930 helpline or cybercrime-portal complaint. Enter the victim's account and when they paid, or a case number from the queue; Ripple follows the money through every hop it can see." />
+      <PageHeader title="Trace stolen money."
+                  description="Enter the victim's account, or a case number. Ripple follows the money hop by hop and tells you exactly what to hold." />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card title="Victim's report" className="lg:col-span-2">
+        <Card title="The report" className="lg:col-span-2">
           <form ref={formRef} noValidate onSubmit={submit} aria-busy={busy} className="space-y-5">
             <Field label="Victim's account or case number" error={errors.account} hint="The account the money was paid from (for example AC0038), or a case number from the queue (for example C-0007).">
               {(a) => (
@@ -201,7 +197,7 @@ function ReportForm() {
                 Traced {plan.edges.length} payment{plan.edges.length === 1 ? "" : "s"} from <span className="font-mono">{plan.victims.join(", ")}</span>, as of {time(plan.as_of)}.
               </Notice>
               <RecoveryMetrics plan={plan} />
-              <Card title="Where the money went" description="Left to right by hop. Accounts with a teal ring are recommended for a hold.">
+              <Card title="Where the money went" description="Left to right, hop by hop. A teal ring marks a recommended hold.">
                 <MoneyGraph edges={plan.edges} accounts={accounts} frozen={plan.freeze.map((f) => f.account_id)} height={460} />
               </Card>
               <FreezeList plan={plan} />

@@ -67,8 +67,8 @@ export default function CheckPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Check a payment"
-                  description="The bank asks Ripple before a payment leaves. Ripple answers in about a millisecond: allow it, pause it for the customer to confirm, or hold it and call them." />
+      <PageHeader title="Ask before money moves."
+                  description="Your payment system checks with Ripple at authorisation. In about a millisecond: allow it, pause it for the customer, or hold it and call." />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Payment about to go" className="lg:col-span-2">
@@ -100,19 +100,19 @@ export default function CheckPage() {
           </form>
         </Card>
 
-        <section className="no-print rounded-card border-2 border-dashed border-line-strong bg-canvas p-4 sm:p-5" aria-labelledby="examples">
+        <section className="no-print rounded-card border border-dashed border-line-strong p-5 sm:p-6" aria-labelledby="examples">
           <div className="flex items-center gap-2">
             <h2 id="examples" className="text-base font-semibold text-navy">Try it</h2>
             <DemoBadge>Demo only</DemoBadge>
           </div>
           <div className="mt-3 space-y-2">
             <button type="button" onClick={coachedExample} disabled={busy !== null}
-                    className="flex w-full flex-col items-start rounded-md border border-line-strong bg-surface px-3 py-2 text-left hover:border-teal hover:bg-teal-soft disabled:opacity-55">
+                    className="flex w-full flex-col items-start rounded-xl border border-line bg-surface px-3.5 py-2.5 text-left hover:-translate-y-0.5 hover:border-navy disabled:opacity-55">
               <span className="flex items-center gap-2 text-sm font-semibold text-ink">{busy === "example" && <Spinner className="h-3.5 w-3.5" />}A coached transfer</span>
               <span className="text-xs text-muted">A pensioner breaks an ₹8 lakh FD, then is told to send ₹7.5 lakh to a &quot;safe account&quot;.</span>
             </button>
             <button type="button" onClick={ordinaryExample} disabled={busy !== null}
-                    className="flex w-full flex-col items-start rounded-md border border-line-strong bg-surface px-3 py-2 text-left hover:border-teal hover:bg-teal-soft disabled:opacity-55">
+                    className="flex w-full flex-col items-start rounded-xl border border-line bg-surface px-3.5 py-2.5 text-left hover:-translate-y-0.5 hover:border-navy disabled:opacity-55">
               <span className="text-sm font-semibold text-ink">An ordinary payment</span>
               <span className="text-xs text-muted">₹450 to a shop over UPI.</span>
             </button>

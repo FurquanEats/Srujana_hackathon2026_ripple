@@ -16,11 +16,12 @@ When a scam victim reports to the 1930 helpline or the cybercrime portal, the mo
 
 | Moment | Capability | How |
 | --- | --- | --- |
+| Before | Pre-payment check | The bank asks Ripple at authorisation, before money moves (`POST /check`). Ripple scores the payment without recording it and answers in about a millisecond: allow, a 60-minute cooling-off hold the customer can release, or hold and call the customer. |
 | Before | Coerced-transfer detection | An established customer sends most of a lump sum that just arrived from their own fixed deposit or long-known source to a payee they have never paid, at five or more times their usual payment and at least Rs 1 lakh. Repeats within 72 hours score higher. The recommended action is a cooling-off hold and a call to the customer or a trusted contact. |
 | During | Streaming detection | Every payment is scored as it arrives by nine typology detectors (pass-through, fan-in then out, fan-out burst, scatter-gather, temporal cycle, cash structuring under the Rs 50,000 PAN-quote limit, device takeover, coerced transfer, rapid cash-out) and any patterns learned from confirmed trails, a behavioural baseline, a graph layer and an optional ML model, fused into one probability. |
 | After | Golden-hour tracing | From a victim's report or an alerted case, Ripple follows the money forward through every hop it can see, using haircut taint tracking (the method used to trace mixed funds in crypto forensics). Money that reached an ATM withdrawal or a crypto off-ramp counts as escaped. |
 | After | One-shot learning | When a victim reports a scam that no detector caught, the officer traces it and clicks "Learn this pattern". Ripple describes every account on the trail that received money and passed it on (how long the money sat, how much moved on, how many senders and payees, how old the account is, whether it has any spending of its own). It starts from the tightest description of those payments, frees the knobs a criminal changes cheaply between runs (amounts, waits, splits, hops), and stops before more than one ordinary payment every two days in the bank's last 30 days would match. The officer sees each rule with how rare it is, and the expected false alarms, before deploying it as a live detector. |
-| After | Hold plan | Ripple proposes liens on the traced amount only, never a freeze of the whole account, in line with MHA's CFCFRMS procedure and recent High Court rulings. The accounts to hold are a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each hold would be, plus any account holding a large share of the traced money. When a mule's own money is mixed with stolen money, each hold is shown as a range under three accepted tracing rules (haircut, first in first out, and lowest intermediate balance), and the drafted hold request asks for the lowest figure, which every rule supports. |
+| After | Hold plan | Ripple proposes liens on the traced amount only, never a freeze of the whole account, in line with MHA's CFCFRMS procedure and recent High Court rulings. The accounts to hold are a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each hold would be, plus any account holding a large share of the traced money. When a mule's own money is mixed with stolen money, each hold is shown as a range under three accepted tracing rules (haircut, first in first out, and lowest intermediate balance), and the lien uses the lowest figure, which every rule supports. For this bank's own accounts the officer places the lien in one step; holds at other banks go out together as a structured CFCFRMS request. |
 
 Every flag carries reason sentences that cite the transactions behind it and a counterfactual ("not flagged if the money had left more than 30 minutes after arriving"). Context signals alone (unusual for this account, near other alerts) can never push a case above Watch, so an unusual but honest customer, such as someone buying Diwali jewellery, is never escalated.
 
@@ -46,11 +47,12 @@ npm install
 npm run dev                         # http://localhost:3000
 ```
 
-1. **Command centre:** live payments, engine throughput and latency, and the case queue. Click **Digital arrest** to inject a scam into the stream.
+1. **Live:** live payments, engine throughput and latency, and the case queue. Click **Digital arrest** to inject a scam into the stream.
 2. **Case workbench:** open the new Critical case. The hold plan shows money already escaped to an ATM and crypto, money still recoverable in mule accounts, and the traced amount to hold in each account. The replay slider shows the money moving hop by hop.
-3. **Report a scam:** enter the victim's account to trace the money forward from the report.
-4. **One-shot learning:** click **Patient mule ring**. Its mules wait just long enough that no built-in detector acts. About 20 seconds later, follow **Report it and trace the money**, then **Learn this pattern** and **Deploy as a live detector**. Click **Patient mule ring** again: the new ring becomes a Critical case citing the learned pattern, and the first ring's mules are flagged before they withdraw.
-5. **Evaluation:** results on IBM's public AML dataset, the red team and one-shot learning.
+3. **Trace:** enter the victim's account, or a case number, to trace the money forward and place liens.
+4. **Check:** check a payment before it goes. Try the coached transfer: a pensioner's broken FD followed by a ₹7.5 lakh transfer to a "safe account" comes back "hold and call".
+5. **One-shot learning:** click **Patient mule ring**. Its mules wait just long enough that no built-in detector acts. About 20 seconds later, follow **Report it and trace the money**, then **Learn this pattern** and **Deploy as a live detector**. Click **Patient mule ring** again: the new ring becomes a Critical case citing the learned pattern, and the first ring's mules are flagged before they withdraw.
+6. **Results:** results on IBM's public AML dataset, the red team and one-shot learning.
 
 Run the tests with `cd backend && pytest -q`. Without `RIPPLE_SOURCE=engine`, the API serves the sample responses in `fixtures/`.
 
@@ -79,7 +81,9 @@ simulator or file replay -> ordered feed -> per-account feature store
 | `GET /cases?budget=N` | Top N open cases, by tier then expected loss |
 | `GET /cases/{id}` | Case detail: reasons, model contributions, money-flow graph, timeline, account profiles |
 | `GET /cases/{id}/interdiction` | Hold plan: traced money, holdings, liens to request with their range across tracing rules, money escaped, recovery over time |
-| `POST /trace` | Hold plan for a victim's report: `{account, from_ts?, amount?}` |
+| `POST /trace` | Hold plan for a victim's report: `{account, from_ts?, amount?}`, or a case number |
+| `POST /check` | Pre-payment check: `{src_account, dst_account, amount, rail}` → allow, cooling-off hold, or hold and call |
+| `POST /liens`, `GET /liens?plan_id=`, `POST /liens/{id}/release` | Liens this bank places on its own accounts after an officer approves |
 | `POST /inject/{kind}` | Adds a simulated scenario to the live stream (`digital_arrest`, `mule_ring`, `scam_fanout`, `sim_swap_takeover`, `cash_structuring`, `diwali_spike`, `patient_ring`) |
 | `POST /motifs/learn` | Learns a pattern from one trail: `{case_id}` or a victim's report `{account, from_ts?, amount?}` |
 | `GET /motifs`, `POST /motifs/{id}/deploy`, `POST /motifs/{id}/retire` | Learned patterns with their live matches; put one live or take it down |

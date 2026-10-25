@@ -132,8 +132,8 @@ export function LearnFromTrail({ request, what }: { request: LearnRequest; what:
   };
 
   return (
-    <Card title="Teach Ripple this pattern"
-          description={`If no detector caught ${what}, Ripple can learn its shape from this one trail and check it against the bank's last 30 days before anything goes live.`}>
+    <Card title="Missed by every rule? Teach Ripple."
+          description={`Ripple learns the shape of ${what} from this one trail and tests it on 30 days of your traffic. Nothing goes live until you say so.`}>
       {!pattern ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button variant="primary" size="lg" onClick={learn} disabled={busy}>
@@ -166,7 +166,7 @@ export function LearnedPatterns() {
 
   return (
     <Card title="Learned patterns"
-          description="Detectors Ripple learned from one confirmed trail each. Report a scam the queue missed, then teach Ripple its shape.">
+          description="Detectors Ripple taught itself, one missed scam each. Trace a scam the rules missed, then teach it.">
       {error ? (
         <ErrorNote title="Could not load learned patterns" error={error} onRetry={load} />
       ) : patterns === null ? (

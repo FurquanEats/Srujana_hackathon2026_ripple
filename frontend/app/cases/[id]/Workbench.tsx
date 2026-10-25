@@ -158,7 +158,7 @@ export function Workbench() {
             </div>
           </div>
         </div>
-        {decision && <Notice tone="success" className="mt-4" title="Decision recorded">{decision.message} No account has been frozen and no report has been filed.</Notice>}
+        {decision && <Notice tone="success" className="mt-4" title="Decision recorded">{decision.message} No lien has been placed and no report filed.</Notice>}
         {decisionError && <div className="mt-4"><ErrorNote title="Decision not recorded" error={decisionError} /></div>}
 
         <nav aria-label="Case sections" className="no-print mt-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
@@ -177,7 +177,7 @@ export function Workbench() {
 
       {/* 3. Evidence */}
       <Card id="evidence" title="Why Ripple flagged it" className="scroll-mt-20"
-            description="Each statement cites the payments behind it and what would have kept it from firing.">
+            description="Each reason names the payments behind it, and what would have kept it quiet.">
         {detail.narrative && (
           <div className="mb-4 rounded-lg bg-mist p-3 sm:p-4">
             <p className="text-xs font-semibold text-navy-700">Case summary · AI-drafted, checked against the case facts</p>
@@ -211,7 +211,7 @@ export function Workbench() {
       </div>
 
       {/* 7. Timeline */}
-      <Card id="timeline" title="Case timeline" className="scroll-mt-20" description="Payments and audit-relevant events, oldest first.">
+      <Card id="timeline" title="Timeline" className="scroll-mt-20" description="Every payment in the case, oldest first.">
         <Timeline transactions={detail.timeline} events={events} />
       </Card>
 
