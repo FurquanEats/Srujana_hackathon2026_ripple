@@ -163,6 +163,76 @@ def test_text_pdfs_carry_the_figures_and_the_planted_text() -> None:
     assert "ignore previous instructions" in text  # present in the text layer, invisible on the page
 
 
+FIVE_CRORE = 5_00_00_000_00  # paise
+TAX_INVOICES = ("tax_invoice", "e_invoice")
+
+
+def gst_documents() -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Every tax invoice, e-invoice and bill of supply, with its case."""
+    return [
+        (t, d)
+        for t in TRUTHS
+        for d in t["documents"]
+        if d["fields"]["document_type"] in (*TAX_INVOICES, "bill_of_supply")
+    ]
+
+
+def issuer_turnover(t: dict[str, Any], d: dict[str, Any]) -> int | None:
+    """The issuer's declared turnover, when the issuer is the account holder (the bank's KYC has it)."""
+    if d["fields"]["issuer"] != t["account_holder"]["name"]:
+        return None
+    turnover: int | None = t["account_holder"]["kyc"].get("declared_annual_turnover")
+    return turnover
+
+
+def test_invoice_numbers_follow_rule_46_b() -> None:
+    """At most 16 characters: letters, digits, hyphen and slash (CGST Rule 46(b))."""
+    for _, d in gst_documents():
+        assert re.fullmatch(r"[A-Za-z0-9/-]{1,16}", d["fields"]["number"]), d["file"]
+
+
+def test_hsn_digits_follow_the_turnover_rule() -> None:
+    """4 digits up to Rs 5 crore turnover, 6 above (Notification 78/2020-Central Tax)."""
+    for t, d in gst_documents():
+        turnover = issuer_turnover(t, d)
+        needed = 6 if turnover is not None and turnover > FIVE_CRORE else 4
+        assert all(len(i["hsn"]) >= needed for i in d["items"]), d["file"]
+
+
+def test_e_invoices_come_from_businesses_above_the_e_invoicing_threshold() -> None:
+    """E-invoicing (an IRN and its QR code) applies above Rs 5 crore turnover (Notification 10/2023-Central Tax)."""
+    e_invoices = [(t, d) for t, d in gst_documents() if d["fields"]["document_type"] == "e_invoice"]
+    assert e_invoices
+    for t, d in e_invoices:
+        turnover = issuer_turnover(t, d)
+        assert turnover is not None
+        assert turnover > FIVE_CRORE, d["file"]
+        assert d["fields"]["irn"], d["file"]
+
+
+def test_gst_rates_are_the_rates_in_force_since_22_september_2025() -> None:
+    """The 12% and 28% slabs went on 22 September 2025; exempt goods go on a bill of supply (Rule 49)."""
+    for _, d in gst_documents():
+        f = d["fields"]
+        rate = Decimal(f["tax"]) * 100 / Decimal(f["taxable_value"])
+        assert rate.quantize(Decimal("0.01")) in {Decimal(0), Decimal(5), Decimal(18)}, d["file"]
+        assert (f["document_type"] == "bill_of_supply") == (f["tax"] == 0), d["file"]
+
+
+def test_e_invoice_carries_the_irp_fields_in_its_qr_code() -> None:
+    """The QR code (Rule 46(r)) carries the fields the IRP signs; here they are plain JSON."""
+    t = BY_ID["D03"]
+    inv = next(c for c in gen.cases() if c.case_id == "D03").docs[0]
+    payload = json.loads(gen.einvoice_qr(inv))
+    fields = t["documents"][0]["fields"]
+    assert payload["SellerGstin"] == fields["issuer_gstin"]
+    assert payload["BuyerGstin"] == fields["recipient_gstin"]
+    assert payload["DocNo"] == fields["number"]
+    assert payload["Irn"] == fields["irn"]
+    assert round(payload["TotInvVal"] * 100) == fields["total"]
+    assert payload["ItemCnt"] == len(t["documents"][0]["items"])
+
+
 def digest(folder: Path, pattern: str) -> dict[Path, bytes]:
     files = (p for p in sorted(folder.rglob(pattern)) if p.is_file())
     return {p.relative_to(folder): hashlib.sha256(p.read_bytes()).digest() for p in files}

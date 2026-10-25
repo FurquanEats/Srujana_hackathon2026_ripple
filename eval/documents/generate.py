@@ -29,6 +29,9 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from reportlab import rl_config
+from reportlab.graphics import renderPDF
+from reportlab.graphics.barcode.qr import QrCodeWidget
+from reportlab.graphics.shapes import Drawing
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -161,7 +164,7 @@ class Doc:
     """One document an account holder hands in."""
 
     file: str
-    kind: str  # tax_invoice, e_invoice, delivery_challan, salary_slip, rent_agreement
+    kind: str  # tax_invoice, e_invoice, bill_of_supply, delivery_challan, salary_slip, rent_agreement
     issuer: Party
     recipient: Party
     number: str
@@ -189,7 +192,7 @@ class Doc:
 
     @property
     def tax(self) -> int:
-        if not self.items or self.kind == "delivery_challan":
+        if not self.items or self.kind in ("delivery_challan", "bill_of_supply"):
             return 0
         if self.interstate:
             return pct(self.taxable, self.gst_rate)
@@ -355,8 +358,10 @@ LABELS = {
         "tax_invoice": "TAX INVOICE",
         "e_invoice": "TAX INVOICE (e-Invoice)",
         "delivery_challan": "DELIVERY CHALLAN",
+        "bill_of_supply": "BILL OF SUPPLY",
         "number": "Invoice No.",
         "challan_number": "Challan No.",
+        "bill_number": "Bill No.",
         "date": "Date",
         "seller": "Seller",
         "buyer": "Bill to",
@@ -377,13 +382,19 @@ LABELS = {
         "sign": "Authorised signatory",
         "irn": "IRN",
         "challan_note": "Goods sent for delivery. Not a tax invoice.",
+        "pos": "Place of supply",
+        "rcm": "Tax payable on reverse charge",
+        "no": "No",
+        "bos_note": "Exempt supply. No GST charged.",
     },
     "hi": {
         "tax_invoice": "कर बीजक (टैक्स इनवॉइस)",
         "e_invoice": "कर बीजक (ई-इनवॉइस)",
         "delivery_challan": "डिलीवरी चालान",
+        "bill_of_supply": "आपूर्ति का बिल",
         "number": "बीजक संख्या",
         "challan_number": "चालान संख्या",
+        "bill_number": "बिल संख्या",
         "date": "दिनांक",
         "seller": "विक्रेता",
         "buyer": "क्रेता",
@@ -404,11 +415,30 @@ LABELS = {
         "sign": "अधिकृत हस्ताक्षरकर्ता",
         "irn": "आईआरएन",
         "challan_note": "माल डिलीवरी हेतु भेजा गया। यह कर बीजक नहीं है।",
+        "pos": "आपूर्ति का स्थान",
+        "rcm": "रिवर्स चार्ज पर देय कर",
+        "no": "नहीं",
+        "bos_note": "छूट प्राप्त आपूर्ति। कोई जीएसटी नहीं लगाया गया।",
     },
 }
 
 
-def layout(doc: Doc) -> list[tuple[str, Any]]:  # noqa: PLR0912  one branch per optional block
+# GST state codes (the first two digits of a GSTIN) for the states the cases use.
+STATE_NAMES = {
+    "08": "Rajasthan",
+    "09": "Uttar Pradesh",
+    "23": "Madhya Pradesh",
+    "24": "Gujarat",
+    "27": "Maharashtra",
+    "29": "Karnataka",
+    "32": "Kerala",
+    "36": "Telangana",
+    "37": "Andhra Pradesh",
+}
+TAX_INVOICES = ("tax_invoice", "e_invoice")
+
+
+def layout(doc: Doc) -> list[tuple[str, Any]]:  # noqa: PLR0912, PLR0915  one branch per optional block
     """The page as a list of blocks: ("title", text), ("text", text), ("kv", (k, v)), ("table", rows), ("gap", n)."""
     if doc.lines_override is not None:
         blocks: list[tuple[str, Any]] = [("title", doc.number), ("gap", 1)]
@@ -425,11 +455,18 @@ def layout(doc: Doc) -> list[tuple[str, Any]]:  # noqa: PLR0912  one branch per 
     if doc.issuer.gstin:
         b.append(("text", f"{lb['gstin']}: {doc.issuer.gstin}"))
     b.append(("gap", 1))
-    num_label = lb["challan_number"] if doc.kind == "delivery_challan" else lb["number"]
+    num_label = {"delivery_challan": lb["challan_number"], "bill_of_supply": lb["bill_number"]}.get(
+        doc.kind, lb["number"]
+    )
     b.append(("kv", (num_label, doc.number)))
     b.append(("kv", (lb["date"], doc.on.strftime("%d/%m/%Y"))))
     if doc.irn:
         b.append(("kv", (lb["irn"], doc.irn)))
+    if doc.kind in TAX_INVOICES:
+        if doc.interstate:
+            code = doc.recipient.state_code
+            b.append(("kv", (lb["pos"], f"{STATE_NAMES[code]} ({code})")))
+        b.append(("kv", (lb["rcm"], lb["no"])))
     b.append(("gap", 1))
     b.append(
         (
@@ -448,6 +485,9 @@ def layout(doc: Doc) -> list[tuple[str, Any]]:  # noqa: PLR0912  one branch per 
     b.append(("gap", 1))
     if doc.kind == "delivery_challan":
         b.append(("text", lb["challan_note"]))
+    elif doc.kind == "bill_of_supply":
+        b.append(("kvbold", (lb["total"], inr(doc.total))))
+        b.append(("text", lb["bos_note"]))
     else:
         b.append(("kv", (lb["taxable"], inr(doc.taxable))))
         if doc.interstate:
@@ -494,6 +534,28 @@ def wrap(text: str, width: int) -> list[str]:
     return [*lines, line] if line else lines
 
 
+def einvoice_qr(doc: Doc) -> str:
+    """What the e-invoice QR code carries: the fields the IRP puts in its signed QR, as plain JSON.
+
+    The real code holds a JWT signed by the Invoice Registration Portal; a simulation cannot sign as the IRP, so
+    the same fields are encoded unsigned.
+    """
+    assert doc.irn is not None  # noqa: S101 - only called for e-invoices
+    payload = {
+        "SellerGstin": doc.issuer.gstin,
+        "BuyerGstin": doc.recipient.gstin,
+        "DocNo": doc.number,
+        "DocTyp": "INV",
+        "DocDt": doc.on.strftime("%d/%m/%Y"),
+        "TotInvVal": doc.total / 100,
+        "ItemCnt": len(doc.items),
+        "MainHsnCode": max(doc.items, key=lambda i: i.qty * i.rate).hsn,
+        "Irn": doc.irn,
+        "IrnDt": f"{doc.on.isoformat()} 10:00:00",
+    }
+    return json.dumps(payload, separators=(",", ":"))
+
+
 def render_pdf(doc: Doc, path: Path) -> None:  # noqa: PLR0912  one branch per block type
     """A text PDF, as accounting software prints it. English only: reportlab cannot shape Devanagari."""
     c = canvas.Canvas(str(path), pagesize=A4, pageCompression=1)
@@ -531,6 +593,13 @@ def render_pdf(doc: Doc, path: Path) -> None:  # noqa: PLR0912  one branch per b
             c.line(x, y + 10, width - 50, y + 10)
         elif kind == "gap":
             y -= 10 * value
+    if doc.irn:
+        qr = QrCodeWidget(einvoice_qr(doc))
+        x0, y0, x1, y1 = qr.getBounds()
+        size = 90
+        drawing = Drawing(size, size, transform=[size / (x1 - x0), 0, 0, size / (y1 - y0), 0, 0])
+        drawing.add(qr)
+        renderPDF.draw(drawing, c, width - 50 - size, y - size)  # below the signatory line
     if doc.hidden_note:
         c.setFillColorRGB(1, 1, 1)
         c.setFont("Latin", 1)
@@ -788,10 +857,10 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
         "KAI/0977",
         date(2026, 10, 8),
         [
-            Item("Power sprayer, 16 litre", "8424", 6, "nos", paise(4250)),
-            Item("Drip irrigation kit, 1 acre", "8424", 2, "nos", paise(18900)),
+            Item("Power sprayer, 16 litre", "842441", 6, "nos", paise(4250)),
+            Item("Drip irrigation kit, 1 acre", "842482", 2, "nos", paise(18900)),
         ],
-        Decimal(12),
+        Decimal(5),
         irn=irn,
     )
     challan = Doc(
@@ -802,7 +871,7 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
         "KAI/DC/0977",
         date(2026, 10, 8),
         inv.items,
-        Decimal(12),
+        Decimal(5),
     )
     c = Credit(
         "C1",
@@ -824,7 +893,7 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
             {
                 "occupation": "Farm equipment dealer",
                 "business_type": "proprietorship",
-                "declared_annual_turnover": paise("95,00,000"),
+                "declared_annual_turnover": paise("9,50,00,000"),
             },
             "Payment from Shivneri Krishi Kendra, Kolhapur, for sprayers and drip kits. E-invoice and "
             "challan attached.",
@@ -836,8 +905,8 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
                     "explained",
                     c.amount,
                     inv.file,
-                    "E-invoice total (with IGST at 12%) equals the credit; the challan confirms delivery "
-                    "on the same date. The e-invoice carries no QR code, so no signature can be verified.",
+                    "E-invoice total (with IGST at 5%) equals the credit; the challan confirms delivery "
+                    "on the same date. The QR code's IRP signature cannot be verified offline.",
                 )
             ],
         )
@@ -1334,7 +1403,7 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
             Item("Brake pads, front set", "8708", 60, "set", paise(1450)),
             Item("Clutch plate assembly", "8708", 15, "nos", paise(3900)),
         ],
-        Decimal(28),
+        Decimal(18),
     )
     c = Credit(
         "C1",
@@ -1559,7 +1628,7 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
     acct = ids.account()
     inv = Doc(
         "invoice_GLN-0388.pdf",
-        "tax_invoice",
+        "bill_of_supply",
         h,
         buyer,
         "GLN/0388",
@@ -1612,7 +1681,7 @@ def cases() -> list[Case]:  # noqa: PLR0915  one long list of fixtures reads bes
                     "explained",
                     c1.amount,
                     inv.file,
-                    "The invoice (plants are exempt from GST, so tax is nil) equals the credit and the "
+                    "The bill of supply (plants are exempt from GST, so no tax is charged) equals the credit and the "
                     "buyer is the remitter.",
                 ),
                 Expected(

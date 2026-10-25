@@ -44,10 +44,36 @@ Amounts are whole paise, as in `ripple_core.money`. Times are ISO 8601 in IST.
   traced amount.
 - `documents`: each file handed in, with its language, form (`pdf` with a text layer, `image_pdf` for a scanned
   page, `photo` for a phone JPEG), quality, any planted instruction, and the fields a reader should extract,
-  exactly as printed: document type, issuer and GSTIN, recipient and GSTIN, number, date, taxable value, tax,
+  exactly as printed: document type (`tax_invoice`, `e_invoice`, `bill_of_supply`, `delivery_challan`,
+  `salary_slip`, `rent_agreement`), issuer and GSTIN, recipient and GSTIN, number, date, taxable value, tax,
   total, payment reference, the issuer's bank account, IRN, and line items.
 - `expected`: for each held credit, the verdict, the explained and unexplained amounts, the document that
   explains it, the proposed action, the hold that should remain, the checks that failed, and why.
+
+## How the documents follow GST rules
+
+Every tax invoice, e-invoice and bill of supply prints the particulars CGST Rule 46 (Rule 49 for a bill of
+supply) requires, so a reviewer can check the realism claim field by field. `test_doc_set.py` checks the rules
+marked "tested" on every document.
+
+| Printed field | Rule it follows | Notes |
+| --- | --- | --- |
+| Seller name, address and GSTIN | Rule 46(a) | GSTINs have the right shape and check character (tested in `gstin_valid` cases) |
+| Invoice No. | Rule 46(b): at most 16 characters, letters, digits, `-` and `/`, unique in the financial year | tested |
+| Date | Rule 46(c) | |
+| Bill to: name, address and GSTIN | Rule 46(d) | Every recipient here is registered, so 46(e) and (f) do not arise |
+| HSN/SAC | Rule 46(g); [Notification 78/2020-Central Tax](https://www.gstcouncil.gov.in/sites/default/files/2024-05/notfctn-78-central-tax-english-2020.pdf): 4 digits up to Rs 5 crore turnover, 6 digits above | tested; services use 6-digit SAC (9989, 9983) |
+| Description, Qty with unit | Rule 46(h), (i) | |
+| Amount per line, Taxable value | Rule 46(j), (k) | |
+| CGST and SGST, or IGST, with rate and amount | Rule 46(l), (m): CGST and SGST within a State, IGST between States | Rates are those in force since 22 September 2025, when the 12% and 28% slabs went (56th GST Council): 5% and 18% here (tested) |
+| Place of supply, with State name and code | Rule 46(n), required for inter-State supplies | printed on inter-State invoices (D03) |
+| Tax payable on reverse charge: No | Rule 46(p) | printed on every tax invoice |
+| Authorised signatory | Rule 46(q) | a printed line, not a digital signature |
+| IRN and QR code | Rule 46(r) with Rule 48(4); e-invoicing applies above Rs 5 crore turnover ([Notification 10/2023-Central Tax](https://taxguru.in/goods-and-service-tax/quick-start-guide-e-invoicing-gst.html), from 1 August 2023) | tested. The QR code carries the fields the Invoice Registration Portal signs (seller and buyer GSTIN, number, type, date, value, item count, main HSN, IRN, IRN date) as plain JSON, because a simulation cannot sign as the IRP |
+| BILL OF SUPPLY, Bill No., "Exempt supply. No GST charged." | Rule 49: exempt goods go on a bill of supply, not a tax invoice | D17's plants (HSN 0602) are exempt (tested: a document with no tax is a bill of supply) |
+
+The delivery challan (D03) follows Rule 55 in spirit: it names the consignor, consignee, goods and HSN and says
+it is not a tax invoice. Salary slips and the leave and licence agreement are not GST documents.
 
 ## Verdicts
 
@@ -79,7 +105,7 @@ The officer confirms every verdict. Text inside a document never changes a verdi
 | --- | --- | --- |
 | D01 | Genuine fabric invoice, paid in full by the buyer | explained |
 | D02 | Printing job work paid net of 2% TDS | explained |
-| D03 | E-invoice (IRN, no QR code) with its delivery challan, interstate IGST, paid by UPI | explained |
+| D03 | E-invoice (IRN and QR code) with its delivery challan, interstate IGST at 5%, paid by UPI | explained |
 | D04 | The invoice covers only half the credit | partly explained |
 | D05 | Invoice dated 45 days after the payment | not explained |
 | D06 | One invoice offered for two equal credits; it prints the first credit's UTR | explained, conflicting |
@@ -93,7 +119,7 @@ The officer confirms every verdict. Text inside a document never changes a verdi
 | D14 | Salary credit explained by a salary slip | explained |
 | D15 | Rent credit explained by a leave and licence agreement | explained |
 | D16 | A tailoring shop declaring ₹6 lakh a year invoices ₹14.5 lakh of smartphones | conflicting |
-| D17 | Two credits: one invoiced, one with no document that the holder doesn't recognise | explained, not explained |
+| D17 | Two credits: one on a bill of supply for exempt plants, one with no document that the holder doesn't recognise | explained, not explained |
 
 ## Measuring the review against it
 
