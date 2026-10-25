@@ -48,8 +48,8 @@ def test_the_trail_completes_and_every_rupee_is_accounted_for(net: Net) -> None:
     held = {story(net).holder(a.account.account_number): a.held for a in trail.accounts if a.held}
     assert held == {
         "M1 (mule)": rupees(100_000),
-        "Wallet W holder": rupees(150_000),
-        "Exchange X customer": rupees(100_000),
+        "Kunal Shah (wallet)": rupees(150_000),
+        "Arvind Menon (crypto account)": rupees(100_000),
         "Ravi Traders (cement supplier)": rupees(200_000),  # cleared later by the document review
         "Galaxy Mobiles (phone shop)": rupees(50_000),  # only the traced part of Rs 1,20,000
     }
@@ -103,8 +103,9 @@ def test_only_the_hub_may_send_notices_and_only_the_simulator_may_post(net: Net)
 
 
 def test_the_mules_are_flagged_as_the_money_moves_before_anyone_reports(net: Net) -> None:
-    """The PRD's story: Bank D flags M3 by minute 9, because Rs 2,50,000 from a first-time payer left again within
-    minutes from a small shop's account. Bank B flags M1. Honest Ravi Traders and Galaxy Mobiles are not flagged."""
+    """The PRD's story: Sangam Bank flags M3 by minute 9, because Rs 2,50,000 from a first-time payer left again
+    within minutes from a small shop's account. Meridian Bank flags M1. Honest Ravi Traders and Galaxy Mobiles are
+    not flagged."""
     m3 = net.call("web", "bank-d", "/v1/officer/cases", {}).payload["cases"]
     [case] = m3
     assert case["account_number"] == story(net).parties["m3"].ref.account_number
@@ -122,7 +123,7 @@ def test_the_frm_analyst_holds_m3s_flagged_credit_and_the_customer_is_told(net: 
     [case] = net.call("web", "bank-d", "/v1/officer/cases", {}).payload["cases"]
     hold = net.call("web", "bank-d", "/v1/officer/holds/place", {
         "actor": "frm-bank-d", "account_number": case["account_number"],
-        "flag_keys": [f["key"] for f in case["flags"]], "contact": "Fraud Risk desk, Bank D, 1800 000 0004",
+        "flag_keys": [f["key"] for f in case["flags"]], "contact": "Fraud Risk desk, Sangam Bank, 1800 000 0004",
     }).payload  # fmt: skip
     assert hold["status"] == "awaiting_explanation"
     assert hold["amount"] > 0

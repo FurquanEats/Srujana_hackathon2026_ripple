@@ -21,6 +21,9 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   return (
     <main className="tone-light flex min-h-dvh items-center justify-center px-4 py-16">
       <div className="w-full max-w-[560px]">
+        <Link href="/" className="link mb-8 inline-block text-sm">
+          ← Back to the home page
+        </Link>
         <Link href="/" className="pixel block text-center text-xl" aria-label="Ripple, home">
           Ripple
         </Link>

@@ -87,6 +87,7 @@ export default async function FlagPage({
           centre={{ label: found.holder_name ?? found.account_number, sub: found.account_number }}
           inflows={flow.inflows}
           outflows={flow.outflows}
+          events={flow.events}
         />
       )}
 

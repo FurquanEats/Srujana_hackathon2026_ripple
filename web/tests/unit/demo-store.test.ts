@@ -37,7 +37,7 @@ function step(s: Extract<Change, { k: "step" }>["s"], b: Record<string, string>,
 
 describe("the demo store applies a visitor's changes with the node's rules", () => {
   it("places a hold with the 20, 30 and 60-day deadlines and a notice", () => {
-    const { holds: after, cases: flagged } = apply("bank-d", "Bank D", cases, holds, [hold()]);
+    const { holds: after, cases: flagged } = apply("bank-d", "Sangam Bank", cases, holds, [hold()]);
     const placed = after.find((h) => h.hold_id === "H0000000000000001")!;
     expect(placed.status).toBe("awaiting_explanation");
     expect(placed.customer_notice).toContain(`Dear ${open.holder_name}`);
@@ -52,12 +52,12 @@ describe("the demo store applies a visitor's changes with the node's rules", () 
 
   it("refuses to report before the customer's 20 days unless they explained", () => {
     expect(() =>
-      apply("bank-d", "Bank D", cases, holds, [
+      apply("bank-d", "Sangam Bank", cases, holds, [
         hold(),
         step("decision", { decision: "report", reason: "x" }),
       ]),
     ).toThrow(DemoConflict);
-    const { holds: after } = apply("bank-d", "Bank D", cases, holds, [
+    const { holds: after } = apply("bank-d", "Sangam Bank", cases, holds, [
       hold(),
       step("explanation", { summary: "No documents" }),
       step("decision", { decision: "report", reason: "No fit" }),
@@ -68,7 +68,7 @@ describe("the demo store applies a visitor's changes with the node's rules", () 
 
   it("drafts an STR due 7 working days after a mule is confirmed", () => {
     expect(workingDaysAfter("2026-10-23T10:00:00Z", 7).slice(0, 10)).toBe("2026-11-03"); // a Friday
-    const { holds: after } = apply("bank-d", "Bank D", cases, holds, [
+    const { holds: after } = apply("bank-d", "Sangam Bank", cases, holds, [
       hold(),
       step("confirm-mule", { grounds: "Notice" }),
     ]);
@@ -76,7 +76,7 @@ describe("the demo store applies a visitor's changes with the node's rules", () 
   });
 
   it("ignores another bank's changes and malformed cookie entries", () => {
-    const other = apply("bank-d", "Bank D", cases, holds, [{ ...hold(), m: "bank-a" }]);
+    const other = apply("bank-d", "Sangam Bank", cases, holds, [{ ...hold(), m: "bank-a" }]);
     expect(other.holds).toHaveLength(holds.length);
     const encoded = Buffer.from(JSON.stringify([{ k: "hold" }, { nonsense: true }, hold()])).toString(
       "base64url",

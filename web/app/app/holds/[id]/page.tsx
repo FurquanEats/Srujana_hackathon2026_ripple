@@ -184,6 +184,7 @@ export default async function HoldPage({
           centre={{ label: hold.holder_name ?? hold.account_number, sub: hold.account_number }}
           inflows={flow.inflows}
           outflows={flow.outflows}
+          events={flow.events}
         />
       )}
 

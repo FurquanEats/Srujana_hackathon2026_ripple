@@ -2,7 +2,7 @@ import type { Trail, TrailAccount } from "@/lib/gateway/types";
 
 export type Placed = { account: TrailAccount; x: number; y: number };
 
-export const NODE_W = 210;
+export const NODE_W = 250;
 export const NODE_H = 78;
 const COL_GAP = 70;
 const ROW_GAP = 22;

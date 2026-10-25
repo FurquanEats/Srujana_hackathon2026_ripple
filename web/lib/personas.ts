@@ -2,12 +2,12 @@ import type { Role } from "@/lib/gateway/types";
 
 /** The institutions in network.toml that a bank role can belong to. */
 export const INSTITUTIONS = [
-  { id: "bank-a", name: "Bank A, a public sector bank", short: "Bank A" },
-  { id: "bank-b", name: "Bank B, a private bank", short: "Bank B" },
-  { id: "bank-c", name: "Bank C, a small finance bank", short: "Bank C" },
-  { id: "bank-d", name: "Bank D, a co-operative bank", short: "Bank D" },
-  { id: "wallet-w", name: "Wallet W, a prepaid wallet issuer", short: "Wallet W" },
-  { id: "exchange-x", name: "Exchange X, a crypto exchange on CFCFRMS", short: "Exchange X" },
+  { id: "bank-a", name: "Navodaya National Bank, a public sector bank", short: "Navodaya Bank" },
+  { id: "bank-b", name: "Meridian Private Bank, a private bank", short: "Meridian Bank" },
+  { id: "bank-c", name: "Pragati Small Finance Bank, a small finance bank", short: "Pragati Bank" },
+  { id: "bank-d", name: "Sangam Urban Co-operative Bank, a co-operative bank", short: "Sangam Bank" },
+  { id: "wallet-w", name: "PaySetu Wallet, a prepaid wallet issuer", short: "PaySetu" },
+  { id: "exchange-x", name: "CoinKosh Exchange, a crypto exchange on CFCFRMS", short: "CoinKosh" },
 ] as const;
 
 export type InstitutionId = (typeof INSTITUTIONS)[number]["id"];

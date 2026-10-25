@@ -1,4 +1,4 @@
-import { formatInr } from "@/lib/format";
+import { formatInr, formatIstSeconds } from "@/lib/format";
 
 export type FlowNode = {
   label: string;
@@ -7,6 +7,17 @@ export type FlowNode = {
   /** victim: traced victim money (green); exit: left the banking system; own: the holder's own money */
   kind?: "victim" | "exit" | "own" | "plain" | "held";
   href?: string;
+  /** When the money moved (or, for a group, the first payment). */
+  at?: string;
+};
+
+/** One dated movement for the timeline under the graph. */
+export type FlowEvent = {
+  at: string;
+  label: string;
+  amount: number;
+  direction: "in" | "out" | "held";
+  kind?: FlowNode["kind"];
 };
 
 const W = 1000;
@@ -15,7 +26,7 @@ const PAD = 14;
 // Characters that fit in a box at each text size: sans 13 px is about 7 px a character, mono 12 px about 7.3 px.
 const LABEL_CHARS = Math.floor((NODE_W - 2 * PAD) / 7.2);
 const SUB_CHARS = Math.floor((NODE_W - 2 * PAD) / 7.4);
-const ROW = 64;
+const ROW = 82;
 const GAP = 12;
 const MIN_STROKE = 3;
 const MAX_STROKE = 34;
@@ -46,6 +57,11 @@ function Box({ node, x, y, align }: { node: FlowNode; x: number; y: number; alig
       <text x={PAD} y={38} fontSize={12} fill="var(--muted)" fontFamily="var(--font-mono)">
         {fit(sub, SUB_CHARS)}
       </text>
+      {node.at && (
+        <text x={PAD} y={58} fontSize={11.5} fill="var(--faint)" fontFamily="var(--font-mono)">
+          {`${formatIstSeconds(node.at)} IST`}
+        </text>
+      )}
     </g>
   );
   return node.href ? (
@@ -67,7 +83,9 @@ export function FlowGraph({
   inflows,
   outflows,
   caption,
+  events,
 }: {
+  events?: FlowEvent[];
   title: string;
   centre: { label: string; sub?: string };
   inflows: FlowNode[];
@@ -160,6 +178,68 @@ export function FlowGraph({
         </svg>
       </div>
       {caption && <p className="text-faint mt-2 text-xs">{caption}</p>}
+      <Timeline
+        events={
+          events ?? [
+            ...inflows.flatMap((n) =>
+              n.at
+                ? [{ at: n.at, label: n.label, amount: n.amount, direction: "in" as const, kind: n.kind }]
+                : [],
+            ),
+            ...outflows.flatMap((n) =>
+              n.at
+                ? [
+                    {
+                      at: n.at,
+                      label: n.label,
+                      amount: n.amount,
+                      direction: n.kind === "held" ? ("held" as const) : ("out" as const),
+                      kind: n.kind,
+                    },
+                  ]
+                : [],
+            ),
+          ]
+        }
+      />
     </figure>
+  );
+}
+
+/** The same movements in time order, to the second, so the officer sees how fast the money moved. */
+function Timeline({ events }: { events: FlowEvent[] }) {
+  if (events.length === 0) return null;
+  const sorted = [...events].sort((a, b) => a.at.localeCompare(b.at));
+  const first = new Date(sorted[0]!.at).getTime();
+  return (
+    <div className="mt-4 border-t border-line pt-3">
+      <p className="text-faint mb-2 text-xs">Timeline (IST)</p>
+      <ol className="grid gap-1.5">
+        {sorted.map((e, i) => {
+          const minutes = Math.round((new Date(e.at).getTime() - first) / 60_000);
+          return (
+            <li
+              key={`${e.at}-${i}`}
+              className="grid grid-cols-[150px_70px_1fr_auto] items-baseline gap-3 text-[13px] max-sm:grid-cols-[1fr_auto]"
+            >
+              <span className="font-mono text-xs tabular-nums">{formatIstSeconds(e.at)}</span>
+              <span className="text-faint text-xs max-sm:hidden">
+                {i === 0 ? "start" : `+${minutes} min`}
+              </span>
+              <span className="max-sm:col-span-2 max-sm:row-start-2">
+                <span
+                  aria-hidden
+                  className="mr-2 inline-block size-2"
+                  style={{ background: COLOURS[e.kind ?? "plain"] }}
+                />
+                {e.direction === "in" ? "In from " : e.direction === "held" ? "" : "Out to "}
+                {e.label}
+              </span>
+              <span className="font-mono text-xs tabular-nums">{formatInr(e.amount)}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }

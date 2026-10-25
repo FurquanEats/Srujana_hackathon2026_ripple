@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { EXIT, RAIL } from "@/lib/accounts";
-import { formatInr, formatIst } from "@/lib/format";
+import { formatInr, formatIst, formatIstSeconds } from "@/lib/format";
 import type { Trail } from "@/lib/gateway/types";
 import { layout, moments, NODE_H, NODE_W, totalsAt } from "@/lib/trail";
 
@@ -118,10 +118,12 @@ export function TrailReplay({ trail, institutions }: { trail: Trail; institution
                   {`Layer ${account.layer} · ${institutions[account.member ?? ""] ?? "Off network"}`}
                 </text>
                 <text x={10} y={36} fontSize={13} fill="var(--fg)">
-                  {(account.holder_name ?? "Unknown holder").slice(0, 28)}
+                  {(account.holder_name ?? "Unknown holder").length > 33
+                    ? `${(account.holder_name ?? "").slice(0, 32)}…`
+                    : (account.holder_name ?? "Unknown holder")}
                 </text>
                 <text x={10} y={54} fontSize={11.5} fill="var(--muted)" fontFamily="var(--font-mono)">
-                  {`In ${formatInr(account.traced_in)} by ${RAIL[account.credit.rail] ?? account.credit.rail}`}
+                  {`In ${formatInr(account.traced_in)} · ${RAIL[account.credit.rail] ?? account.credit.rail} · ${formatIstSeconds(account.credit.at).slice(-8)}`}
                 </text>
                 {held ? (
                   <g>
@@ -148,6 +150,39 @@ export function TrailReplay({ trail, institutions }: { trail: Trail; institution
           })}
         </svg>
       </div>
+
+      <h3 className="pixel mt-8 mb-3 text-base">Timeline (IST)</h3>
+      <ol className="grid gap-1.5">
+        {trail.accounts
+          .flatMap((a) => [
+            {
+              at: a.credit.at,
+              text: `${formatInr(a.traced_in)} reached ${a.holder_name ?? "an account"} (layer ${a.layer}, ${institutions[a.member ?? ""] ?? "off network"}) by ${RAIL[a.credit.rail] ?? a.credit.rail}`,
+              exit: false,
+            },
+            ...a.exits.map((e) => ({
+              at: e.at,
+              text: `${formatInr(e.traced_amount)} left the banks: ${EXIT[e.mode]} at ${e.identifier}${e.location ? `, ${e.location}` : ""}`,
+              exit: true,
+            })),
+          ])
+          .sort((x, y) => x.at.localeCompare(y.at))
+          .map((e, i) => (
+            <li
+              key={`${e.at}-${i}`}
+              className={`grid grid-cols-[150px_1fr] gap-3 text-[13px] ${e.at <= at ? "" : "opacity-40"}`}
+            >
+              <span className="font-mono text-xs tabular-nums">{formatIstSeconds(e.at)}</span>
+              <span>
+                <span
+                  aria-hidden
+                  className={`mr-2 inline-block size-2 ${e.exit ? "bg-red-500" : "bg-accent"}`}
+                />
+                {e.text}
+              </span>
+            </li>
+          ))}
+      </ol>
 
       <h3 id="exits" className="pixel mt-10 mb-3 scroll-mt-6 text-base">
         Exits for the police

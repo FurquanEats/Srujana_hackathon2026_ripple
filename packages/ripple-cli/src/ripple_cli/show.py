@@ -76,8 +76,8 @@ def print_trail(network: Network, story: demo.Story, trail: Trail, elapsed: floa
     paid_at = story.victim_payment.at.astimezone(IST).strftime("%H:%M")
     members = {a.member for a in trail.accounts if a.member}
     print()
-    print(f"A retired teacher sent {fmt_inr(story.victim_payment.amount)} by RTGS from Bank A to a mule at "
-          f"Bank B at {paid_at} IST, and called 1930 twelve minutes later.")  # fmt: skip
+    print(f"A retired teacher sent {fmt_inr(story.victim_payment.amount)} by RTGS from Navodaya Bank to a mule at "
+          f"Meridian Bank at {paid_at} IST, and called 1930 twelve minutes later.")  # fmt: skip
     print(f"Complaint {trail.ack_number}: trail {'complete' if trail.complete else 'NOT complete'} in "
           f"{elapsed:.2f} s across {len(members)} institutions, every bank answering automatically.")  # fmt: skip
     print()

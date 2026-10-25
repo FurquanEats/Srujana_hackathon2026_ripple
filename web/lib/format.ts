@@ -39,3 +39,19 @@ export function formatIst(iso: string): string {
   const parts = Object.fromEntries(IST.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
   return `${parts.day} ${parts.month} ${parts.year}, ${parts.hour}:${parts.minute} IST`;
 }
+
+const IST_SECONDS = new Intl.DateTimeFormat("en-IN", {
+  timeZone: "Asia/Kolkata",
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+/** An ISO 8601 time to the second, for timelines: "26 Oct, 00:58:12". */
+export function formatIstSeconds(iso: string): string {
+  const parts = Object.fromEntries(IST_SECONDS.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
+  return `${parts.day} ${parts.month}, ${parts.hour}:${parts.minute}:${parts.second}`;
+}

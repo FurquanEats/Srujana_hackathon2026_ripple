@@ -72,9 +72,9 @@ cd web && npm run lint && npm run typecheck && npm test && npm run build && npm 
 
 ## Results
 
-**The demo story.** A retired teacher sends Rs 8,00,000 by RTGS to a mule at Bank B. Within nine minutes it is split across three more institutions, partly withdrawn at two ATMs and partly paid to shops. Twelve minutes later she calls 1930. The trail completes in under a second across six institutions: Rs 6,00,000 held across five accounts, Rs 2,00,000 withdrawn at two named ATMs, and nothing liened that is not the victim's money. The shop's assistant, paid after the victim's money ran out, gets no notice.
+**The demo story.** A retired teacher sends Rs 8,00,000 by RTGS to a mule at Meridian Private Bank. Within nine minutes it is split across three more institutions, partly withdrawn at two ATMs and partly paid to shops. Twelve minutes later she calls 1930. The trail completes in under a second across six institutions: Rs 6,00,000 held across five accounts, Rs 2,00,000 withdrawn at two named ATMs, and nothing liened that is not the victim's money. The shop's assistant, paid after the victim's money ran out, gets no notice.
 
-**The next victim.** A customer of Bank C who tries to pay Rs 4,00,000 to the same mule the next day gets "hold and call": DPIP finds the mule on the suspect registry built from CFCFRMS trails. A payment to the cement supplier that the mule paid for goods is allowed.
+**The next victim.** A customer of Pragati Small Finance Bank who tries to pay Rs 4,00,000 to the same mule the next day gets "hold and call": DPIP finds the mule on the suspect registry built from CFCFRMS trails. A payment to the cement supplier that the mule paid for goods is allowed.
 
 **The document review.** On the synthetic document set (`eval/documents/`, 17 cases covering genuine invoices, a TDS deduction, an e-invoice, Hindi scans, a reused invoice, an invalid GSTIN, a late invoice and planted instructions to the reviewer), Gemini 3.5 Flash read 16 of 18 documents before the free tier's daily quota ran out. On the 15 cases those cover:
 
@@ -99,7 +99,7 @@ The two misses are safe ones: a salary slip and a rent agreement were marked "no
 | `packages/ripple-service` | Shared plumbing: configuration, signed requests over mutual TLS, a replay store and an append-only audit log |
 | `packages/ripple-cli` | The `ripple` command: `certs`, `up` and `demo` |
 | `web/` | The Next.js web app: the home page and the workspace |
-| `network.toml` | The simulated network: the hub, four banks, a wallet issuer and a crypto exchange (all fictional) |
+| `network.toml` | The simulated network: the hub, four banks (Navodaya National, Meridian Private, Pragati Small Finance, Sangam Urban Co-operative), PaySetu Wallet and CoinKosh Exchange, all fictional |
 
 **Tracing.** A debit takes the victims' money before the account holder's own money, shared pro rata among victims. This rule reproduces both worked examples in Annexure V of the MHA SOP exactly, and both are tests. Once a lien is placed, that money is set aside, and later payments cannot be counted as taking it.
 

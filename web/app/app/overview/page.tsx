@@ -5,6 +5,7 @@ import { CardLink, Metric, Section } from "@/components/workspace/cards";
 import { Held, Money, PageHeader, Priority } from "@/components/workspace/ui";
 import { formatInr, formatIst } from "@/lib/format";
 import { statusLabel } from "@/lib/holds";
+import { sortCases, sortNotices } from "@/lib/sort";
 import { cases, holdReports, holds, liens, muleCases, notices, now } from "@/lib/gateway/source";
 import { requireRole } from "@/lib/guard";
 import { institutionName } from "@/lib/personas";
@@ -26,7 +27,10 @@ async function Nodal({ session }: { session: DemoSession }) {
   const matched = list.filter((n) => n.status === "matched");
   const active = held.filter((l) => !l.released_at);
   const tracedIn = matched.reduce((s, n) => s + n.traced_in, 0);
-  const latest = [...list].sort((a, b) => b.received_at.localeCompare(a.received_at)).slice(0, 5);
+  const counts = new Map<string, number>();
+  for (const n of list)
+    if (n.account_number) counts.set(n.account_number, (counts.get(n.account_number) ?? 0) + 1);
+  const latest = sortNotices(list, "severity", counts).slice(0, 5);
   return (
     <>
       <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -45,7 +49,7 @@ async function Nodal({ session }: { session: DemoSession }) {
         />
       </div>
       <Section
-        title="Latest notices"
+        title="Notices by severity"
         action={
           <Link href="/app/notices" className="link text-[13px]">
             All notices
@@ -184,7 +188,7 @@ async function Police({ session }: { session: DemoSession }) {
         />
       </div>
       <Section
-        title="Latest complaints"
+        title="Complaints by severity"
         action={
           <Link href="/app/cases" className="link text-[13px]">
             All cases
@@ -192,8 +196,7 @@ async function Police({ session }: { session: DemoSession }) {
         }
       >
         <div className="grid gap-2">
-          {[...list]
-            .sort((a, b) => b.filed_at.localeCompare(a.filed_at))
+          {sortCases(list, "severity")
             .slice(0, 6)
             .map((c) => (
               <CardLink

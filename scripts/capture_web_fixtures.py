@@ -112,7 +112,7 @@ EXTRA_SCAMS = [
      {"m6": ("bank-d", "BKDD", "Vikram Joshi", "individual; student; declared annual income Rs 0", 0),
       "m7": ("bank-c", "BKCC", "Nisha Traders",
              "proprietorship; mobile accessories; declared annual turnover Rs 4,00,000", 4_00_000),
-      "m8": ("exchange-x", "XCHX", "Exchange X customer", "", None)},
+      "m8": ("exchange-x", "XCHX", "Deepa Kulkarni", "individual; crypto trading account", None)},
      [("victim", "m6", 2_40_000, 0, "imps"), ("m6", "m7", 1_00_000, 3, "imps"), ("m6", "m8", 60_000, 6, "imps")]),
 ]  # fmt: skip
 
@@ -209,12 +209,12 @@ def payment_checks(police: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
         and d["kind"] == "account_opening"
         and d["message"]["declared_profile"].startswith("individual")
         and d["message"]["account_number"] not in flagged
-    )  # an ordinary salaried customer of Bank C
+    )  # an ordinary salaried customer of Pragati Bank
     who = sender["account_number"]
     examples = [
         (
             "bank-c",
-            "A customer of Bank C pays Rs 4,00,000 to M1, the mule from yesterday's scam",
+            "A customer of Pragati Bank pays Rs 4,00,000 to M1, the mule from yesterday's scam",
             who,
             m1,
             40_000_000,

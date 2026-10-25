@@ -8,8 +8,10 @@ export function Filters({
   fields: {
     name: string;
     label: string;
-    options?: { value: string; label: string }[];
+    options?: readonly { value: string; label: string }[];
     placeholder?: string;
+    /** A choice that always has a value, such as the sort order: no "All" option. */
+    required?: boolean;
   }[];
   values: Record<string, string | undefined>;
   total: number;
@@ -24,7 +26,7 @@ export function Filters({
           </label>
           {f.options ? (
             <select id={`f-${f.name}`} name={f.name} defaultValue={values[f.name] ?? ""} className="field">
-              <option value="">All</option>
+              {!f.required && <option value="">All</option>}
               {f.options.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}

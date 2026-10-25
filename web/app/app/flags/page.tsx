@@ -7,28 +7,33 @@ import { Empty, Money, Notice, PageHeader, Priority } from "@/components/workspa
 import { formatIst } from "@/lib/format";
 import { muleCases } from "@/lib/gateway/source";
 import { requireRole } from "@/lib/guard";
+import { FLAG_SORTS, sortFlags } from "@/lib/sort";
 
 export const metadata: Metadata = { title: "Mule flags" };
 
-const ORDER = { high: 0, medium: 1, low: 2 } as const;
-
-type Search = Promise<{ error?: string; done?: string; priority?: string; rule?: string; q?: string }>;
+type Search = Promise<{
+  error?: string;
+  done?: string;
+  priority?: string;
+  rule?: string;
+  q?: string;
+  sort?: string;
+}>;
 
 export default async function FlagsPage({ searchParams }: { searchParams: Search }) {
   const session = await requireRole("frm_analyst");
-  const { error, done, priority, rule, q } = await searchParams;
+  const { error, done, priority, rule, q, sort } = await searchParams;
   const all = (await muleCases(session)).filter(
     (c) => c.flags.some((f) => f.status === "open") || c.active_hold_id,
   );
   const needle = (q ?? "").trim().toLowerCase();
-  const list = all.filter(
+  const list = sortFlags(all, sort).filter(
     (c) =>
       (!priority || c.priority === priority) &&
       (!rule || c.rules.includes(rule)) &&
       (!needle || `${c.holder_name} ${c.account_number}`.toLowerCase().includes(needle)),
   );
   const rules = [...new Map(all.flatMap((c) => c.flags.map((f) => [f.rule, f.title] as const))).entries()];
-  list.sort((a, b) => ORDER[a.priority] - ORDER[b.priority] || b.last_at.localeCompare(a.last_at));
   return (
     <>
       <PageHeader
@@ -38,7 +43,7 @@ export default async function FlagsPage({ searchParams }: { searchParams: Search
       {error && <Notice kind="error">{error}</Notice>}
       {done && <Notice kind="done">{done}</Notice>}
       <Filters
-        values={{ priority, rule, q }}
+        values={{ priority, rule, q, sort: sort ?? "severity" }}
         total={all.length}
         shown={list.length}
         fields={[
@@ -53,6 +58,7 @@ export default async function FlagsPage({ searchParams }: { searchParams: Search
           },
           { name: "rule", label: "Rule", options: rules.map(([value, label]) => ({ value, label })) },
           { name: "q", label: "Holder or account", placeholder: "Search" },
+          { name: "sort", label: "Sort by", options: FLAG_SORTS, required: true },
         ]}
       />
       <p className="text-muted mb-3 text-sm">

@@ -113,9 +113,20 @@ export default async function CasePage({
       {police && heldAccounts.length > 0 && (
         <section id="return" className="mt-10 scroll-mt-6">
           <h2 className="pixel mb-1 text-lg">Return held money to the victim</h2>
-          <p className="text-muted mb-4 text-sm">
-            Each order goes to the bank holding the money; the bank records it against its lien.
-          </p>
+          <div className="text-muted mb-4 grid max-w-3xl gap-2 text-sm leading-relaxed">
+            <p>
+              These accounts still hold the victim&apos;s money under a lien. You can order each bank to give
+              it back to the victim as interim custody under BNSS section 106(3): below ₹50,000 without an
+              FIR, above it with one (SOP section 11, Process 1). The bank records your order against its
+              lien, and the victim&apos;s status page shows the money returning.
+            </p>
+            <p>
+              <strong className="font-medium text-[var(--fg)]">Layer</strong> is how many transfers the money
+              made before reaching the account: layer 1 is the account the victim paid, layer 2 an account
+              that one paid on to, and so on. An account at a higher layer is often a shop paid for real
+              goods, so check its bank&apos;s grievance before ordering a return from it.
+            </p>
+          </div>
           <div className="grid gap-3">
             {heldAccounts.map((a) => {
               const r = released.get(a.lien_id ?? "");

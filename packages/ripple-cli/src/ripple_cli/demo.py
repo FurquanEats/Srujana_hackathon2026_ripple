@@ -1,9 +1,9 @@
 """The PRD's demo story: a digital-arrest scam traced across six institutions.
 
-A retired teacher sends Rs 8,00,000 by RTGS from Bank A to M1 at Bank B. Within nine minutes M1 splits it to M2
-at Bank C, M3 at Bank D and a wallet; M2 takes Rs 2,00,000 out at two ATMs and sends Rs 1,00,000 to a crypto
-exchange; M3, a shop with Rs 3,00,000 of its own money, pays a cement supplier, a phone shop and its assistant's
-salary. The victim calls 1930 twelve minutes after paying.
+A retired teacher sends Rs 8,00,000 by RTGS from Navodaya Bank to M1 at Meridian Bank. Within nine minutes M1
+splits it to M2 at Pragati Bank, M3 at Sangam Bank and a wallet; M2 takes Rs 2,00,000 out at two ATMs and
+sends Rs 1,00,000 to a crypto exchange; M3, a shop with Rs 3,00,000 of its own money, pays a cement supplier,
+a phone shop and its assistant's salary. The victim calls 1930 twelve minutes after paying.
 
 `seed` posts the story to the network through any `Call`, so the same story runs in tests and on the live network.
 """
@@ -128,8 +128,15 @@ def parties(run: str) -> dict[str, Party]:
                 profile="proprietorship; general store; declared annual turnover Rs 6,00,000",
                 income=600_000,
             ),
-            party("wallet", member="wallet-w", code="WLTW", n=8, holder="Wallet W holder", opening=0),
-            party("crypto", member="exchange-x", code="XCHX", n=9, holder="Exchange X customer", opening=0),
+            party("wallet", member="wallet-w", code="WLTW", n=8, holder="Kunal Shah (wallet)", opening=0),
+            party(
+                "crypto",
+                member="exchange-x",
+                code="XCHX",
+                n=9,
+                holder="Arvind Menon (crypto account)",
+                opening=0,
+            ),
         ]
     }
 

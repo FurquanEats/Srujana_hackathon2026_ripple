@@ -5,12 +5,12 @@ import type { TrailAccount } from "@/lib/gateway/types";
 import { DEMO_TRAIL } from "@/lib/showcase";
 
 const INSTITUTIONS: Record<string, string> = {
-  "bank-a": "Bank A",
-  "bank-b": "Bank B",
-  "bank-c": "Bank C",
-  "bank-d": "Bank D",
-  "wallet-w": "Wallet W",
-  "exchange-x": "Exchange X",
+  "bank-a": "Navodaya Bank",
+  "bank-b": "Meridian Bank",
+  "bank-c": "Pragati Bank",
+  "bank-d": "Sangam Bank",
+  "wallet-w": "PaySetu",
+  "exchange-x": "CoinKosh",
 };
 
 function outcome(a: TrailAccount): string {

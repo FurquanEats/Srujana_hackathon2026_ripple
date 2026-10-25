@@ -89,6 +89,7 @@ export default async function AccountPage({ params }: { params: Promise<{ accoun
         centre={{ label: a.holder_name, sub: a.account_number }}
         inflows={flow.inflows}
         outflows={flow.outflows}
+        events={flow.events}
         caption={`${formatInr(a.credits_30d)} in and ${formatInr(a.debits_30d)} out in the last 30 days, with ${a.counterparties_30d} different counterparties.`}
       />
 

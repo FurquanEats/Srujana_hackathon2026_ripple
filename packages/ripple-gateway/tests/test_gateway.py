@@ -60,7 +60,7 @@ def test_sessions_are_checked(gw: TestClient) -> None:
         "sub": "u1",
         "role": "nodal_officer",
         "member": "bank-b",
-        "member_name": "Bank B, a private bank",
+        "member_name": "Meridian Private Bank, a private bank",
     }
 
 
@@ -149,7 +149,7 @@ def test_the_frm_analyst_works_a_mule_case_through_a_hold(gw: TestClient) -> Non
     [case] = gw.get("/v1/mule-cases", headers=FRM_D).json()
     assert case["holder_name"] == "M3 General Store (mule)"
     body = {"account_number": case["account_number"], "flag_keys": [f["key"] for f in case["flags"]],
-            "contact": "Fraud Risk desk, Bank D, 1800 000 0004"}  # fmt: skip
+            "contact": "Fraud Risk desk, Sangam Bank, 1800 000 0004"}  # fmt: skip
     hold = gw.post("/v1/holds", headers=FRM_D, json=body)
     assert hold.status_code == 200, hold.text
     hold_id = hold.json()["hold_id"]
@@ -184,7 +184,7 @@ def test_the_shadow_run_proposes_settings_the_frm_head_approves(gw: TestClient) 
 def place_m3_hold(gw: TestClient) -> tuple[str, str]:
     [case] = gw.get("/v1/mule-cases", headers=FRM_D).json()
     body = {"account_number": case["account_number"], "flag_keys": [f["key"] for f in case["flags"]],
-            "contact": "Fraud Risk desk, Bank D, 1800 000 0004"}  # fmt: skip
+            "contact": "Fraud Risk desk, Sangam Bank, 1800 000 0004"}  # fmt: skip
     hold = gw.post("/v1/holds", headers=FRM_D, json=body).json()
     return case["account_number"], hold["hold_id"]
 

@@ -1,4 +1,4 @@
-import type { FlowNode } from "@/components/workspace/flow-graph";
+import type { FlowEvent, FlowNode } from "@/components/workspace/flow-graph";
 import { accountText, EXIT, RAIL } from "@/lib/accounts";
 import type { AccountLine, AccountView, NoticeDetail } from "@/lib/gateway/types";
 
@@ -15,7 +15,8 @@ function grouped(lines: AccountLine[], kind: (l: AccountLine) => FlowNode["kind"
   const by = new Map<string, FlowNode & { count: number }>();
   for (const l of lines) {
     const key = party(l);
-    const node = by.get(key) ?? { label: key, amount: 0, kind: kind(l), count: 0 };
+    const node = by.get(key) ?? { label: key, amount: 0, kind: kind(l), count: 0, at: l.at };
+    if (l.at < (node.at ?? l.at)) node.at = l.at;
     node.amount += l.amount;
     node.count += 1;
     by.set(key, node);
@@ -43,6 +44,7 @@ export function noticeFlow(n: NoticeDetail) {
       sub: `${RAIL[n.credit.rail]} ${n.credit.reference}`,
       amount: s.traced_in,
       kind: "victim",
+      at: n.credit.at,
     },
   ];
   const outflows: FlowNode[] = [
@@ -51,16 +53,24 @@ export function noticeFlow(n: NoticeDetail) {
       sub: `${RAIL[h.payment.rail]} onward`,
       amount: h.traced_amount,
       kind: "victim" as const,
+      at: h.payment.at,
     })),
     ...n.exits.map((e) => ({
       label: `${EXIT[e.mode] ?? e.mode} ${e.identifier}`,
       sub: e.location ?? "cash out",
       amount: e.traced_amount,
       kind: "exit" as const,
+      at: e.at,
     })),
   ];
   if (s.held > 0)
-    outflows.unshift({ label: "Still here, under lien", sub: "held", amount: s.held, kind: "held" });
+    outflows.unshift({
+      label: "Still here, under lien",
+      sub: "lien placed",
+      amount: s.held,
+      kind: "held",
+      at: s.received_at,
+    });
   return { inflows, outflows: outflows.filter((o) => o.amount > 0) };
 }
 
@@ -79,6 +89,7 @@ export function accountFlow(a: AccountView, now: string) {
       (l) => (l.exit ? "exit" : "plain"),
     ),
     windowed: recent.length > 0,
+    events: lineEvents([...lines].sort((x, y) => y.at.localeCompare(x.at)).slice(0, 12)),
   };
 }
 
@@ -98,7 +109,20 @@ export function creditsFlow(a: AccountView, creditTxns: string[]) {
       sub: `${RAIL[c.rail]} ${c.reference}`,
       amount: c.amount,
       kind: "victim" as const,
+      at: c.at,
     })),
     outflows: grouped(after, (l) => (l.exit ? "exit" : "plain")),
+    events: lineEvents([...credits, ...after]),
   };
+}
+
+/** Each statement line as a dated movement for a graph's timeline. */
+function lineEvents(lines: AccountLine[]): FlowEvent[] {
+  return lines.map((l) => ({
+    at: l.at,
+    label: party(l),
+    amount: l.amount,
+    direction: l.direction === "credit" ? "in" : "out",
+    kind: l.exit ? "exit" : l.direction === "credit" ? "victim" : "plain",
+  }));
 }

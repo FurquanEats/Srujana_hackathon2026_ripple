@@ -9,7 +9,7 @@ port = 8100
 
 [[member]]
 id = "bank-a"
-name = "Bank A, a public sector bank"
+name = "Navodaya National Bank, a public sector bank"
 kind = "bank"
 port = 8101
 bank_code = "BKAA"
@@ -17,7 +17,7 @@ vpa_handles = ["bkaa"]
 
 [[member]]
 id = "bank-b"
-name = "Bank B, a private bank"
+name = "Meridian Private Bank, a private bank"
 kind = "bank"
 port = 8102
 bank_code = "BKBB"
@@ -25,7 +25,7 @@ vpa_handles = ["bkbb"]
 
 [[member]]
 id = "bank-c"
-name = "Bank C, a small finance bank"
+name = "Pragati Small Finance Bank, a small finance bank"
 kind = "bank"
 port = 8103
 bank_code = "BKCC"
@@ -33,7 +33,7 @@ vpa_handles = ["bkcc"]
 
 [[member]]
 id = "bank-d"
-name = "Bank D, a co-operative bank"
+name = "Sangam Urban Co-operative Bank, a co-operative bank"
 kind = "bank"
 port = 8104
 bank_code = "BKDD"
@@ -41,7 +41,7 @@ vpa_handles = ["bkdd"]
 
 [[member]]
 id = "wallet-w"
-name = "Wallet W, a prepaid wallet issuer"
+name = "PaySetu Wallet, a prepaid wallet issuer"
 kind = "wallet"
 port = 8105
 bank_code = "WLTW"
@@ -49,7 +49,7 @@ vpa_handles = ["wltw"]
 
 [[member]]
 id = "exchange-x"
-name = "Exchange X, a crypto exchange on CFCFRMS"
+name = "CoinKosh Exchange, a crypto exchange on CFCFRMS"
 kind = "exchange"
 port = 8106
 bank_code = "XCHX"

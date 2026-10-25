@@ -7,19 +7,21 @@ import { Empty, Held, Money, PageHeader } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
 import { notices } from "@/lib/gateway/source";
 import { requireRole } from "@/lib/guard";
+import { NOTICE_SORTS, sortNotices } from "@/lib/sort";
 
 export const metadata: Metadata = { title: "Notices" };
 
-type Search = Promise<{ status?: string; q?: string }>;
+type Search = Promise<{ status?: string; q?: string; sort?: string }>;
 
 export default async function NoticesPage({ searchParams }: { searchParams: Search }) {
   const session = await requireRole("nodal_officer");
-  const { status, q } = await searchParams;
-  const all = [...(await notices(session))].sort((a, b) => b.received_at.localeCompare(a.received_at));
+  const { status, q, sort } = await searchParams;
+  const fetched = await notices(session);
   const needle = (q ?? "").trim().toLowerCase();
   const counts = new Map<string, number>();
-  for (const n of all)
+  for (const n of fetched)
     if (n.account_number) counts.set(n.account_number, (counts.get(n.account_number) ?? 0) + 1);
+  const all = sortNotices(fetched, sort, counts);
   const list = all.filter(
     (n) =>
       (!status ||
@@ -37,7 +39,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Sear
         lead="Every notice the hub sent this bank, and Ripple's answer: how much of the victim's money reached the account, the lien on that amount only, and where the rest went next. Ripple answered each one in under a second."
       />
       <Filters
-        values={{ status, q }}
+        values={{ status, q, sort: sort ?? "severity" }}
         total={all.length}
         shown={list.length}
         fields={[
@@ -51,6 +53,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Sear
             ],
           },
           { name: "q", label: "Holder, account or complaint", placeholder: "Search" },
+          { name: "sort", label: "Sort by", options: NOTICE_SORTS, required: true },
         ]}
       />
       <p className="text-muted mb-3 text-sm">

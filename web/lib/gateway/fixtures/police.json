@@ -1,10 +1,10 @@
 {
  "/v1/cases": [
   {
-   "ack_number": "39577951100000",
+   "ack_number": "39600781100000",
    "cashed_out": 0,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:55.686359Z",
+   "filed_at": "2026-10-25T20:27:57.847764Z",
    "held": 24000000,
    "not_found": 0,
    "off_network": 0,
@@ -13,10 +13,10 @@
    "waiting": 0
   },
   {
-   "ack_number": "39577950000000",
+   "ack_number": "39600770000000",
    "cashed_out": 0,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:55.136801Z",
+   "filed_at": "2026-10-25T20:27:57.345308Z",
    "held": 9500000,
    "not_found": 0,
    "off_network": 0,
@@ -25,10 +25,10 @@
    "waiting": 0
   },
   {
-   "ack_number": "39826521718778",
+   "ack_number": "33033011273523",
    "cashed_out": 20000000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:49.514550Z",
+   "filed_at": "2026-10-25T20:27:51.696940Z",
    "held": 60000000,
    "not_found": 0,
    "off_network": 0,
@@ -40,7 +40,7 @@
    "ack_number": "25300428205673",
    "cashed_out": 300000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:47.981739Z",
+   "filed_at": "2026-10-25T20:27:50.137372Z",
    "held": 0,
    "not_found": 0,
    "off_network": 0,
@@ -52,7 +52,7 @@
    "ack_number": "28858815922556",
    "cashed_out": 1000000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:47.828522Z",
+   "filed_at": "2026-10-25T20:27:49.976604Z",
    "held": 0,
    "not_found": 0,
    "off_network": 0,
@@ -64,7 +64,7 @@
    "ack_number": "29162403489284",
    "cashed_out": 500000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:47.627197Z",
+   "filed_at": "2026-10-25T20:27:49.780717Z",
    "held": 0,
    "not_found": 0,
    "off_network": 0,
@@ -76,7 +76,7 @@
    "ack_number": "22928096743133",
    "cashed_out": 200000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:47.454211Z",
+   "filed_at": "2026-10-25T20:27:49.602496Z",
    "held": 0,
    "not_found": 0,
    "off_network": 0,
@@ -88,7 +88,7 @@
    "ack_number": "38069132210127",
    "cashed_out": 8000000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:47.374158Z",
+   "filed_at": "2026-10-25T20:27:49.527229Z",
    "held": 26000000,
    "not_found": 0,
    "off_network": 0,
@@ -100,7 +100,7 @@
    "ack_number": "25925884038089",
    "cashed_out": 2450000,
    "complete": false,
-   "filed_at": "2026-10-25T19:49:46.642567Z",
+   "filed_at": "2026-10-25T20:27:48.665717Z",
    "held": 0,
    "not_found": 0,
    "off_network": 0,
@@ -112,7 +112,7 @@
    "ack_number": "30391446601247",
    "cashed_out": 20000000,
    "complete": true,
-   "filed_at": "2026-10-25T19:49:46.579604Z",
+   "filed_at": "2026-10-25T20:27:48.597317Z",
    "held": 60000000,
    "not_found": 0,
    "off_network": 0,
@@ -121,27 +121,27 @@
    "waiting": 0
   }
  ],
- "/v1/cases/39577951100000/trail": {
+ "/v1/cases/39600781100000/trail": {
   "accounts": [
    {
     "account": {
-     "account_number": "6957795101",
+     "account_number": "6960078101",
      "ifsc": "BKDD0000002",
      "vpa": null
     },
     "credit": {
      "amount": 24000000,
-     "at": "2026-10-25T19:29:54.998256Z",
+     "at": "2026-10-25T20:07:57.208476Z",
      "rail": "imps",
-     "reference": "957795100000"
+     "reference": "960078100000"
     },
     "exits": [],
     "held": 8000000,
     "holder_name": "Vikram Joshi",
     "layer": 1,
-    "lien_id": "LEB553AC6136D445E",
+    "lien_id": "L245C6F9F91179436",
     "member": "bank-d",
-    "notice_id": "39577951100000-001",
+    "notice_id": "39600781100000-001",
     "parent_id": null,
     "reason": null,
     "state": "answered",
@@ -149,54 +149,54 @@
    },
    {
     "account": {
-     "account_number": "6957795102",
+     "account_number": "6960078102",
      "ifsc": "BKCC0000002",
      "vpa": null
     },
     "credit": {
      "amount": 10000000,
-     "at": "2026-10-25T19:32:54.998256Z",
+     "at": "2026-10-25T20:10:57.208476Z",
      "rail": "imps",
-     "reference": "957795100001"
+     "reference": "960078100001"
     },
     "exits": [],
     "held": 10000000,
     "holder_name": "Nisha Traders",
     "layer": 2,
-    "lien_id": "L2F3AB7BBC3971402",
+    "lien_id": "L0204F125EADC6A92",
     "member": "bank-c",
-    "notice_id": "39577951100000-002",
-    "parent_id": "39577951100000-001",
+    "notice_id": "39600781100000-002",
+    "parent_id": "39600781100000-001",
     "reason": null,
     "state": "answered",
     "traced_in": 10000000
    },
    {
     "account": {
-     "account_number": "6957795103",
+     "account_number": "6960078103",
      "ifsc": "XCHX0000002",
      "vpa": null
     },
     "credit": {
      "amount": 6000000,
-     "at": "2026-10-25T19:35:54.998256Z",
+     "at": "2026-10-25T20:13:57.208476Z",
      "rail": "imps",
-     "reference": "957795100002"
+     "reference": "960078100002"
     },
     "exits": [],
     "held": 6000000,
-    "holder_name": "Exchange X customer",
+    "holder_name": "Deepa Kulkarni",
     "layer": 2,
-    "lien_id": "LF7472C80A02C4B48",
+    "lien_id": "L0D9810E25E921921",
     "member": "exchange-x",
-    "notice_id": "39577951100000-003",
-    "parent_id": "39577951100000-001",
+    "notice_id": "39600781100000-003",
+    "parent_id": "39600781100000-001",
     "reason": null,
     "state": "answered",
     "traced_in": 6000000
    }
   ],
-  "ack_number": "39577951100000",
+  "ack_number": "39600781100000",
   "cashed_out": 0,
   "complete": true,
   "held": 24000000,
@@ -205,27 +205,27 @@
   "reported": 24000000,
   "waiting": 0
  },
- "/v1/cases/39577950000000/trail": {
+ "/v1/cases/39600770000000/trail": {
   "accounts": [
    {
     "account": {
-     "account_number": "6957795001",
+     "account_number": "6960077001",
      "ifsc": "BKCC0000002",
      "vpa": null
     },
     "credit": {
      "amount": 9500000,
-     "at": "2026-10-25T19:29:54.998256Z",
+     "at": "2026-10-25T20:07:57.208476Z",
      "rail": "upi",
-     "reference": "957795000000"
+     "reference": "960077000000"
     },
     "exits": [],
     "held": 5500000,
     "holder_name": "Rohit Khanna",
     "layer": 1,
-    "lien_id": "L19B6D26B8FA18846",
+    "lien_id": "L9C284934AA2986C9",
     "member": "bank-c",
-    "notice_id": "39577950000000-001",
+    "notice_id": "39600770000000-001",
     "parent_id": null,
     "reason": null,
     "state": "answered",
@@ -233,30 +233,30 @@
    },
    {
     "account": {
-     "account_number": "6957795002",
+     "account_number": "6960077002",
      "ifsc": "BKDD0000002",
      "vpa": null
     },
     "credit": {
      "amount": 4000000,
-     "at": "2026-10-25T19:33:54.998256Z",
+     "at": "2026-10-25T20:11:57.208476Z",
      "rail": "imps",
-     "reference": "957795000001"
+     "reference": "960077000001"
     },
     "exits": [],
     "held": 4000000,
     "holder_name": "Asha Enterprises",
     "layer": 2,
-    "lien_id": "L9E3CB50BCF421522",
+    "lien_id": "L5FED22510BF35476",
     "member": "bank-d",
-    "notice_id": "39577950000000-002",
-    "parent_id": "39577950000000-001",
+    "notice_id": "39600770000000-002",
+    "parent_id": "39600770000000-001",
     "reason": null,
     "state": "answered",
     "traced_in": 4000000
    }
   ],
-  "ack_number": "39577950000000",
+  "ack_number": "39600770000000",
   "cashed_out": 0,
   "complete": true,
   "held": 9500000,
@@ -265,27 +265,27 @@
   "reported": 9500000,
   "waiting": 0
  },
- "/v1/cases/39826521718778/trail": {
+ "/v1/cases/33033011273523/trail": {
   "accounts": [
    {
     "account": {
-     "account_number": "3243795002",
+     "account_number": "3763953002",
      "ifsc": "BKBB0000001",
-     "vpa": "m1shop243795@bkbb"
+     "vpa": "m1shop763953@bkbb"
     },
     "credit": {
      "amount": 80000000,
-     "at": "2026-10-25T19:37:48.080480Z",
+     "at": "2026-10-25T20:15:50.241850Z",
      "rail": "rtgs",
-     "reference": "BKAAR24379500000000001"
+     "reference": "BKAAR76395300000000001"
     },
     "exits": [],
     "held": 10000000,
     "holder_name": "M1 (mule)",
     "layer": 1,
-    "lien_id": "L6E18F31A4B57BD7B",
+    "lien_id": "L04BF95F1D4E83E3C",
     "member": "bank-b",
-    "notice_id": "39826521718778-001",
+    "notice_id": "33033011273523-001",
     "parent_id": null,
     "reason": null,
     "state": "answered",
@@ -293,33 +293,33 @@
    },
    {
     "account": {
-     "account_number": "5243795002",
+     "account_number": "5763953002",
      "ifsc": "BKCC0000001",
      "vpa": null
     },
     "credit": {
      "amount": 30000000,
-     "at": "2026-10-25T19:39:48.080480Z",
+     "at": "2026-10-25T20:17:50.241850Z",
      "rail": "imps",
-     "reference": "243795000002"
+     "reference": "763953000002"
     },
     "exits": [
      {
       "amount": 10000000,
-      "at": "2026-10-25T19:42:48.080480Z",
+      "at": "2026-10-25T20:20:50.241850Z",
       "identifier": "S1BW000101",
       "location": "Ameerpet, Hyderabad",
       "mode": "atm",
-      "reference": "ATMW24379505",
+      "reference": "ATMW76395305",
       "traced_amount": 10000000
      },
      {
       "amount": 10000000,
-      "at": "2026-10-25T19:44:48.080480Z",
+      "at": "2026-10-25T20:22:50.241850Z",
       "identifier": "S1BW000245",
       "location": "Secunderabad",
       "mode": "atm",
-      "reference": "ATMW24379509",
+      "reference": "ATMW76395309",
       "traced_amount": 10000000
      }
     ],
@@ -328,23 +328,23 @@
     "layer": 2,
     "lien_id": null,
     "member": "bank-c",
-    "notice_id": "39826521718778-002",
-    "parent_id": "39826521718778-001",
+    "notice_id": "33033011273523-002",
+    "parent_id": "33033011273523-001",
     "reason": null,
     "state": "answered",
     "traced_in": 30000000
    },
    {
     "account": {
-     "account_number": "7243795002",
+     "account_number": "7763953002",
      "ifsc": "BKDD0000001",
      "vpa": null
     },
     "credit": {
      "amount": 25000000,
-     "at": "2026-10-25T19:40:48.080480Z",
+     "at": "2026-10-25T20:18:50.241850Z",
      "rail": "imps",
-     "reference": "243795000003"
+     "reference": "763953000003"
     },
     "exits": [],
     "held": 0,
@@ -352,110 +352,110 @@
     "layer": 2,
     "lien_id": null,
     "member": "bank-d",
-    "notice_id": "39826521718778-003",
-    "parent_id": "39826521718778-001",
+    "notice_id": "33033011273523-003",
+    "parent_id": "33033011273523-001",
     "reason": null,
     "state": "answered",
     "traced_in": 25000000
    },
    {
     "account": {
-     "account_number": "8243795006",
+     "account_number": "8763953006",
      "ifsc": "WLTW0000001",
      "vpa": null
     },
     "credit": {
      "amount": 15000000,
-     "at": "2026-10-25T19:41:48.080480Z",
+     "at": "2026-10-25T20:19:50.241850Z",
      "rail": "imps",
-     "reference": "243795000004"
+     "reference": "763953000004"
     },
     "exits": [],
     "held": 15000000,
-    "holder_name": "Wallet W holder",
+    "holder_name": "Kunal Shah (wallet)",
     "layer": 2,
-    "lien_id": "L1A36EC856B98F0B0",
+    "lien_id": "L6707F7328BF4128C",
     "member": "wallet-w",
-    "notice_id": "39826521718778-004",
-    "parent_id": "39826521718778-001",
+    "notice_id": "33033011273523-004",
+    "parent_id": "33033011273523-001",
     "reason": null,
     "state": "answered",
     "traced_in": 15000000
    },
    {
     "account": {
-     "account_number": "9243795006",
+     "account_number": "9763953006",
      "ifsc": "XCHX0000001",
      "vpa": null
     },
     "credit": {
      "amount": 10000000,
-     "at": "2026-10-25T19:43:48.080480Z",
+     "at": "2026-10-25T20:21:50.241850Z",
      "rail": "imps",
-     "reference": "243795000007"
+     "reference": "763953000007"
     },
     "exits": [],
     "held": 10000000,
-    "holder_name": "Exchange X customer",
+    "holder_name": "Arvind Menon (crypto account)",
     "layer": 3,
-    "lien_id": "LC1B456F4B6700A63",
+    "lien_id": "LD038AE58627570E4",
     "member": "exchange-x",
-    "notice_id": "39826521718778-005",
-    "parent_id": "39826521718778-002",
+    "notice_id": "33033011273523-005",
+    "parent_id": "33033011273523-002",
     "reason": null,
     "state": "answered",
     "traced_in": 10000000
    },
    {
     "account": {
-     "account_number": "2243795004",
+     "account_number": "2763953004",
      "ifsc": "BKAA0000001",
      "vpa": null
     },
     "credit": {
      "amount": 20000000,
-     "at": "2026-10-25T19:42:48.080480Z",
+     "at": "2026-10-25T20:20:50.241850Z",
      "rail": "neft",
-     "reference": "BKDDN24379500006"
+     "reference": "BKDDN76395300006"
     },
     "exits": [],
     "held": 20000000,
     "holder_name": "Ravi Traders (cement supplier)",
     "layer": 3,
-    "lien_id": "L92D403893DB4677D",
+    "lien_id": "LB23C20A87BE5995E",
     "member": "bank-a",
-    "notice_id": "39826521718778-006",
-    "parent_id": "39826521718778-003",
+    "notice_id": "33033011273523-006",
+    "parent_id": "33033011273523-003",
     "reason": null,
     "state": "answered",
     "traced_in": 20000000
    },
    {
     "account": {
-     "account_number": "4243795006",
+     "account_number": "4763953006",
      "ifsc": "BKBB0000001",
-     "vpa": "galaxy243795@bkbb"
+     "vpa": "galaxy763953@bkbb"
     },
     "credit": {
      "amount": 12000000,
-     "at": "2026-10-25T19:43:48.080480Z",
+     "at": "2026-10-25T20:21:50.241850Z",
      "rail": "imps",
-     "reference": "243795000008"
+     "reference": "763953000008"
     },
     "exits": [],
     "held": 5000000,
     "holder_name": "Galaxy Mobiles (phone shop)",
     "layer": 3,
-    "lien_id": "L28C9B1DB1563839A",
+    "lien_id": "LF712882F2968D23F",
     "member": "bank-b",
-    "notice_id": "39826521718778-007",
-    "parent_id": "39826521718778-003",
+    "notice_id": "33033011273523-007",
+    "parent_id": "33033011273523-003",
     "reason": null,
     "state": "answered",
     "traced_in": 5000000
    }
   ],
-  "ack_number": "39826521718778",
+  "ack_number": "33033011273523",
   "cashed_out": 20000000,
   "complete": true,
   "held": 60000000,
@@ -790,7 +790,7 @@
     "held": 12000000,
     "holder_name": "Deepak Rathore",
     "layer": 1,
-    "lien_id": "L94ABDAFAC594AF59",
+    "lien_id": "L6C6175B3D6FFF478",
     "member": "bank-b",
     "notice_id": "38069132210127-001",
     "parent_id": null,
@@ -884,7 +884,7 @@
     "held": 14000000,
     "holder_name": "Imran Sheikh",
     "layer": 3,
-    "lien_id": "L822201FBA9C18FEE",
+    "lien_id": "LAD5C314E9501D104",
     "member": "wallet-w",
     "notice_id": "38069132210127-003",
     "parent_id": "38069132210127-002",
@@ -1038,7 +1038,7 @@
     "held": 10000000,
     "holder_name": "Arjun Mondal",
     "layer": 1,
-    "lien_id": "LFCB5A9FED8C67AAE",
+    "lien_id": "L82A44B48593357B5",
     "member": "bank-b",
     "notice_id": "30391446601247-001",
     "parent_id": null,
@@ -1129,7 +1129,7 @@
     "held": 15000000,
     "holder_name": "Arjun Mondal",
     "layer": 2,
-    "lien_id": "L7A7729EA69713038",
+    "lien_id": "LE4EFBF3397E7AEB4",
     "member": "wallet-w",
     "notice_id": "30391446601247-004",
     "parent_id": "30391446601247-001",
@@ -1153,7 +1153,7 @@
     "held": 10000000,
     "holder_name": "Bikash Shaw",
     "layer": 3,
-    "lien_id": "LFF439F5CD6E72610",
+    "lien_id": "L88A4E0BC3BC1EC04",
     "member": "exchange-x",
     "notice_id": "30391446601247-005",
     "parent_id": "30391446601247-002",
@@ -1177,7 +1177,7 @@
     "held": 20000000,
     "holder_name": "Ravi Traders",
     "layer": 3,
-    "lien_id": "L6774C606C595D8DA",
+    "lien_id": "L1A71E2FDEB8CAB49",
     "member": "bank-a",
     "notice_id": "30391446601247-006",
     "parent_id": "30391446601247-003",
@@ -1201,7 +1201,7 @@
     "held": 5000000,
     "holder_name": "Galaxy Mobiles",
     "layer": 3,
-    "lien_id": "LA022B35AD8688100",
+    "lien_id": "L2CA356F95D16A8F8",
     "member": "bank-b",
     "notice_id": "30391446601247-007",
     "parent_id": "30391446601247-003",
@@ -1229,37 +1229,37 @@
    },
    {
     "id": "bank-a",
-    "name": "Bank A, a public sector bank",
+    "name": "Navodaya National Bank, a public sector bank",
     "kind": "bank",
     "bank_code": "BKAA"
    },
    {
     "id": "bank-b",
-    "name": "Bank B, a private bank",
+    "name": "Meridian Private Bank, a private bank",
     "kind": "bank",
     "bank_code": "BKBB"
    },
    {
     "id": "bank-c",
-    "name": "Bank C, a small finance bank",
+    "name": "Pragati Small Finance Bank, a small finance bank",
     "kind": "bank",
     "bank_code": "BKCC"
    },
    {
     "id": "bank-d",
-    "name": "Bank D, a co-operative bank",
+    "name": "Sangam Urban Co-operative Bank, a co-operative bank",
     "kind": "bank",
     "bank_code": "BKDD"
    },
    {
     "id": "wallet-w",
-    "name": "Wallet W, a prepaid wallet issuer",
+    "name": "PaySetu Wallet, a prepaid wallet issuer",
     "kind": "wallet",
     "bank_code": "WLTW"
    },
    {
     "id": "exchange-x",
-    "name": "Exchange X, a crypto exchange on CFCFRMS",
+    "name": "CoinKosh Exchange, a crypto exchange on CFCFRMS",
     "kind": "exchange",
     "bank_code": "XCHX"
    }
@@ -1267,60 +1267,60 @@
  },
  "/v1/hold-reports": [
   {
-   "hold_id": "HAB4EA5320CE82748",
-   "account_number": "7243795002",
+   "hold_id": "H1A6B7D63F328255B",
+   "account_number": "7763953002",
    "holder_name": "M3 General Store (mule)",
    "amount": 21500000,
    "whole_account": false,
    "reasons": [
-    "Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:10 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
-    "₹2,50,000 arrived on 26 Oct 2026, 01:10 AM IST, and 80% of it left the account within 2 minutes in 1 debit."
+    "Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:48 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
+    "₹2,50,000 arrived on 26 Oct 2026, 01:48 AM IST, and 80% of it left the account within 2 minutes in 1 debit."
    ],
    "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-   "customer_notice": "Dear M3 General Store (mule),\n\nBank D, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 5002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:10 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 26 Oct 2026, 01:10 AM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
-   "placed_at": "2026-10-25T19:49:59.746128Z",
+   "customer_notice": "Dear M3 General Store (mule),\n\nSangam Urban Co-operative Bank, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 3002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:48 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 26 Oct 2026, 01:48 AM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
+   "placed_at": "2026-10-25T20:28:01.873274Z",
    "status": "reported_to_police",
    "deadlines": [
     {
-     "due": "2026-10-25T19:49:59.746128Z",
-     "met_at": "2026-10-25T19:49:59.746128Z",
+     "due": "2026-10-25T20:28:01.873274Z",
+     "met_at": "2026-10-25T20:28:01.873274Z",
      "name": "Customer notified",
      "rule": "Annex III Step 2: at once when the customer is reached digitally",
      "state": "met"
     },
     {
-     "due": "2026-11-14T19:49:59.746128Z",
-     "met_at": "2026-10-25T19:49:59.817510Z",
+     "due": "2026-11-14T20:28:01.873274Z",
+     "met_at": "2026-10-25T20:28:01.948858Z",
      "name": "Customer explanation",
      "rule": "Annex III Step 3: 20 days from the hold",
      "state": "met"
     },
     {
-     "due": "2026-11-04T19:49:59.817510Z",
-     "met_at": "2026-10-25T19:49:59.863744Z",
+     "due": "2026-11-04T20:28:01.948858Z",
+     "met_at": "2026-10-25T20:28:02.009027Z",
      "name": "Bank decision",
      "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
      "state": "met"
     },
     {
-     "due": "2026-11-24T19:49:59.863744Z",
+     "due": "2026-11-24T20:28:02.009027Z",
      "met_at": null,
      "name": "Release unless the police instruct otherwise",
      "rule": "Annex III Step 6: the 31st day from the report, within 60 days of the hold",
      "state": "open"
     }
    ],
-   "next_deadline": "2026-11-24T19:49:59.863744Z",
-   "expires_at": "2026-11-24T19:49:59.863744Z",
+   "next_deadline": "2026-11-24T20:28:02.009027Z",
+   "expires_at": "2026-11-24T20:28:02.009027Z",
    "explanation": "The customer sent no documents and said the money was a loan from a friend.",
-   "explanation_at": "2026-10-25T19:49:59.817510Z",
+   "explanation_at": "2026-10-25T20:28:01.948858Z",
    "decision": "report",
    "decision_reason": "No document supports the credit, which is five times the declared turnover and left within two minutes.",
    "released_at": null,
    "release_reason": null,
-   "reported_at": "2026-10-25T19:49:59.863744Z",
+   "reported_at": "2026-10-25T20:28:02.009027Z",
    "member": "bank-d",
-   "member_name": "Bank D, a co-operative bank",
+   "member_name": "Sangam Urban Co-operative Bank, a co-operative bank",
    "instruction": null,
    "str_filed_at": null,
    "mule_confirmed_at": null

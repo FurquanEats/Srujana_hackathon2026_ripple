@@ -6,15 +6,16 @@ import { Empty, Held, Money, PageHeader } from "@/components/workspace/ui";
 import { formatIst } from "@/lib/format";
 import { cases } from "@/lib/gateway/source";
 import { requireRole } from "@/lib/guard";
+import { CASE_SORTS, sortCases } from "@/lib/sort";
 
 export const metadata: Metadata = { title: "Cases" };
 
-type Search = Promise<{ state?: string; q?: string }>;
+type Search = Promise<{ state?: string; q?: string; sort?: string }>;
 
 export default async function CasesPage({ searchParams }: { searchParams: Search }) {
   const session = await requireRole("police_officer", "demo");
-  const { state, q } = await searchParams;
-  const all = [...(await cases(session))].sort((a, b) => b.filed_at.localeCompare(a.filed_at));
+  const { state, q, sort } = await searchParams;
+  const all = sortCases(await cases(session), sort);
   const needle = (q ?? "").trim().toLowerCase();
   const list = all.filter(
     (c) =>
@@ -35,7 +36,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Search
         )}
       </div>
       <Filters
-        values={{ state, q }}
+        values={{ state, q, sort: sort ?? "severity" }}
         total={all.length}
         shown={list.length}
         fields={[
@@ -49,6 +50,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Search
             ],
           },
           { name: "q", label: "Victim or acknowledgement", placeholder: "Search" },
+          { name: "sort", label: "Sort by", options: CASE_SORTS, required: true },
         ]}
       />
       {list.length === 0 ? (

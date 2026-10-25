@@ -1,14 +1,13 @@
 """The PRD's demo story as a fixed scenario, with its exact amounts.
 
-A victim at Bank A is coached into sending Rs 8,00,000 by RTGS to a first mule, M1, at Bank B. Within 9 minutes,
-M1 keeps Rs 1,00,000 and sends Rs 3,00,000 to M2 at Bank C, Rs 2,50,000 to M3 at Bank D and Rs 1,50,000 to a
-wallet at Wallet W. M2 takes Rs 2,00,000 in cash at two ATMs and sends Rs 1,00,000 to Exchange X. M3 already holds
-Rs 3,00,000 of its own money, and pays Ravi Traders Rs 2,00,000, Galaxy Mobiles Rs 1,20,000 and a shop assistant's
-Rs 15,000 salary. The victim calls 1930 at minute 12.
+A victim at Navodaya Bank is coached into sending Rs 8,00,000 by RTGS to a first mule, M1, at Meridian Bank.
+Within 9 minutes, M1 keeps Rs 1,00,000 and sends Rs 3,00,000 to M2 at Pragati Bank, Rs 2,50,000 to M3 at
+Sangam Bank and Rs 1,50,000 to a wallet at PaySetu. M2 takes Rs 2,00,000 in cash at two ATMs and sends Rs
+1,00,000 to CoinKosh. M3 already holds Rs 3,00,000 of its own money, and pays Ravi Traders Rs 2,00,000, Galaxy
+Mobiles Rs 1,20,000 and a shop assistant's Rs 15,000 salary. The victim calls 1930 at minute 12.
 
-Under the SOP's rule (victims' money leaves before the holder's own), Ravi Traders carries Rs 2,00,000 of traced
-money, Galaxy Mobiles Rs 50,000 and the salary Rs 0.
-"""
+Under the SOP's rule (victims' money leaves before the holder's own), Ravi Traders carries Rs 2,00,000 of
+traced money, Galaxy Mobiles Rs 50,000 and the salary Rs 0."""
 
 from __future__ import annotations
 

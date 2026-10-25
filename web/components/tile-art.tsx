@@ -15,11 +15,11 @@ type Tile = {
 };
 
 const TILES: Tile[] = [
-  { id: "a", label: "Bank A", x: 30, y: 150, rotate: -4, pixels: 0, state: "source" },
-  { id: "b", label: "Bank B", x: 215, y: 60, rotate: 3, pixels: 10, state: "held" },
-  { id: "c", label: "Bank C", x: 215, y: 255, rotate: -2, pixels: 0, state: "passed" },
-  { id: "w", label: "Wallet W", x: 405, y: 20, rotate: -3, pixels: 15, state: "held" },
-  { id: "x", label: "Exchange X", x: 420, y: 190, rotate: 4, pixels: 10, state: "held" },
+  { id: "a", label: "Navodaya", x: 30, y: 150, rotate: -4, pixels: 0, state: "source" },
+  { id: "b", label: "Meridian", x: 215, y: 60, rotate: 3, pixels: 10, state: "held" },
+  { id: "c", label: "Pragati", x: 215, y: 255, rotate: -2, pixels: 0, state: "passed" },
+  { id: "w", label: "PaySetu", x: 405, y: 20, rotate: -3, pixels: 15, state: "held" },
+  { id: "x", label: "CoinKosh", x: 420, y: 190, rotate: 4, pixels: 10, state: "held" },
   { id: "atm", label: "ATM", x: 405, y: 350, rotate: -5, pixels: 20, state: "cashed" },
 ];
 
@@ -56,8 +56,9 @@ export function TileArt({ className = "" }: { className?: string }) {
       shapeRendering="geometricPrecision"
     >
       <title id="tile-art-title">
-        A victim&apos;s money leaves Bank A and splits across Bank B, Bank C, Wallet W, Exchange X and an ATM.
-        Liens hold the traced money at Bank B, Wallet W and Exchange X; the ATM cash has left the system.
+        A victim&apos;s money leaves Navodaya National Bank and splits across Meridian Private Bank, Pragati
+        Small Finance Bank, PaySetu Wallet, CoinKosh Exchange and an ATM. Liens hold the traced money at
+        Meridian, PaySetu and CoinKosh; the ATM cash has left the system.
       </title>
       <defs>
         <pattern id="ridges" width="6" height="6" patternUnits="userSpaceOnUse">

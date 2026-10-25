@@ -1,6 +1,6 @@
 """The institutions in the simulated network, read from `network.toml` so the simulator and the nodes share one roster.
 
-Every member that holds customer accounts (the four banks, Wallet W and Exchange X) is one `Member` here, with the
+Every member that holds customer accounts (the four banks, PaySetu and CoinKosh) is one `Member` here, with the
 4-letter code that starts its IFSCs and NEFT and RTGS UTRs, and its UPI handle. The CFCFRMS hub keeps no accounts,
 so it is left out. The city is the simulator's own detail, used for ATM and shop locations.
 """

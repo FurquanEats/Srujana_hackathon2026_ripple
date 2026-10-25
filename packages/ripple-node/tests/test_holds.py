@@ -72,8 +72,8 @@ def open_flags(s: Session) -> list[str]:
 
 def place(s: Session, now: datetime, **kw: object) -> ledger.HoldRow:
     return holds.place(
-        s, now=now, actor="frm-1", bank_name="Bank B", account_number=MULE, flag_keys=open_flags(s),
-        contact="Fraud Risk desk, Bank B, 1800 000 0000", **kw,  # type: ignore[arg-type]
+        s, now=now, actor="frm-1", bank_name="Meridian Bank", account_number=MULE, flag_keys=open_flags(s),
+        contact="Fraud Risk desk, Meridian Bank, 1800 000 0000", **kw,  # type: ignore[arg-type]
     )  # fmt: skip
 
 
@@ -95,7 +95,7 @@ def test_a_hold_covers_the_flagged_credit_capped_at_what_is_left(factory: sessio
     assert view.status == "awaiting_explanation"
     assert "debits of ₹30,000 from your account ending 0001" in view.customer_notice
     assert "by 09 November 2026" in view.customer_notice  # 20 days to explain
-    assert "Contact: Fraud Risk desk, Bank B" in view.customer_notice
+    assert "Contact: Fraud Risk desk, Meridian Bank" in view.customer_notice
     assert [d.state for d in view.deadlines[:3]] == ["met", "open", "open"]
 
 
@@ -202,7 +202,7 @@ def test_a_confirmed_mule_needs_an_str_within_7_working_days(factory: sessionmak
     with transaction(factory) as s:
         row = place(s, now)
         holds.confirm_mule(s, row.hold_id, now=now, actor="frm-1", grounds="Pass-through of a reported victim's money",
-                           bank_name="Bank B", bank_code="BKBB")  # fmt: skip
+                           bank_name="Meridian Bank", bank_code="BKBB")  # fmt: skip
         assert row.str_due == now + 9 * DAY  # 7 working days, skipping the weekend
         view = holds.view(s, row, now + DAY)
         assert view.str_draft is not None
