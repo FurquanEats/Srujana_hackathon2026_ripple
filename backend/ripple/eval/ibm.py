@@ -294,7 +294,8 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
     # The single-transaction baseline gets the same number of alerts as the full system, so the two compare fairly.
     p_single = single.predict(X[test][:, single_idx])
     baseline = metrics("Single-transaction baseline", p_single, yt, top_alerts=n_alerts)
-    ablation = [baseline] + [metrics(k, v, yt, thresholds[k]) for k, v in variants.items()]
+    ablation = [baseline] + [metrics(k, v, yt, thresholds[k]) for k, v in variants.items() if k in keeps]
+    contrast = [metrics(k, variants[k], yt, thresholds[k]) for k in (pack_key, model_key)]
     overall = metrics("Ripple (full)", p_full, yt, alert_at_full)
     alert_at = alert_at_full
 
@@ -337,7 +338,7 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
             "to the same account are excluded because the engine never alerts on them.",
             f"Alert threshold {alert_at:.4f} is the F1-best threshold on a held-out training day, after Platt scaling of "
             "the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; "
-            "the pack's hand-set weights, shown as their own ablation row, rank far worse on IBM because a detector "
+            "the pack's hand-set weights rank far worse on IBM (see the contrast rows in eval_extra.json) because a detector "
             "hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled "
             "day, so legitimate-row subsampling does not inflate it.",
             "The model's strongest feature is whether the payer has paid this payee before. It is computed from past "
@@ -364,6 +365,7 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
             "model_calibration_day": str(calib_days[0])[:10], "fusion_calibration_day": str(calib_days[-1])[:10],
             "variants": {k: {"threshold": round(thresholds[k], 5), "platt_a": round(tuned[k]["a"], 4),
                              "platt_b": round(tuned[k]["b"], 4)} | fitted.get(k, {}) for k in tuned},
+            "contrast": contrast,
             "pack_fusion": {"weights": {layer.value: x for layer, x in fusion.weights.items()}, "bias": fusion.bias},
             "alert_rate_test": round(float((p_full >= alert_at).mean()), 5),
             "pack_alert_at": r["alert_at"],
