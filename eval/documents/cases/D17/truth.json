@@ -52,7 +52,7 @@
       "readable": true,
       "planted_instruction": null,
       "fields": {
-        "document_type": "tax_invoice",
+        "document_type": "bill_of_supply",
         "issuer": "Green Leaf Nursery",
         "issuer_gstin": "37CEFFO3430Q1ZL",
         "recipient": "Vizag Landscapes",
@@ -96,7 +96,7 @@
       "proposed_action": "lift",
       "hold_after": 0,
       "failed_checks": [],
-      "why": "The invoice (plants are exempt from GST, so tax is nil) equals the credit and the buyer is the remitter."
+      "why": "The bill of supply (plants are exempt from GST, so no tax is charged) equals the credit and the buyer is the remitter."
     },
     {
       "credit_id": "C2",

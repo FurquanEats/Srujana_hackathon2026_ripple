@@ -20,14 +20,14 @@
       "credit_id": "C1",
       "rail": "imps",
       "reference": "065945794805",
-      "amount": 18624000,
+      "amount": 17169000,
       "at": "2026-10-11T17:32:00+05:30",
       "remitter": {
         "name": "KUNAL SINGH",
         "ifsc": "NVBK0000729",
         "account_number": "74589698777445"
       },
-      "traced_amount": 18624000
+      "traced_amount": 17169000
     }
   ],
   "documents": [
@@ -47,8 +47,8 @@
         "number": "RAP/0904",
         "date": "2026-10-10",
         "taxable_value": 14550000,
-        "tax": 4074000,
-        "total": 18624000,
+        "tax": 2619000,
+        "total": 17169000,
         "payment_reference": null,
         "issuer_bank_account": null,
         "irn": null
@@ -78,10 +78,10 @@
       "credit_id": "C1",
       "verdict": "conflicting",
       "explained_amount": 0,
-      "unexplained_amount": 18624000,
+      "unexplained_amount": 17169000,
       "document": null,
       "proposed_action": "keep",
-      "hold_after": 18624000,
+      "hold_after": 17169000,
       "failed_checks": [
         "payer_match"
       ],
