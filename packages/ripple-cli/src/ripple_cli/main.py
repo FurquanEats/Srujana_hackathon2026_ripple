@@ -45,6 +45,9 @@ def main(argv: list[str] | None = None) -> int:
         "--speed", type=float, default=1.0, help="how much faster than real time the clock runs"
     )
     up_cmd.add_argument("--start", help="simulated start time, ISO 8601 (default: now in IST)")
+    up_cmd.add_argument(
+        "--fresh", action="store_true", help="delete every service's database before starting"
+    )
     commands.add_parser("demo", help="run the demo story on the running network (started with speed 1)")
     args = parser.parse_args(argv)
 
@@ -63,6 +66,10 @@ def main(argv: list[str] | None = None) -> int:
         from ripple_cli.show import run_demo  # noqa: PLC0415 - only the demo needs the network client
 
         return run_demo(network, paths)
+    if args.fresh:
+        for database in (paths.home / "data").glob("*.sqlite3*"):
+            database.unlink()
+        print("Deleted the databases in .ripple/data; every service starts empty.")
     return up(network, paths, root, args.speed, args.start)
 
 

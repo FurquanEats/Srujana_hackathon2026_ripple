@@ -41,6 +41,7 @@ class Party:
     ref: AccountRef
     opening_rupees: int
     profile: str = ""
+    income_rupees: int | None = None  # declared annual income or turnover (KYC)
 
 
 @dataclass(frozen=True)
@@ -70,9 +71,9 @@ def parties(run: str) -> dict[str, Party]:
 
     def party(key: str,
         *, member: str, code: str, n: int, holder: str, opening: int, vpa: str | None = None,
-              profile: str = "") -> Party:  # fmt: skip
+              profile: str = "", income: int | None = None) -> Party:  # fmt: skip
         ref = AccountRef(ifsc=f"{code}0000001", account_number=f"{n}{run}{len(key):03d}", vpa=vpa)
-        return Party(key, member, holder, ref, opening, profile)
+        return Party(key, member, holder, ref, opening, profile, income)
 
     return {
         p.key: p
@@ -101,6 +102,8 @@ def parties(run: str) -> dict[str, Party]:
                 holder="M1 (mule)",
                 opening=0,
                 vpa=f"m1shop{run}@bkbb",
+                profile="individual; student; declared annual income Rs 0",
+                income=0,
             ),
             party(
                 "galaxy",
@@ -122,7 +125,8 @@ def parties(run: str) -> dict[str, Party]:
                 n=7,
                 holder="M3 General Store (mule)",
                 opening=300_000,
-                profile="small shop",
+                profile="proprietorship; general store; declared annual turnover Rs 6,00,000",
+                income=600_000,
             ),
             party("wallet", member="wallet-w", code="WLTW", n=8, holder="Wallet W holder", opening=0),
             party("crypto", member="exchange-x", code="XCHX", n=9, holder="Exchange X customer", opening=0),
@@ -141,6 +145,7 @@ def seed(call: Call, start: datetime, run: str) -> Story:
             holder_name=p.holder,
             vpa=p.ref.vpa,
             declared_profile=p.profile,
+            declared_annual_income=None if p.income_rupees is None else rupees(p.income_rupees),
             opening_balance=rupees(p.opening_rupees),
             opened_at=start - timedelta(days=30),
         )

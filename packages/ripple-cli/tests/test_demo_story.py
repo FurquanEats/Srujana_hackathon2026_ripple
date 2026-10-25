@@ -100,3 +100,40 @@ def test_only_the_hub_may_send_notices_and_only_the_simulator_may_post(net: Net)
     client: TestClient = net.clients["bank-b"]
     assert client.post("/v1/notices", json={"envelope": "a.b.c"}).status_code == 401
     assert client.post("/v1/notices", json={"wrong": "shape"}).status_code == 422
+
+
+def test_the_mules_are_flagged_as_the_money_moves_before_anyone_reports(net: Net) -> None:
+    """The PRD's story: Bank D flags M3 by minute 9, because Rs 2,50,000 from a first-time payer left again within
+    minutes from a small shop's account. Bank B flags M1. Honest Ravi Traders and Galaxy Mobiles are not flagged."""
+    m3 = net.call("web", "bank-d", "/v1/officer/cases", {}).payload["cases"]
+    [case] = m3
+    assert case["account_number"] == story(net).parties["m3"].ref.account_number
+    assert {"pass_through", "out_of_profile"} <= set(case["rules"])
+    assert max(f["at"] for f in case["flags"]) <= (T0 + timedelta(minutes=9)).isoformat()
+    [m1] = net.call("web", "bank-b", "/v1/officer/cases", {}).payload["cases"]
+    assert m1["holder_name"] == "M1 (mule)"
+    flagged = {c["holder_name"] for bank in ("bank-a", "bank-b") for c in
+               net.call("web", bank, "/v1/officer/cases", {}).payload["cases"]}  # fmt: skip
+    assert "Ravi Traders (cement supplier)" not in flagged
+    assert "Galaxy Mobiles (phone shop)" not in flagged
+
+
+def test_the_frm_analyst_holds_m3s_flagged_credit_and_the_customer_is_told(net: Net) -> None:
+    [case] = net.call("web", "bank-d", "/v1/officer/cases", {}).payload["cases"]
+    hold = net.call("web", "bank-d", "/v1/officer/holds/place", {
+        "actor": "frm-bank-d", "account_number": case["account_number"],
+        "flag_keys": [f["key"] for f in case["flags"]], "contact": "Fraud Risk desk, Bank D, 1800 000 0004",
+    }).payload  # fmt: skip
+    assert hold["status"] == "awaiting_explanation"
+    assert hold["amount"] > 0
+    assert "Dear M3 General Store (mule)" in hold["customer_notice"]
+    [queued] = net.call("web", "bank-d", "/v1/officer/holds", {}).payload["holds"]
+    assert queued["hold_id"] == hold["hold_id"]
+    step = {
+        "actor": "frm-bank-d",
+        "hold_id": hold["hold_id"],
+        "decision": "report",
+        "reason": "too early",
+    }
+    with pytest.raises(Exception, match="409"):
+        net.call("web", "bank-d", "/v1/officer/holds/decision", step)

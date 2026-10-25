@@ -10,7 +10,7 @@ from __future__ import annotations
 import secrets
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, String, Text, UniqueConstraint, func, select
+from sqlalchemy import Engine, ForeignKey, Integer, String, Text, UniqueConstraint, func, inspect, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 from ripple_core.messages import AccountOpening, AccountRef, ExitDetail, LedgerPosting, Notice, NoticeResponse
@@ -35,6 +35,7 @@ class Account(NodeBase):
     holder_name: Mapped[str] = mapped_column(String(120))
     account_type: Mapped[str] = mapped_column(String(16))
     declared_profile: Mapped[str] = mapped_column(String(200))
+    declared_annual_income: Mapped[int | None] = mapped_column(Integer)
     opening_balance: Mapped[int] = mapped_column(Integer)
     opened_at: Mapped[datetime] = mapped_column(UtcDateTime())
 
@@ -77,6 +78,54 @@ class LienRow(NodeBase):
     released_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
 
 
+class HoldRow(NodeBase):
+    """An RBI temporary debit hold the bank placed itself on a suspected mule credit (see `ripple_node.holds`).
+
+    `amount` is the amount on hold; `whole_account` is the last-resort hold on every debit (Annex III para 6(ii)).
+    The hold stops debits from `placed_at` until it is released or reaches `expires_at`.
+    """
+
+    __tablename__ = "debit_holds"
+
+    hold_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    account_number: Mapped[str] = mapped_column(ForeignKey("accounts.account_number"), index=True)
+    whole_account: Mapped[bool] = mapped_column(default=False)
+    amount: Mapped[int] = mapped_column(Integer)
+    credit_txns: Mapped[str] = mapped_column(Text)  # JSON list of the held credits' txn ids
+    flag_keys: Mapped[str] = mapped_column(Text)  # JSON list of the flags behind the hold
+    reasons: Mapped[str] = mapped_column(Text)  # JSON list of reason sentences
+    account_level_reason: Mapped[str | None] = mapped_column(Text)
+    contact: Mapped[str] = mapped_column(String(200))
+    customer_notice: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    placed_by: Mapped[str] = mapped_column(String(64))
+    placed_at: Mapped[datetime] = mapped_column(UtcDateTime())
+    explanation_due: Mapped[datetime] = mapped_column(UtcDateTime())
+    explanation_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    explanation: Mapped[str | None] = mapped_column(Text)
+    decision_due: Mapped[datetime] = mapped_column(UtcDateTime())
+    decided_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    decision: Mapped[str | None] = mapped_column(String(16))
+    decision_reason: Mapped[str | None] = mapped_column(Text)
+    reported_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    instruction_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    instruction: Mapped[str | None] = mapped_column(Text)
+    expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    released_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    release_reason: Mapped[str | None] = mapped_column(Text)
+    mule_confirmed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    str_draft: Mapped[str | None] = mapped_column(Text)  # JSON
+    str_due: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    str_filed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    str_reference: Mapped[str | None] = mapped_column(String(64))
+
+    def active_at(self, at: datetime) -> bool:
+        if at < self.placed_at:
+            return False
+        end = self.released_at or self.expires_at
+        return end is None or at < end
+
+
 class NoticeRow(NodeBase):
     """Every notice received and the answer sent, so a repeated notice gets the same answer."""
 
@@ -95,6 +144,18 @@ class NoticeRow(NodeBase):
         return NoticeResponse.model_validate_json(self.response)
 
 
+def missing_columns(engine: Engine) -> list[str]:
+    """Columns this version expects in tables that already exist; a database from an older version lacks some."""
+    inspector = inspect(engine)
+    missing = []
+    for table in NodeBase.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        present = {c["name"] for c in inspector.get_columns(table.name)}
+        missing += [f"{table.name}.{c.name}" for c in table.columns if c.name not in present]
+    return missing
+
+
 def open_account(session: Session, opening: AccountOpening) -> Account:
     if session.get(Account, opening.account_number) is not None:
         raise LedgerConflict(f"account {opening.account_number} already exists")
@@ -110,6 +171,7 @@ def open_account(session: Session, opening: AccountOpening) -> Account:
         holder_name=opening.holder_name,
         account_type=opening.account_type.value,
         declared_profile=opening.declared_profile,
+        declared_annual_income=opening.declared_annual_income,
         opening_balance=opening.opening_balance,
         opened_at=opening.opened_at,
     )
@@ -143,9 +205,19 @@ def post(session: Session, posting: LedgerPosting) -> Posting:
     if posting.payment.at < account.opened_at:
         raise LedgerConflict(f"transaction {posting.txn_id} is before the account was opened")
     if posting.direction == "debit":
-        available = balance(session, account) - held(session, account.account_number)
+        holds = [
+            h
+            for h in session.scalars(select(HoldRow).where(HoldRow.account_number == account.account_number))
+            if h.active_at(posting.payment.at)
+        ]
+        if any(h.whole_account for h in holds):
+            raise LedgerConflict(f"transaction {posting.txn_id}: every debit from this account is on hold")
+        on_hold = held(session, account.account_number) + sum(h.amount for h in holds)
+        available = balance(session, account) - on_hold
         if posting.payment.amount > available:
-            raise LedgerConflict(f"transaction {posting.txn_id} is more than the balance not under a lien")
+            raise LedgerConflict(
+                f"transaction {posting.txn_id} is more than the balance not under a lien or a debit hold"
+            )
     row = Posting(
         txn_id=posting.txn_id,
         account_number=posting.account_number,

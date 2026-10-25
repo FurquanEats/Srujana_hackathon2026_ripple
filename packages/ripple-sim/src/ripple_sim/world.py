@@ -90,6 +90,7 @@ class World:
                     holder_name=holder,
                     vpa=vpa,
                     declared_profile=profile.describe(),
+                    declared_annual_income=profile.annual_income,
                     opening_balance=opening_balance,
                     opened_at=at.astimezone(UTC),
                 ),

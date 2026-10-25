@@ -209,6 +209,7 @@ class AccountOpening(Model):
     account_type: AccountType = AccountType.REGULAR
     vpa: str | None = None
     declared_profile: Annotated[str, Field(max_length=200)] = ""
+    declared_annual_income: PaiseAmount | None = None  # KYC: income for a person, turnover for a business
     opening_balance: PaiseAmount = 0
     opened_at: AwareDatetime
 

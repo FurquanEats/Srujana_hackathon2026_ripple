@@ -18,7 +18,7 @@ from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from ripple_cli import demo
 from ripple_core.clock import Clock
@@ -35,7 +35,64 @@ POLICE_ROLES = frozenset({Role.POLICE_OFFICER, Role.DEMO})
 HUB = "cfcfrms"
 COMPLAINT_DELAY = timedelta(minutes=12)
 
+FRM_ROLES = frozenset({Role.FRM_ANALYST})
+
 AckPath = Annotated[str, Path(pattern=r"^[23]\d{13}$")]
+HoldPath = Annotated[str, Path(pattern=r"^H[0-9A-F]{16}$")]
+AccountPath = Annotated[str, Path(pattern=r"^[0-9A-Z]{6,20}$")]
+
+
+class Body(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+
+class DismissBody(Body):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class HoldBody(Body):
+    account_number: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
+    flag_keys: Annotated[list[str], Field(min_length=1, max_length=50)]
+    contact: Annotated[str, Field(min_length=5, max_length=200)]
+    whole_account: bool = False
+    account_level_reason: Annotated[str, Field(max_length=2000)] | None = None
+
+
+class ExplanationBody(Body):
+    summary: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+class DecisionBody(Body):
+    decision: Annotated[str, Field(pattern=r"^(release|report)$")]
+    reason: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+class InstructionBody(Body):
+    instruction: Annotated[str, Field(pattern=r"^(release|continue)$")]
+    authority: Annotated[str, Field(min_length=3, max_length=200)]
+
+
+class GroundsBody(Body):
+    grounds: Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+class StrFiledBody(Body):
+    reference: Annotated[str, Field(min_length=3, max_length=64)]
+
+
+class ShadowRunBody(Body):
+    budget_per_day: Annotated[float, Field(gt=0, le=10_000)]
+
+
+class ThresholdsBody(Body):
+    budget_per_day: Annotated[float, Field(gt=0, le=10_000)] | None = None
+    pass_through_minutes: Annotated[int, Field(ge=1, le=10_080)]
+    new_senders: Annotated[int, Field(ge=2, le=1_000)]
+    profile_multiple: Annotated[float, Field(gt=0, le=1_000)]
+    dormant_days: Annotated[int, Field(ge=1, le=3_650)]
+    cash_out_minutes: Annotated[int, Field(ge=1, le=10_080)]
+
+
 NoticePath = Annotated[str, Path(min_length=8, max_length=64, pattern=r"^[0-9A-Za-z-]+$")]
 
 
@@ -133,6 +190,68 @@ def build_app(ctx: GatewayContext) -> FastAPI:  # noqa: PLR0915 - one short func
     def liens(who: Who) -> list[Any]:
         result: list[Any] = call("web", own_bank(who), "/v1/officer/liens", {})["liens"]
         return result
+
+    def frm_bank(who: Session) -> str:
+        allow(who, FRM_ROLES)
+        return own_bank(who)
+
+    def hold_step(who: Session, hold_id: str, path: str, body: Body) -> dict[str, Any]:
+        payload = {**body.model_dump(), "actor": who.sub, "hold_id": hold_id}
+        return call("web", frm_bank(who), f"/v1/officer/holds/{path}", payload)
+
+    @app.get("/v1/mule-cases")
+    def mule_cases(who: Who, include_closed: bool = False) -> list[Any]:
+        result: list[Any] = call(
+            "web", frm_bank(who), "/v1/officer/cases", {"include_closed": include_closed}
+        )["cases"]
+        return result
+
+    @app.post("/v1/mule-cases/{account_number}/dismiss")
+    def dismiss_case(who: Who, account_number: AccountPath, body: DismissBody) -> dict[str, Any]:
+        payload = {"actor": who.sub, "account_number": account_number, "reason": body.reason}
+        return call("web", frm_bank(who), "/v1/officer/cases/dismiss", payload)
+
+    @app.get("/v1/holds")
+    def hold_queue(who: Who) -> list[Any]:
+        result: list[Any] = call("web", frm_bank(who), "/v1/officer/holds", {})["holds"]
+        return result
+
+    @app.post("/v1/holds")
+    def place_hold(who: Who, body: HoldBody) -> dict[str, Any]:
+        return call("web", frm_bank(who), "/v1/officer/holds/place", {**body.model_dump(), "actor": who.sub})
+
+    @app.post("/v1/holds/{hold_id}/explanation")
+    def hold_explanation(who: Who, hold_id: HoldPath, body: ExplanationBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "explanation", body)
+
+    @app.post("/v1/holds/{hold_id}/decision")
+    def hold_decision(who: Who, hold_id: HoldPath, body: DecisionBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "decision", body)
+
+    @app.post("/v1/holds/{hold_id}/police-instruction")
+    def hold_instruction(who: Who, hold_id: HoldPath, body: InstructionBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "instruction", body)
+
+    @app.post("/v1/holds/{hold_id}/confirm-mule")
+    def hold_confirm(who: Who, hold_id: HoldPath, body: GroundsBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "confirm-mule", body)
+
+    @app.post("/v1/holds/{hold_id}/str-filed")
+    def hold_str_filed(who: Who, hold_id: HoldPath, body: StrFiledBody) -> dict[str, Any]:
+        return hold_step(who, hold_id, "str-filed", body)
+
+    @app.get("/v1/detection/thresholds")
+    def thresholds(who: Who) -> dict[str, Any]:
+        return call("web", frm_bank(who), "/v1/officer/detection/thresholds", {})
+
+    @app.post("/v1/detection/shadow-run")
+    def shadow_run(who: Who, body: ShadowRunBody) -> dict[str, Any]:
+        return call("web", frm_bank(who), "/v1/officer/detection/shadow-run", body.model_dump())
+
+    @app.post("/v1/detection/thresholds")
+    def approve_thresholds(who: Who, body: ThresholdsBody) -> dict[str, Any]:
+        payload = {**body.model_dump(), "actor": who.sub}
+        return call("web", frm_bank(who), "/v1/officer/detection/approve", payload)
 
     @app.get("/v1/cases")
     def cases(who: Who) -> list[Any]:

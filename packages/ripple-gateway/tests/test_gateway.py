@@ -138,3 +138,44 @@ def test_the_secret_is_created_once_and_reused(tmp_path: Path) -> None:
     assert load_secret(path, None) == first
     assert len(first) >= 48
     assert load_secret(path, "from-env") == b"from-env"
+
+
+FRM_D = headers(Role.FRM_ANALYST, "bank-d")
+
+
+def test_the_frm_analyst_works_a_mule_case_through_a_hold(gw: TestClient) -> None:
+    run_demo(gw)
+    assert gw.get("/v1/mule-cases", headers=BANK_B).status_code == 403  # nodal officers do not run mule holds
+    [case] = gw.get("/v1/mule-cases", headers=FRM_D).json()
+    assert case["holder_name"] == "M3 General Store (mule)"
+    body = {"account_number": case["account_number"], "flag_keys": [f["key"] for f in case["flags"]],
+            "contact": "Fraud Risk desk, Bank D, 1800 000 0004"}  # fmt: skip
+    hold = gw.post("/v1/holds", headers=FRM_D, json=body)
+    assert hold.status_code == 200, hold.text
+    hold_id = hold.json()["hold_id"]
+    assert hold.json()["placed_by"] == "u1"
+    again = gw.post("/v1/holds", headers=FRM_D, json=body)
+    assert again.status_code == 409
+    assert "already has a temporary debit hold" in again.json()["message"]
+    explained = gw.post(f"/v1/holds/{hold_id}/explanation", headers=FRM_D, json={"summary": "Shop sales"})
+    assert explained.json()["status"] == "explanation_received"
+    released = gw.post(f"/v1/holds/{hold_id}/decision", headers=FRM_D,
+                       json={"decision": "release", "reason": "Invoices match"})  # fmt: skip
+    assert released.json()["status"] == "released"
+    assert gw.post("/v1/holds/HNOTAVALIDID/decision", headers=FRM_D, json={}).status_code == 422
+    [queued] = gw.get("/v1/holds", headers=FRM_D).json()
+    assert queued["released_at"] is not None
+
+
+def test_the_shadow_run_proposes_settings_the_frm_head_approves(gw: TestClient) -> None:
+    run_demo(gw)
+    run = gw.post("/v1/detection/shadow-run", headers=FRM_D, json={"budget_per_day": 20}).json()
+    assert {r["rule"] for r in run["rules"]} == {
+        "pass_through", "many_new_senders", "out_of_profile", "dormant_then_busy", "quick_cash_out"
+    }  # fmt: skip
+    assert run["within_budget"]
+    approved = gw.post(
+        "/v1/detection/thresholds", headers=FRM_D, json={**run["proposal"], "budget_per_day": 20}
+    )
+    assert approved.status_code == 200, approved.text
+    assert gw.get("/v1/detection/thresholds", headers=FRM_D).json() == run["proposal"]
