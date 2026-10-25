@@ -55,6 +55,10 @@ export default async function FlagsPage({ searchParams }: { searchParams: Search
           { name: "q", label: "Holder or account", placeholder: "Search" },
         ]}
       />
+      <p className="text-muted mb-3 text-sm">
+        <strong className="font-medium">Priority</strong> is high when the account is linked to a CFCFRMS
+        notice or three or more rules fired, medium for two rules, and low for one.
+      </p>
       {list.length === 0 ? (
         <Empty>No open flags. Every flag has been held or dismissed.</Empty>
       ) : (
@@ -63,7 +67,7 @@ export default async function FlagsPage({ searchParams }: { searchParams: Search
             <thead>
               <tr>
                 <th>
-                  <Term name="priority" />
+                  <Term name="priority" below />
                 </th>
                 <th>Account</th>
                 <th>Why it was flagged</th>

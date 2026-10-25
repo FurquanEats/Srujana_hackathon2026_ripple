@@ -53,6 +53,10 @@ export default async function NoticesPage({ searchParams }: { searchParams: Sear
           { name: "q", label: "Holder, account or complaint", placeholder: "Search" },
         ]}
       />
+      <p className="text-muted mb-3 text-sm">
+        <strong className="font-medium">Layer</strong> is how many transfers the money is from the victim:
+        layer 1 is the account the victim paid, layer 2 the accounts that one paid on, and so on.
+      </p>
       {list.length === 0 ? (
         <Empty>No notices have reached this institution.</Empty>
       ) : (
@@ -63,7 +67,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Sear
                 <th>Acknowledgement</th>
                 <th>Account</th>
                 <th>
-                  <Term name="layer" />
+                  <Term name="layer" below />
                 </th>
                 <th className="text-right">Victim money in</th>
                 <th className="text-right">Lien</th>
