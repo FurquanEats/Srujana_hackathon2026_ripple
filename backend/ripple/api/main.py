@@ -256,6 +256,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
             raise HTTPException(status_code=404, detail="run scripts/oneshot_eval.py first")
         return json.loads(path.read_text(encoding="utf-8"))
 
+    @app.get("/oneshot/ibm")
+    def get_oneshot_ibm() -> dict:
+        """One-shot learning on IBM AML from scripts/oneshot_ibm.py, or 404 until it has been run."""
+        path = Path(__file__).resolve().parents[3] / "data" / "oneshot_ibm.json"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="run scripts/oneshot_ibm.py first")
+        return json.loads(path.read_text(encoding="utf-8"))
+
     @app.get("/stats")
     def stats() -> dict[str, float]:
         return engine.stats() if engine else {}

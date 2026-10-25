@@ -42,7 +42,7 @@ HISTORY = timedelta(days=30)  # relay events kept as the background a new motif 
 # are treated as established (their real age is unknown), and motifs stay silent until the warm-up is over.
 WARMUP = timedelta(days=3)
 ESTABLISHED_DAYS = 365.0
-HUB_LIMIT = 1000  # accounts with more receipts than this in the window are payment hubs, not relays
+HUB_LIMIT = 200  # accounts paid or paying more often than this in the window are payment hubs, not relays
 NEW_SHARE_RELAY = 0.5  # an account relays money when most of what came in was from senders it had not seen before
 MIN_CONSTRAINTS = 3  # a motif keeps at least this many constraints, so it describes a shape and not one trait
 
@@ -111,7 +111,8 @@ class RelayTracker:
         src = self._state(txn.src_account, ts)
         _prune(src, ts)
         _prune(dst, ts)
-        event = self._event(txn, src) if src.incoming and len(src.incoming) <= HUB_LIMIT else None
+        hub = len(src.incoming) > HUB_LIMIT or len(src.outgoing) > HUB_LIMIT
+        event = self._event(txn, src) if src.incoming and not hub else None
         src.outgoing.append((ts, txn.dst_account, txn.amount))
         src.own_out.append(ts)
         if len(src.own_out) > 200:

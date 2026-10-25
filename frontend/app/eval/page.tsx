@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Button, Card, EmptyState, ErrorNote, Icon, LoadingPanel, Notice, PageHeader, Stat } from "@/components/ui";
-import { api, money, pct, time, type ConsortiumReport, type EvalReport, type MetricRow, type OneShotReport, type RedTeamRun } from "@/lib/api";
+import { api, money, pct, time, type ConsortiumReport, type EvalReport, type MetricRow, type OneShotIbmReport, type OneShotReport, type RedTeamRun } from "@/lib/api";
 
 const AXIS = { stroke: "#5d6d84", fontSize: 11 };
 const GRID = "#e3eaf2";
@@ -112,18 +112,58 @@ function OneShot({ r }: { r: OneShotReport }) {
   );
 }
 
+const typeName = (t: string) => t.replace(/_/g, "-").toUpperCase();
+
+function OneShotIbm({ r }: { r: OneShotIbmReport }) {
+  const learned = r.per_type.filter((t) => !t.error);
+  return (
+    <Card title="Where one-shot learning does not work yet: IBM AML"
+          description={`${r.dataset}, ${r.rows.toLocaleString("en-IN")} payments over ${r.days} days. Run ${time(r.generated_at)}.`}>
+      <Table caption="One-shot learning per IBM laundering type"
+             head={<tr><th className={th}>Type</th><th className={th}>Later attempts caught</th><th className={th}>In time to act</th><th className={th}>Legitimate matches a day</th><th className={th}>What it learned</th></tr>}>
+        {r.per_type.map((t) => (
+          <tr key={t.type} className="align-top">
+            <td className={`${td} font-semibold text-ink`}>{typeName(t.type)}</td>
+            {t.error ? (
+              <td className={`${td} text-muted`} colSpan={4}>Not learnable from this example: {t.error}</td>
+            ) : (
+              <>
+                <td className={td}>{t.caught_same_type} of {t.attempts_after}{t.attempts_after ? ` (${pct((t.caught_same_type ?? 0) / t.attempts_after)})` : ""}</td>
+                <td className={td}>{t.caught_same_type_in_time} of {t.attempts_after}</td>
+                <td className={td}>{t.legit_matches_per_day}</td>
+                <td className="py-2.5 pr-3 text-xs text-muted">{t.rules?.join("; ")}</td>
+              </>
+            )}
+          </tr>
+        ))}
+      </Table>
+      <p className="mt-3 text-sm text-muted">
+        One-shot learning describes the accounts that pass money on. In the Indian simulator those are fresh accounts with no spending of their own,
+        which ordinary customers almost never resemble. IBM&apos;s synthetic laundering hides inside ordinary, long-lived accounts, and its types are
+        defined by the shape of the graph (a stack, a cycle), so one attempt&apos;s account traits do not carry over to the next: within a type, the
+        accounts&apos; own spending ranges from none to dozens of payments and the money waits anywhere from two hours to two days. Learning
+        graph shapes from one example is the next step. {learned.length} of {r.per_type.length} types could be learned from a single attempt. Each pattern was allowed at most {r.max_false_alarms_per_day} false alarms a day,
+        judged only on traffic seen before it went live.
+      </p>
+      {r.notes.map((n) => <p key={n} className="mt-1 text-xs text-subtle">{n}</p>)}
+    </Card>
+  );
+}
+
 export default function Evaluation() {
   const [report, setReport] = useState<EvalReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consortium, setConsortium] = useState<ConsortiumReport | null>(null);
   const [redteam, setRedteam] = useState<{ latest: RedTeamRun; before: RedTeamRun | null } | null>(null);
   const [oneshot, setOneshot] = useState<OneShotReport | null>(null);
+  const [oneshotIbm, setOneshotIbm] = useState<OneShotIbmReport | null>(null);
 
   const load = useCallback(() => {
     api.eval().then(setReport).catch((e) => setError(e.message));
     api.consortium().then(setConsortium).catch(() => setConsortium(null));
     api.redteam().then(setRedteam).catch(() => setRedteam(null));
     api.oneshot().then(setOneshot).catch(() => setOneshot(null));
+    api.oneshotIbm().then(setOneshotIbm).catch(() => setOneshotIbm(null));
   }, []);
 
   useEffect(load, [load]);
@@ -226,6 +266,8 @@ export default function Evaluation() {
       {redteam && <RedTeam redteam={redteam} />}
 
       {oneshot && <OneShot r={oneshot} />}
+
+      {oneshotIbm && <OneShotIbm r={oneshotIbm} />}
 
       {consortium && (
         <Card title={`Bank consortium: ${consortium.member_banks.length} banks sharing only keyed hashes`}

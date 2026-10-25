@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-10-25T06:28:34",
+  "dataset": "IBM AML HI-Small",
+  "rows": 5073618,
+  "days": 17.7,
+  "max_false_alarms_per_day": 20.0,
+  "history_days": 7,
+  "per_type": [
+    {
+      "type": "bipartite",
+      "example_attempt": 100,
+      "error": "the trail has no account that received money and passed it on, so there is no shape to learn"
+    },
+    {
+      "type": "cycle",
+      "example_attempt": 126,
+      "rules": [
+        "passed on 91% to 94% of what came in",
+        "1 to 1 own payments in 30 days",
+        "40% to 100% of the money from first-time senders"
+      ],
+      "expected_false_alarms_per_day": 6.49,
+      "deployed_at": "2022-09-07T16:34:00",
+      "attempts_after": 15,
+      "caught_same_type": 0,
+      "caught_same_type_in_time": 0,
+      "attempts_after_any_type": 123,
+      "caught_any_type": 1,
+      "matches": 3,
+      "legit_matches": 1,
+      "legit_matches_per_day": 0.09,
+      "days_live": 11.0
+    },
+    {
+      "type": "fan_in",
+      "example_attempt": 120,
+      "error": "the trail has no account that received money and passed it on, so there is no shape to learn"
+    },
+    {
+      "type": "fan_out",
+      "example_attempt": 116,
+      "error": "the trail has no account that received money and passed it on, so there is no shape to learn"
+    },
+    {
+      "type": "gather_scatter",
+      "example_attempt": 115,
+      "error": "even the tightest description of this trail matches 405 ordinary payments in 7 days, so it cannot run as a detector without flooding the queue"
+    },
+    {
+      "type": "random",
+      "example_attempt": 122,
+      "error": "even the tightest description of this trail matches 2942 ordinary payments in 4 days, so it cannot run as a detector without flooding the queue"
+    },
+    {
+      "type": "scatter_gather",
+      "example_attempt": 124,
+      "error": "even the tightest description of this trail matches 3001 ordinary payments in 4 days, so it cannot run as a detector without flooding the queue"
+    },
+    {
+      "type": "stack",
+      "example_attempt": 59,
+      "rules": [
+        "100% to 100% of the money from first-time senders",
+        "0 to 6 own payments in 30 days",
+        "account 32 days to 4158 days old when the money arrived"
+      ],
+      "expected_false_alarms_per_day": 0.0,
+      "deployed_at": "2022-09-04T18:59:00",
+      "attempts_after": 31,
+      "caught_same_type": 0,
+      "caught_same_type_in_time": 0,
+      "attempts_after_any_type": 233,
+      "caught_any_type": 0,
+      "matches": 0,
+      "legit_matches": 0,
+      "legit_matches_per_day": 0.0,
+      "days_live": 13.9
+    }
+  ],
+  "seconds": 181,
+  "notes": [
+    "Each motif is learned from one laundering attempt only, with no other labels, and deployed from the moment that attempt's last payment is seen. Later attempts are ones that start after that moment.",
+    "The learner may add at most 20 false alarms a day, judged on the last 7 days of traffic seen so far. IBM HI-Small carries about 280,000 payments a day.",
+    "Caught in time means a motif matched one of the attempt's payments before its last payment.",
+    "Types with no account that received money and passed it on cannot be learned from a relay shape."
+  ]
+}

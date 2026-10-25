@@ -258,6 +258,31 @@ export interface OneShotReport {
   notes: string[];
 }
 
+export interface OneShotIbmType {
+  type: string;
+  example_attempt: number;
+  rules?: string[];
+  expected_false_alarms_per_day?: number;
+  error?: string;
+  attempts_after?: number;
+  caught_same_type?: number;
+  caught_same_type_in_time?: number;
+  attempts_after_any_type?: number;
+  caught_any_type?: number;
+  legit_matches_per_day?: number;
+  days_live?: number;
+}
+
+export interface OneShotIbmReport {
+  generated_at: string;
+  dataset: string;
+  rows: number;
+  days: number;
+  max_false_alarms_per_day: number;
+  per_type: OneShotIbmType[];
+  notes: string[];
+}
+
 export interface InjectResult {
   kind: string;
   at: string;
@@ -309,6 +334,7 @@ export const api = {
   deploy: (id: string) => request<LearnedPattern>(`/motifs/${encodeURIComponent(id)}/deploy`, post()),
   retire: (id: string) => request<LearnedPattern>(`/motifs/${encodeURIComponent(id)}/retire`, post()),
   oneshot: () => request<OneShotReport>("/oneshot"),
+  oneshotIbm: () => request<OneShotIbmReport>("/oneshot/ibm"),
 };
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
