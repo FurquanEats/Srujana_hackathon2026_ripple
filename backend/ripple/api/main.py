@@ -75,6 +75,8 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=os.environ.get("RIPPLE_CORS_ORIGINS", "http://localhost:3000").split(","),
+        # The hosted frontend: the production domain and Vercel's preview builds of the same project.
+        allow_origin_regex=os.environ.get("RIPPLE_CORS_REGEX", r"https://srujana-hackathon2026-ripple(-[a-z0-9-]+)?\.vercel\.app"),
         allow_methods=["*"],
         allow_headers=["*"],
     )
