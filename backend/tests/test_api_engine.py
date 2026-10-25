@@ -29,6 +29,18 @@ def test_ingest_then_cases_detail_and_feedback():
     assert result["status"] == "confirmed"
     assert top["case_id"] not in {c["case_id"] for c in client.get("/cases").json()}
     assert client.get("/stats").json()["processed"] == len(payload)
+    again = client.post(f"/cases/{top['case_id']}/feedback", json={"verdict": "dismissed"})
+    assert again.status_code == 409  # a closed case cannot train the weights a second time
+
+
+def test_ingest_rejects_oversized_batches_and_infinite_amounts():
+    client = TestClient(create_app(source="engine", data=""))
+    payload, _ = ring_payload()
+    assert client.post("/ingest", json=payload[:1] * 5001).status_code == 422
+    client = TestClient(client.app, raise_server_exceptions=False)  # the 422 body cannot echo Infinity back as JSON
+    client.post("/ingest", content='[{"txn_id": "x", "ts": "2026-10-01T10:00:00", "src_account": "A", '
+                '"dst_account": "B", "amount": Infinity, "rail": "UPI"}]', headers={"Content-Type": "application/json"})
+    assert client.get("/stats").json()["processed"] == 0
 
 
 def test_stream_pushes_ingested_transactions():

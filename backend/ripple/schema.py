@@ -61,7 +61,7 @@ class Transaction(BaseModel):
     ts: datetime
     src_account: str
     dst_account: str
-    amount: float = Field(gt=0)
+    amount: float = Field(gt=0, allow_inf_nan=False)
     currency: str = "INR"
     rail: Rail
     src_handle: str | None = None  # VPA, masked PAN or IFSC; may be missing
@@ -259,7 +259,7 @@ class TraceRequest(BaseModel):
 
     account: str
     from_ts: datetime | None = None  # defaults to 24 hours before the engine's current time
-    amount: float | None = None
+    amount: float | None = Field(None, gt=0, allow_inf_nan=False)
 
 
 class InjectResult(BaseModel):
@@ -306,5 +306,5 @@ class LearnRequest(BaseModel):
     case_id: str | None = None
     account: str | None = None
     from_ts: datetime | None = None
-    amount: float | None = None
-    name: str | None = None
+    amount: float | None = Field(None, gt=0, allow_inf_nan=False)
+    name: str | None = Field(None, max_length=80)

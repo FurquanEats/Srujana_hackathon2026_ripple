@@ -139,7 +139,7 @@ function ReportForm() {
               <legend className="flex items-baseline gap-2 text-sm font-semibold text-ink">
                 Paid from <span className="text-xs font-normal text-subtle">Optional</span>
               </legend>
-              <p className="mt-0.5 text-xs text-subtle">When the victim made the first payment. Leave blank to trace the whole visible window (72 hours).</p>
+              <p className="mt-0.5 text-xs text-subtle">When the victim made the first payment. Leave blank to start from 24 hours before the latest payment Ripple has seen.</p>
               <div className="mt-2 grid grid-cols-2 gap-3 sm:max-w-md">
                 <Field label="Date" error={errors.date}>
                   {(a) => (

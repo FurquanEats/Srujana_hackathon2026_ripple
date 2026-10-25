@@ -19,6 +19,7 @@ def test_cases_ordered_by_tier_then_expected_loss_and_cut_to_budget():
 def test_case_detail_and_unknown_case():
     assert client.get("/cases/C-0001").json()["tier"] == "Critical"
     assert client.get("/cases/C-9999").status_code == 404
+    assert client.get("/cases/..\..\eval").status_code == 404  # never resolved as a path to another fixture
 
 
 def test_feedback_rejects_bad_verdict():

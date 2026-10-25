@@ -23,6 +23,10 @@ def cases() -> list[CaseSummary]:
 
 @lru_cache(maxsize=None)
 def case_detail(case_id: str) -> CaseDetail | None:
+    # Only known ids reach the file system and the cache: an id from the URL could otherwise name another .json file
+    # (a backslash is a path separator on Windows) or grow the unbounded cache one miss at a time.
+    if case_id not in {c.case_id for c in cases()}:
+        return None
     path = FIXTURES_DIR / f"case_{case_id}.json"
     if not path.is_file():
         return None
