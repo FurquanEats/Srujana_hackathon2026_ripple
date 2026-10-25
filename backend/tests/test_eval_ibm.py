@@ -12,6 +12,17 @@ from ripple.eval.ibm import recoverable_at_first_alert
 from ripple.schema import EvalReport
 
 
+def test_rail_features_match_between_training_and_serving():
+    from ripple.models.lgbm import RAIL_FEATURES, rail_features, rail_matrix
+    from ripple.schema import Rail
+
+    served = rail_features(Rail.ACH)
+    assert list(served) == RAIL_FEATURES and sum(served.values()) == 1.0 and served["rail_ach"] == 1.0
+    trained = rail_matrix(np.array(["ACH", "CASH"]))
+    assert trained.shape == (2, len(RAIL_FEATURES))
+    assert dict(zip(RAIL_FEATURES, trained[0])) == served
+
+
 def test_recoverable_counts_money_from_the_first_alert_on():
     t0 = datetime(2022, 9, 8)
     attempts = pd.DataFrame({

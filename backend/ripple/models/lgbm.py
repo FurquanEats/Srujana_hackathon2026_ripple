@@ -12,9 +12,21 @@ from pathlib import Path
 
 import numpy as np
 
-from ripple.schema import ShapValue, Transaction
+from ripple.schema import Rail, ShapValue, Transaction
 
 TOP_SHAP = 5
+# One-hot payment rail. The model derives these from the transaction itself, so the feature store needs no change.
+RAIL_FEATURES = [f"rail_{r.value.lower()}" for r in Rail]
+
+
+def rail_features(rail: Rail | str) -> dict[str, float]:
+    value = rail.value if isinstance(rail, Rail) else str(rail)
+    return {f"rail_{r.value.lower()}": float(r.value == value) for r in Rail}
+
+
+def rail_matrix(rails: np.ndarray) -> np.ndarray:
+    """rail_features for a column of rail values, as a float32 matrix whose columns follow RAIL_FEATURES."""
+    return np.column_stack([(rails == r.value) for r in Rail]).astype(np.float32)
 
 
 class LightGBMModel:
@@ -47,6 +59,7 @@ class LightGBMModel:
         return self.calibrate(self.booster.predict(X))
 
     def score(self, txn: Transaction, features: dict[str, float]) -> tuple[float, list[ShapValue]]:
+        features = features | rail_features(txn.rail)
         x = np.array([[features.get(name, 0.0) for name in self.features]], dtype=float)
         p = float(self.predict(x)[0])
         contrib = self.booster.predict(x, pred_contrib=True)[0][:-1]  # last column is the expected value
