@@ -1,0 +1,89 @@
+{
+  "case_id": "D01",
+  "title": "Genuine fabric invoice, paid in full by the buyer",
+  "account_holder": {
+    "name": "Meghana Fabrics",
+    "address": "14 Weavers Lane, Ichalkaranji, Maharashtra 416115",
+    "ifsc": "KVSB0000412",
+    "account_number": "15991790901046",
+    "gstin": "27NMYFH3971N1ZA",
+    "kyc": {
+      "occupation": "Fabric wholesaler",
+      "business_type": "partnership firm",
+      "declared_annual_turnover": 1800000000
+    }
+  },
+  "explanation": "This is payment from Sonal Garments for cotton fabric we supplied on 12 October. Invoice attached.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "neft",
+      "reference": "NVBKN73700536874",
+      "amount": 26502000,
+      "at": "2026-10-14T11:42:00+05:30",
+      "remitter": {
+        "name": "Sonal Garments Pvt Ltd",
+        "ifsc": "NVBK0000731",
+        "account_number": "95327705439152"
+      },
+      "traced_amount": 26502000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_MF-2026-0418.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Meghana Fabrics",
+        "issuer_gstin": "27NMYFH3971N1ZA",
+        "recipient": "Sonal Garments Pvt Ltd",
+        "recipient_gstin": "27LEYCW2057M1ZV",
+        "number": "MF/2026/0418",
+        "date": "2026-10-12",
+        "taxable_value": 25240000,
+        "tax": 1262000,
+        "total": 26502000,
+        "payment_reference": null,
+        "issuer_bank_account": "15991790901046, KVSB0000412",
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Cotton poplin fabric, 58 inch",
+          "hsn": "5208",
+          "qty": 1200,
+          "unit": "m",
+          "rate": 14500,
+          "amount": 17400000
+        },
+        {
+          "description": "Cotton cambric fabric, 44 inch",
+          "hsn": "5208",
+          "qty": 800,
+          "unit": "m",
+          "rate": 9800,
+          "amount": 7840000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "explained",
+      "explained_amount": 26502000,
+      "unexplained_amount": 0,
+      "document": "invoice_MF-2026-0418.pdf",
+      "proposed_action": "lift",
+      "hold_after": 0,
+      "failed_checks": [],
+      "why": "Invoice total equals the credit, the buyer on the invoice is the remitter, the invoice predates the payment and the GSTIN is valid."
+    }
+  ]
+}

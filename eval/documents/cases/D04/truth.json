@@ -1,0 +1,83 @@
+{
+  "case_id": "D04",
+  "title": "Invoice explains only half the credit",
+  "account_holder": {
+    "name": "Sahyadri Steel Traders",
+    "address": "Shop 3, Lokhand Bazar, Nashik, Maharashtra 422001",
+    "ifsc": "NVBK0000144",
+    "account_number": "41069912800768",
+    "gstin": "27UUSFN5942U1ZA",
+    "kyc": {
+      "occupation": "Steel trader",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 3100000000
+    }
+  },
+  "explanation": "Om Sai Constructions paid for TMT bars. Invoice attached.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "rtgs",
+      "reference": "AKSBR58460262011792472",
+      "amount": 23601180,
+      "at": "2026-10-17T12:30:00+05:30",
+      "remitter": {
+        "name": "Om Sai Constructions",
+        "ifsc": "AKSB0000301",
+        "account_number": "51905802354395"
+      },
+      "traced_amount": 23601180
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_SST-1290.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Sahyadri Steel Traders",
+        "issuer_gstin": "27UUSFN5942U1ZA",
+        "recipient": "Om Sai Constructions",
+        "recipient_gstin": "27YIHFP2495S1Z5",
+        "number": "SST/1290",
+        "date": "2026-10-15",
+        "taxable_value": 10000500,
+        "tax": 1800090,
+        "total": 11800590,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "TMT bars Fe 550D, 12 mm",
+          "hsn": "7214",
+          "qty": 1500,
+          "unit": "kg",
+          "rate": 6667,
+          "amount": 10000500
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "partly_explained",
+      "explained_amount": 11800590,
+      "unexplained_amount": 11800590,
+      "document": "invoice_SST-1290.pdf",
+      "proposed_action": "reduce",
+      "hold_after": 11800590,
+      "failed_checks": [
+        "amount_match"
+      ],
+      "why": "The invoice is valid but its total is half the credit; the other half is unexplained."
+    }
+  ]
+}
