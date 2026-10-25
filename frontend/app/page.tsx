@@ -17,7 +17,7 @@ const SCENARIOS: { kind: string; label: string; note: string }[] = [
   { kind: "sim_swap_takeover", label: "SIM-swap takeover", note: "New device drains an account" },
   { kind: "cash_structuring", label: "Cash structuring", note: "Deposits kept under ₹50,000" },
   { kind: "diwali_spike", label: "Diwali shopping", note: "Legitimate spike; should stay quiet" },
-  { kind: "patient_ring", label: "Patient mule ring", note: "Waits a day per hop; no built-in detector acts" },
+  { kind: "patient_ring", label: "Patient mule ring", note: "Waits hours to a day per hop; no built-in detector acts" },
 ];
 
 const fmtInt = (n: number) => Math.round(n).toLocaleString("en-IN");
@@ -116,7 +116,7 @@ function DemoControls() {
           {injected.victim_account ? (
             <>
               The simulated victim is <span className="font-mono font-semibold">{injected.victim_account}</span>.{" "}
-              <Link className="font-semibold text-link underline" href={`/trace?account=${injected.victim_account}&from=${encodeURIComponent(injected.victim_paid_at ?? injected.at)}`}>
+              <Link className="font-semibold text-link underline" href={`/trace?account=${encodeURIComponent(injected.victim_account)}&from=${encodeURIComponent(injected.victim_paid_at ?? injected.at)}`}>
                 Report it and trace the money
               </Link>
             </>

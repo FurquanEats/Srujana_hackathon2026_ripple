@@ -22,6 +22,9 @@ QUIET = 0.1  # a layer score below this counts as "nothing to say" for the corro
 
 
 def _sigmoid(x: float) -> float:
+    if x < 0:  # math.exp(-x) overflows once weights drift far enough
+        z = math.exp(x)
+        return z / (1 + z)
     return 1 / (1 + math.exp(-x))
 
 

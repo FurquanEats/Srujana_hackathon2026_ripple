@@ -338,10 +338,11 @@ def rapid_cash_out(txn: Transaction, store: FeatureStore, src: AccountState, dst
     if share < p["min_share"]:
         return None
     strength = 0.8 + 0.2 * _ramp(min(share, 1.0), p["min_share"], 1.0)
+    n_senders = len({e.counterparty for e in received})
     return _reason(
         "rapid_cash_out",
-        f"{txn.src_account} received {money(inflow, txn.currency)} from {len({e.counterparty for e in received})} new "
-        f"senders in the last {p['lookback_hours']} hours and has sent {min(share, 1.0):.0%} of it to cash or crypto "
+        f"{txn.src_account} received {money(inflow, txn.currency)} from {n_senders} new "
+        f"sender{'s' if n_senders > 1 else ''} in the last {p['lookback_hours']} hours and has sent {min(share, 1.0):.0%} of it to cash or crypto "
         f"({ids([e.txn_id for e in cashed])})",
         strength,
         [e.txn_id for e in received] + [e.txn_id for e in cashed],

@@ -4,6 +4,7 @@ import scenarios as s
 
 from ripple import feedback
 from ripple.engine import Engine
+from ripple.fusion import Fusion
 from ripple.schema import Layer, Tier
 
 
@@ -110,3 +111,8 @@ def test_no_alerts_during_warm_up():
     hop = out[ring["hop"][1]]
     assert hop.reasons and not hop.is_alert
     assert engine.stats()["warming_up"] == 1.0
+
+
+def test_fusion_survives_extreme_weights():
+    fusion = Fusion({"bias": -1000, "detector": 1, "baseline": 1, "graph": 1, "model": 1}, baseline_only_cap=0.5)
+    assert fusion.probability({Layer.DETECTOR: 1.0}) == 0.0
