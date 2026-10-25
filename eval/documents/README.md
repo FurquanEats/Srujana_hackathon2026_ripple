@@ -29,7 +29,8 @@ uv run --no-project --with pytest --with pypdf --with pillow==13.0.0 --with repo
 
 The generator rewrites `cases/` and gives the same files every run. It pins Pillow and reportlab, because a
 different version gives different PDF and JPEG bytes (the ground truth stays the same). On first run it downloads
-Noto Sans Devanagari (SIL Open Font License) into `eval/documents/.fonts/`, which git ignores.
+DejaVu Sans 2.37 (free licence, see dejavu-fonts.github.io) and Noto Sans Devanagari (SIL Open Font License) into
+`eval/documents/.fonts/`, which git ignores, so it runs the same on Windows, macOS and Linux.
 
 ## What a case holds (`truth.json`)
 
