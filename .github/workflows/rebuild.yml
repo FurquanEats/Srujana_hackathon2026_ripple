@@ -34,6 +34,9 @@ jobs:
   secrets:
     name: secret scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read  # the action lists the pull request's commits to scan them
     steps:
       - uses: actions/checkout@v4
         with:
