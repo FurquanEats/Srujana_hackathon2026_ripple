@@ -22,6 +22,17 @@ from ripple_service.config import Paths, repo_root
 
 APPS = {Kind.HUB: "ripple_hubs.cfcfrms:create_app"}
 NODE_APP = "ripple_node.app:create_app"
+GATEWAY_APP = "ripple_gateway.app:create_app"
+GATEWAY_PORT = 8090
+
+
+def gateway_command() -> list[str]:
+    """The web gateway listens on localhost only, in plain HTTP, for the web app's server; it reaches the network
+    over mutual TLS itself."""
+    return [
+        sys.executable, "-m", "uvicorn", GATEWAY_APP, "--factory",
+        "--host", "127.0.0.1", "--port", str(GATEWAY_PORT), "--log-level", "warning",
+    ]  # fmt: skip
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -84,6 +95,10 @@ def up(network: Network, paths: Paths, root: Path, speed: float, start: str | No
                 command_for(member, paths), env={**env, "RIPPLE_MEMBER": member.id}
             )
             print(f"  {member.id:<12} {member.url}  {member.name}")
+        processes["gateway"] = subprocess.Popen(gateway_command(), env=env)  # noqa: S603 - fixed argv, no shell
+        print(
+            f"  {'gateway':<12} http://127.0.0.1:{GATEWAY_PORT}  Web gateway (secret in .ripple/gateway.secret)"
+        )
         print(f"Clock starts at {clock_start.isoformat()} and runs {speed:g}x. Press Ctrl+C to stop.")
         while True:
             for member_id, process in processes.items():

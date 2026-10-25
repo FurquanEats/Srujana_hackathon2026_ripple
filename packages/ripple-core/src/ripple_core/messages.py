@@ -160,6 +160,7 @@ class NoticeResponse(Model):
     reason: str | None = None
     traced_in: PaiseAmount = 0
     account_type: AccountType | None = None
+    holder_name: str | None = None  # KYC the bank must report (SOP 6.1 k)
     held_amount: PaiseAmount = 0
     lien_id: str | None = None
     onward: tuple[OnwardHop, ...] = ()

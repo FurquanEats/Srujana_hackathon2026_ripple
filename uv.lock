@@ -7,6 +7,7 @@ members = [
     "ripple",
     "ripple-cli",
     "ripple-core",
+    "ripple-gateway",
     "ripple-hubs",
     "ripple-node",
     "ripple-service",
@@ -812,6 +813,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "ripple-cli" },
     { name = "ripple-core" },
+    { name = "ripple-gateway" },
     { name = "ripple-hubs" },
     { name = "ripple-node" },
     { name = "ripple-service" },
@@ -832,6 +834,7 @@ dev = [
 requires-dist = [
     { name = "ripple-cli", editable = "packages/ripple-cli" },
     { name = "ripple-core", editable = "packages/ripple-core" },
+    { name = "ripple-gateway", editable = "packages/ripple-gateway" },
     { name = "ripple-hubs", editable = "packages/ripple-hubs" },
     { name = "ripple-node", editable = "packages/ripple-node" },
     { name = "ripple-service", editable = "packages/ripple-service" },
@@ -880,6 +883,23 @@ dependencies = [
 requires-dist = [
     { name = "cryptography", specifier = ">=43" },
     { name = "pydantic", specifier = ">=2.9" },
+]
+
+[[package]]
+name = "ripple-gateway"
+version = "0.1.0"
+source = { editable = "packages/ripple-gateway" }
+dependencies = [
+    { name = "ripple-cli" },
+    { name = "ripple-core" },
+    { name = "ripple-service" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ripple-cli", editable = "packages/ripple-cli" },
+    { name = "ripple-core", editable = "packages/ripple-core" },
+    { name = "ripple-service", editable = "packages/ripple-service" },
 ]
 
 [[package]]

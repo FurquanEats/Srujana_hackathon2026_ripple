@@ -107,6 +107,7 @@ def respond(session: Session, notice: Notice, now: datetime, actor: str) -> Noti
         status="matched",
         traced_in=held + sum(h.traced_amount for h in onward) + sum(e.traced_amount for e in exits),
         account_type=AccountType(account.account_type),
+        holder_name=account.holder_name,
         held_amount=held,
         lien_id=lien_id,
         onward=tuple(onward),

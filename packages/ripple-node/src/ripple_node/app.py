@@ -1,7 +1,8 @@
 """The bank node's HTTP service.
 
 Routes take and return signed envelopes. Only the simulator ("sim") may open accounts and post transactions,
-standing in for the core banking feed, and only the CFCFRMS hub may send notices.
+standing in for the core banking feed, and only the CFCFRMS hub may send notices. The officer routes are read-only
+and only the web gateway ("web") may call them; the gateway checks the officer's role and bank.
 """
 
 from __future__ import annotations
@@ -17,13 +18,20 @@ from ripple_core.clock import Clock
 from ripple_core.messages import AccountOpening, LedgerPosting, Notice
 from ripple_core.signing import Opened
 from ripple_core.tracing import LedgerError
-from ripple_node import ledger, responder
+from ripple_node import ledger, officer, responder
 from ripple_service.config import load_keyring, load_service_config, load_signing_key
 from ripple_service.db import SqlReplayGuard, init_db, make_engine, transaction
 from ripple_service.transport import Envelopes, Sealed
 
 SIMULATOR = "sim"
 HUB = "cfcfrms"
+GATEWAY = "web"
+
+
+class NoticeQuery(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    notice_id: str
 
 
 class PostingBatch(BaseModel):
@@ -81,6 +89,30 @@ def build_app(ctx: NodeContext) -> FastAPI:
             except LedgerError as exc:
                 raise HTTPException(status.HTTP_409_CONFLICT, f"ledger does not add up: {exc}") from exc
         return ctx.envelopes.seal(response, opened.sender, opened.idempotency_key)
+
+    @app.post("/v1/officer/notices")
+    def officer_notices(body: Sealed) -> Sealed:
+        opened = ctx.envelopes.open(body, {GATEWAY})
+        with ctx.factory() as session:
+            rows = officer.notices(session)
+        return ctx.envelopes.seal({"notices": [r.model_dump(mode="json") for r in rows]}, opened.sender)
+
+    @app.post("/v1/officer/notice")
+    def officer_notice(body: Sealed) -> Sealed:
+        opened = ctx.envelopes.open(body, {GATEWAY})
+        query = _parse(NoticeQuery, opened)
+        with ctx.factory() as session:
+            detail = officer.notice_detail(session, query.notice_id, ctx.clock.now())
+        if detail is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "no such notice at this bank")
+        return ctx.envelopes.seal(detail, opened.sender)
+
+    @app.post("/v1/officer/liens")
+    def officer_liens(body: Sealed) -> Sealed:
+        opened = ctx.envelopes.open(body, {GATEWAY})
+        with ctx.factory() as session:
+            rows = officer.liens(session)
+        return ctx.envelopes.seal({"liens": [r.model_dump(mode="json") for r in rows]}, opened.sender)
 
     return app
 

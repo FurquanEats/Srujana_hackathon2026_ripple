@@ -32,6 +32,23 @@ from ripple_service.config import Paths
 Post = Callable[[str, str, dict[str, Any]], dict[str, Any]]  # (member id, path, JSON body) -> JSON body
 
 
+class RemoteError(ConnectionError):
+    """Another member refused a request with an HTTP error; `status` and `detail` say why."""
+
+    def __init__(self, status: int, detail: str) -> None:
+        super().__init__(f"{status}: {detail}")
+        self.status = status
+        self.detail = detail
+
+
+def _detail(response: httpx.Response) -> str:
+    try:
+        detail = response.json().get("detail", "")
+    except (ValueError, AttributeError):
+        detail = ""
+    return str(detail)[:300] or response.reason_phrase
+
+
 class Sealed(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -110,10 +127,14 @@ def mtls_post(network: Network, paths: Paths, party: str, timeout: float = 15.0)
     def post(to: str, path: str, body: dict[str, Any]) -> dict[str, Any]:
         try:
             response = client.post(network.get(to).url + path, json=body)
-            response.raise_for_status()
-            data: dict[str, Any] = response.json()
-        except (httpx.HTTPError, ValueError) as exc:
+        except httpx.HTTPError as exc:
             raise ConnectionError(f"{to}{path} failed: {exc}") from exc
+        if response.is_error:
+            raise RemoteError(response.status_code, _detail(response))
+        try:
+            data: dict[str, Any] = response.json()
+        except ValueError as exc:
+            raise ConnectionError(f"{to}{path} sent a reply that is not JSON") from exc
         return data
 
     return post

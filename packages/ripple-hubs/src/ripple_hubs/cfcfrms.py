@@ -72,6 +72,7 @@ class TrailAccount(BaseModel):
     credit: Payment
     traced_in: int
     state: Literal["answered", "not_found", "off_network", "waiting"]
+    holder_name: str | None = None
     held: int = 0
     lien_id: str | None = None
     exits: tuple[Exit, ...] = ()
@@ -90,6 +91,21 @@ class Trail(BaseModel):
     waiting: int
     complete: bool
     accounts: tuple[TrailAccount, ...]
+
+
+class CaseSummary(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    ack_number: str
+    victim_name: str
+    filed_at: datetime
+    reported: int
+    held: int
+    cashed_out: int
+    off_network: int
+    not_found: int
+    waiting: int
+    complete: bool
 
 
 class TrailQuery(BaseModel):
@@ -231,6 +247,22 @@ class Tracer:
             )
         )
 
+    def cases(self) -> list[CaseSummary]:
+        with self.factory() as session:
+            rows = session.scalars(select(CaseRow).order_by(CaseRow.filed_at.desc())).all()
+        summaries = []
+        for row in rows:
+            trail = self.trail(row.ack_number)
+            if trail is None:
+                continue
+            totals = trail.model_dump(include={"reported", "held", "cashed_out", "off_network", "not_found", "waiting",
+                                               "complete"})  # fmt: skip
+            victim = Complaint.model_validate_json(row.complaint).victim_name
+            summaries.append(
+                CaseSummary(ack_number=row.ack_number, victim_name=victim, filed_at=row.filed_at, **totals)
+            )
+        return summaries
+
     def trail(self, ack_number: str) -> Trail | None:
         with self.factory() as session:
             case = session.get(CaseRow, ack_number)
@@ -275,7 +307,12 @@ def _trail_account(row: NoticeOut) -> TrailAccount:
     if response.status == "not_found":
         return TrailAccount(**base, state="not_found", reason=response.reason)
     return TrailAccount(
-        **base, state="answered", held=response.held_amount, lien_id=response.lien_id, exits=response.exits
+        **base,
+        state="answered",
+        holder_name=response.holder_name,
+        held=response.held_amount,
+        lien_id=response.lien_id,
+        exits=response.exits,
     )
 
 
@@ -308,6 +345,12 @@ def build_app(tracer: Tracer, envelopes: Envelopes) -> FastAPI:
         if trail is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "no such case")
         return envelopes.seal(trail, opened.sender)
+
+    @app.post("/v1/cases")
+    def list_cases(body: Sealed) -> Sealed:
+        """Every case with its totals, newest first."""
+        opened = envelopes.open(body, FILERS)
+        return envelopes.seal({"cases": [c.model_dump(mode="json") for c in tracer.cases()]}, opened.sender)
 
     return app
 

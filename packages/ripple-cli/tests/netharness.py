@@ -24,7 +24,7 @@ from ripple_node.app import build_app as build_node
 from ripple_node.ledger import NodeBase
 from ripple_service.config import CLIENTS
 from ripple_service.db import init_db, make_engine
-from ripple_service.transport import Courier, Envelopes
+from ripple_service.transport import Courier, Envelopes, RemoteError
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -64,7 +64,9 @@ class Net:
 
     def post(self, to: str, path: str, body: dict[str, Any]) -> dict[str, Any]:
         response = self.clients[to].post(path, json=body)
-        response.raise_for_status()
+        if response.is_error:
+            detail = response.json().get("detail", "") if response.content else ""
+            raise RemoteError(response.status_code, str(detail))
         data: dict[str, Any] = response.json()
         return data
 
