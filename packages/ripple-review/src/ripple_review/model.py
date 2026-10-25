@@ -59,8 +59,8 @@ class Extraction(Frozen):
     readable: bool = Field(
         description="False if the page cannot be read reliably (blurred, cut off, too dark)"
     )
-    document_type: Quoted = Field(description="tax_invoice, e_invoice, delivery_challan, salary_slip, "
-                                              "rent_agreement, bill, or other")  # fmt: skip
+    document_type: Quoted = Field(description="tax_invoice, e_invoice, bill_of_supply, delivery_challan, "
+                                              "salary_slip, rent_agreement, bill, or other")  # fmt: skip
     issuer: Quoted
     issuer_gstin: Quoted
     recipient: Quoted = Field(description="The buyer, employee or licensee the document is addressed to")

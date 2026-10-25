@@ -80,3 +80,12 @@ def test_every_case_was_loaded() -> None:
 )
 def test_payer_names_match_across_spellings_but_not_across_parties(a: str | None, b: str, same: bool) -> None:
     assert same_party(a, b) is same
+
+
+def test_a_bill_of_supply_with_another_gstin_fails_the_gstin_check() -> None:
+    case = next(c for c in CASES if c.case_id == "D17")
+    doc = next(d for d in case.documents if d["fields"]["document_type"] == "bill_of_supply")
+    other = Quoted(value="27AAAAA0000A1Z5", quote="27AAAAA0000A1Z5")
+    forged = perfect(doc).model_copy(update={"issuer_gstin": other})
+    verdicts = {v.credit_id: v for v in review(case.holder, case.credits, [read(doc["file"], forged)])}
+    assert "gstin_valid" in verdicts["C1"].failed_checks

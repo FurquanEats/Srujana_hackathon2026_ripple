@@ -37,7 +37,7 @@ from ripple_review.model import (
 DATE_GRACE = timedelta(days=7)
 AMOUNT_TOLERANCE = 100  # paise: one rupee of rounding
 PAYER_IS_ISSUER = frozenset({"salary_slip"})  # the employer issues the slip and pays the salary
-GSTIN_DOCUMENTS = frozenset({"tax_invoice", "e_invoice", "bill"})
+GSTIN_DOCUMENTS = frozenset({"tax_invoice", "e_invoice", "bill_of_supply", "bill"})  # CGST Rules 46 and 49
 STOPWORDS = frozenset(
     {"pvt", "private", "ltd", "limited", "llp", "the", "ms", "m", "s", "and", "co", "company", "shri", "shree",
      "sri", "smt", "mr", "mrs"}
