@@ -56,3 +56,18 @@ def test_victim_flag_marks_first_hop_of_stolen_money(scored):
             assert row.victim_account == row.txn.src_account
             flagged[row.scenario] = flagged.get(row.scenario, 0) + 1
     assert flagged == {"mule_ring": 7, "scam_fanout": 1, "sim_swap_takeover": 2, "digital_arrest": 2}
+
+
+def test_simulated_bank_keeps_running_when_the_feed_runs_low():
+    from datetime import timedelta
+
+    from ripple.api.main import TOP_UP_DAYS, top_up
+    from ripple.stream import Feed
+
+    world = World(n_people=20, n_shops=5)
+    world.simulate(days=2)
+    feed = Feed()
+    end = top_up(world, feed, START + timedelta(days=2))
+    assert end == START + timedelta(days=2 + TOP_UP_DAYS) and len(feed) > 0
+    first = feed.pop()
+    assert first.ts >= START + timedelta(days=2)  # the new days follow the old ones

@@ -2,7 +2,8 @@
 
 RIPPLE_SOURCE=engine runs the live engine. RIPPLE_DATA is replayed at RIPPLE_SPEED seconds of data per real second:
 a CSV or Parquet file, or "sim:india" for a freshly simulated legitimate month whose scam scenarios are injected live
-with POST /inject/{kind}; its first RIPPLE_HISTORY_DAYS (default 20) are scored at full speed as account history. POST /ingest accepts more transactions at any time, and POST /trace follows a victim's money.
+with POST /inject/{kind}; its first RIPPLE_HISTORY_DAYS (default 20) are scored at full speed as account history, and
+the simulated bank keeps running past the month, so the live stream never runs dry during a demo. POST /ingest accepts more transactions at any time, and POST /trace follows a victim's money.
 RIPPLE_SOURCE=fixtures (the default) serves the sample responses in /fixtures.
 """
 
@@ -40,6 +41,19 @@ from ripple.schema import (
 )
 from ripple.stream import EventBus, Feed, ingest, load_transactions, replay_feed
 
+TOP_UP_BELOW = 500  # payments still queued: about a day of the simulated bank's ordinary traffic
+TOP_UP_DAYS = 2
+
+
+def top_up(world, feed: Feed, sim_end: datetime) -> datetime:
+    """Simulates TOP_UP_DAYS more ordinary days from `sim_end` when the feed is running low, and returns the new end."""
+    if len(feed) >= TOP_UP_BELOW:
+        return sim_end
+    before = len(world.rows)
+    world.simulate(start=sim_end, days=TOP_UP_DAYS)
+    feed.add(row.txn for row in world.rows[before:])
+    return sim_end + timedelta(days=TOP_UP_DAYS)
+
 
 def create_app(source: str | None = None, data: str | None = None, speed: float | None = None) -> FastAPI:
     source = source or os.environ.get("RIPPLE_SOURCE", "fixtures")
@@ -51,22 +65,32 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
     feed = Feed()
     world = None
     fast_until = None
+    sim_end = None
     if engine is not None and data:
         if data.startswith("sim:"):
-            from ripple.sim.india import START, World
+            from ripple.sim.india import DAYS, START, World
 
             world = World()
             world.simulate()
             feed.add(row.txn for row in world.sorted_rows())
             fast_until = START + timedelta(days=float(os.environ.get("RIPPLE_HISTORY_DAYS", "20")))
+            sim_end = START + timedelta(days=DAYS)
         else:
             feed.add(load_transactions(data))
 
+    async def keep_simulating() -> None:
+        end = sim_end
+        while True:
+            end = top_up(world, feed, end)
+            await asyncio.sleep(1)
+
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        task = asyncio.create_task(replay_feed(engine, bus, feed, speed, fast_until=fast_until)) if engine else None
+        tasks = [asyncio.create_task(replay_feed(engine, bus, feed, speed, fast_until=fast_until))] if engine else []
+        if world is not None:
+            tasks.append(asyncio.create_task(keep_simulating()))
         yield
-        if task:
+        for task in tasks:
             task.cancel()
 
     app = FastAPI(title="Ripple", version="0.2.0", lifespan=lifespan)
