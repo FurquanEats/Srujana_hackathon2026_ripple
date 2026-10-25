@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Design tokens (02 Web app design brief, section 1). Cyan marks money that is traced or held, nothing else. */
+@theme {
+  --color-ink: #121212;
+  --color-cyan: #00a9cc;
+  --color-grey-900: #2a2a2a;
+  --color-grey-700: #4b4b4b;
+  --color-grey-500: #6b6b6b;
+  --color-grey-300: #b3b3b3;
+  --color-paper: #f4f4f2;
+
+  --font-pixel: var(--font-silkscreen), ui-monospace, monospace;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --tracking-pixel: -0.04em;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Pixel display type: capitals, tight tracking, crisp edges. */
+  .pixel {
+    font-family: var(--font-pixel);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-pixel);
+    line-height: 1.05;
+    font-weight: 400;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border: 1px solid currentColor;
+    font-size: 0.875rem;
+    font-weight: 400;
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  .button-solid {
+    background: #fff;
+    color: var(--color-ink);
+    border-color: #fff;
+  }
+  .button-solid:hover {
+    background: var(--color-grey-300);
+    border-color: var(--color-grey-300);
+  }
+  .button-ghost:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+  .on-paper .button-ghost:hover {
+    background: rgb(0 0 0 / 0.06);
+  }
+}

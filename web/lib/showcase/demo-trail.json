@@ -1,0 +1,199 @@
+{
+  "accounts": [
+    {
+      "account": {
+        "account_number": "3694901002",
+        "ifsc": "BKBB0000001",
+        "vpa": "m1shop694901@bkbb"
+      },
+      "credit": {
+        "amount": 80000000,
+        "at": "2026-10-25T17:19:39.142681Z",
+        "rail": "rtgs",
+        "reference": "BKAAR69490100000000001"
+      },
+      "exits": [],
+      "held": 10000000,
+      "holder_name": "M1 (mule)",
+      "layer": 1,
+      "lien_id": "L4A95F898C5B403D3",
+      "member": "bank-b",
+      "notice_id": "38209696306616-001",
+      "parent_id": null,
+      "reason": null,
+      "state": "answered",
+      "traced_in": 80000000
+    },
+    {
+      "account": {
+        "account_number": "5694901002",
+        "ifsc": "BKCC0000001",
+        "vpa": null
+      },
+      "credit": {
+        "amount": 30000000,
+        "at": "2026-10-25T17:21:39.142681Z",
+        "rail": "imps",
+        "reference": "694901000002"
+      },
+      "exits": [
+        {
+          "amount": 10000000,
+          "at": "2026-10-25T17:24:39.142681Z",
+          "identifier": "S1BW000101",
+          "location": "Ameerpet, Hyderabad",
+          "mode": "atm",
+          "reference": "ATMW69490105",
+          "traced_amount": 10000000
+        },
+        {
+          "amount": 10000000,
+          "at": "2026-10-25T17:26:39.142681Z",
+          "identifier": "S1BW000245",
+          "location": "Secunderabad",
+          "mode": "atm",
+          "reference": "ATMW69490109",
+          "traced_amount": 10000000
+        }
+      ],
+      "held": 0,
+      "holder_name": "M2 (mule)",
+      "layer": 2,
+      "lien_id": null,
+      "member": "bank-c",
+      "notice_id": "38209696306616-002",
+      "parent_id": "38209696306616-001",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 30000000
+    },
+    {
+      "account": {
+        "account_number": "7694901002",
+        "ifsc": "BKDD0000001",
+        "vpa": null
+      },
+      "credit": {
+        "amount": 25000000,
+        "at": "2026-10-25T17:22:39.142681Z",
+        "rail": "imps",
+        "reference": "694901000003"
+      },
+      "exits": [],
+      "held": 0,
+      "holder_name": "M3 General Store (mule)",
+      "layer": 2,
+      "lien_id": null,
+      "member": "bank-d",
+      "notice_id": "38209696306616-003",
+      "parent_id": "38209696306616-001",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 25000000
+    },
+    {
+      "account": {
+        "account_number": "8694901006",
+        "ifsc": "WLTW0000001",
+        "vpa": null
+      },
+      "credit": {
+        "amount": 15000000,
+        "at": "2026-10-25T17:23:39.142681Z",
+        "rail": "imps",
+        "reference": "694901000004"
+      },
+      "exits": [],
+      "held": 15000000,
+      "holder_name": "Wallet W holder",
+      "layer": 2,
+      "lien_id": "LD533679601816844",
+      "member": "wallet-w",
+      "notice_id": "38209696306616-004",
+      "parent_id": "38209696306616-001",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 15000000
+    },
+    {
+      "account": {
+        "account_number": "9694901006",
+        "ifsc": "XCHX0000001",
+        "vpa": null
+      },
+      "credit": {
+        "amount": 10000000,
+        "at": "2026-10-25T17:25:39.142681Z",
+        "rail": "imps",
+        "reference": "694901000007"
+      },
+      "exits": [],
+      "held": 10000000,
+      "holder_name": "Exchange X customer",
+      "layer": 3,
+      "lien_id": "LD383AA89F2FC1154",
+      "member": "exchange-x",
+      "notice_id": "38209696306616-005",
+      "parent_id": "38209696306616-002",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 10000000
+    },
+    {
+      "account": {
+        "account_number": "2694901004",
+        "ifsc": "BKAA0000001",
+        "vpa": null
+      },
+      "credit": {
+        "amount": 20000000,
+        "at": "2026-10-25T17:24:39.142681Z",
+        "rail": "neft",
+        "reference": "BKDDN69490100006"
+      },
+      "exits": [],
+      "held": 20000000,
+      "holder_name": "Ravi Traders (cement supplier)",
+      "layer": 3,
+      "lien_id": "LCE118CD5EB77C9C1",
+      "member": "bank-a",
+      "notice_id": "38209696306616-006",
+      "parent_id": "38209696306616-003",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 20000000
+    },
+    {
+      "account": {
+        "account_number": "4694901006",
+        "ifsc": "BKBB0000001",
+        "vpa": "galaxy694901@bkbb"
+      },
+      "credit": {
+        "amount": 12000000,
+        "at": "2026-10-25T17:25:39.142681Z",
+        "rail": "imps",
+        "reference": "694901000008"
+      },
+      "exits": [],
+      "held": 5000000,
+      "holder_name": "Galaxy Mobiles (phone shop)",
+      "layer": 3,
+      "lien_id": "L5DB87497006E9F07",
+      "member": "bank-b",
+      "notice_id": "38209696306616-007",
+      "parent_id": "38209696306616-003",
+      "reason": null,
+      "state": "answered",
+      "traced_in": 5000000
+    }
+  ],
+  "ack_number": "38209696306616",
+  "cashed_out": 20000000,
+  "complete": true,
+  "held": 60000000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 80000000,
+  "waiting": 0
+}
