@@ -24,6 +24,7 @@ through the same fusion, case building, freeze planning and analyst feedback as 
 
 from __future__ import annotations
 
+import copy
 from bisect import bisect_left
 from collections import deque
 from collections.abc import Callable
@@ -132,6 +133,16 @@ class RelayTracker:
                 if not (self.keep and self.keep(old.txn_id)):  # a case's own payments stay learnable however old
                     self.by_txn.pop(old.txn_id, None)
         return event
+
+    def peek(self, txn: Transaction) -> RelayEvent | None:
+        """The relay event this payment would produce, without recording anything."""
+        state = self.accounts.get(txn.src_account)
+        if state is None or txn.src_account == txn.dst_account or is_cash_deposit(txn):
+            return None
+        state = copy.deepcopy(state)
+        _prune(state, txn.ts)
+        hub = len(state.incoming) > HUB_LIMIT or len(state.outgoing) > HUB_LIMIT
+        return self._event(txn, state) if state.incoming and not hub else None
 
     def _event(self, txn: Transaction, src: _Account) -> RelayEvent:
         ts = txn.ts
@@ -423,6 +434,14 @@ class MotifLayer:
                 motif.hits.append(txn.txn_id)
                 reasons.append(motif.reason(event, txn))
         return reasons
+
+    def preview(self, txn: Transaction) -> list[Reason]:
+        """The learned-pattern evidence a payment would get, without recording it or counting a hit."""
+        live = [m for m in self.motifs.values() if m.deployed]
+        event = self.tracker.peek(txn) if live else None
+        if event is None or event.ts < (self.tracker.started or event.ts) + WARMUP:
+            return []
+        return [m.reason(event, txn) for m in live if m.matches(event)]
 
     def learn(self, trail_txn_ids: set[str], learned_from: str, name: str | None = None,
               max_per_day: float = 0.5) -> Motif:

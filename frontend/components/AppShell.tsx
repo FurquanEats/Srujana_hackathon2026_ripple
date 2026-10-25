@@ -9,6 +9,7 @@ import { Icon, type IconName } from "./ui";
 const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "Command centre", icon: "activity" },
   { href: "/trace", label: "Report a scam", icon: "search" },
+  { href: "/check", label: "Check a payment", icon: "shield" },
   { href: "/eval", label: "Evaluation", icon: "list" },
 ];
 

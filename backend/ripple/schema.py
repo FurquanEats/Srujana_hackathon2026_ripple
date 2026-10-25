@@ -227,6 +227,8 @@ class FreezeAction(BaseModel):
     by_rule: dict[str, float] = Field(default_factory=dict)  # traced money held under haircut, FIFO and LIBR
     hold_low: float | None = None  # the lowest of the three: the amount every tracing rule supports
     hold_high: float | None = None
+    bank: str | None = None  # which bank holds the account
+    own_bank: bool | None = None  # True: this bank can place the lien itself; False: it goes through CFCFRMS
 
 
 class RecoveryPoint(BaseModel):
@@ -268,6 +270,7 @@ class InjectResult(BaseModel):
     txn_ids: list[str]
     victim_account: str | None = None  # whose money the scenario steals, for a "report a scam" trace
     victim_paid_at: datetime | None = None
+    customer_account: str | None = None  # whose fixed deposit broke, for a pre-payment check
 
 
 class MotifRule(BaseModel):
@@ -308,3 +311,47 @@ class LearnRequest(BaseModel):
     from_ts: datetime | None = None
     amount: float | None = Field(None, gt=0, allow_inf_nan=False)
     name: str | None = Field(None, max_length=80)
+
+
+class CheckRequest(BaseModel):
+    """A payment the bank is about to execute, sent for a check before it goes."""
+
+    src_account: str
+    dst_account: str
+    amount: float = Field(gt=0)
+    rail: Rail = Rail.IMPS
+    ts: datetime | None = None  # defaults to the engine's current time
+    device_id: str | None = None
+    location: str | None = None
+    channel: str | None = None
+
+
+class CheckResult(BaseModel):
+    """What to do with a payment before it executes."""
+
+    decision: str  # "allow" | "cooling_off" | "hold_and_call"
+    headline: str
+    probability: float = Field(ge=0, le=1)
+    tier: Tier | None = None
+    reasons: list[Reason] = Field(default_factory=list)
+    hold_minutes: int | None = None
+    customer_message: str | None = None
+    checked_in_ms: float
+
+
+class LienRequest(BaseModel):
+    plan_id: str  # a case id, or "trace-<account>" for a victim's report
+    account_id: str
+    amount: float = Field(gt=0)
+
+
+class Lien(BaseModel):
+    """A lien this bank placed on the traced amount in one of its own accounts, after an officer approved it."""
+
+    lien_id: str
+    plan_id: str
+    account_id: str
+    bank: str
+    amount: float
+    placed_at: datetime
+    status: str  # "placed" | "released"

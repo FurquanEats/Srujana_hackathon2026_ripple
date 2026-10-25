@@ -11,6 +11,7 @@ exact feature rows the live engine sees, so training and serving never drift apa
 
 from __future__ import annotations
 
+import copy
 import time
 from collections import deque
 from collections.abc import Callable
@@ -119,15 +120,34 @@ class Engine:
                 **txn.model_dump(), probability=0.0, confidence=1.0, layer_scores={layer: 0.0 for layer in Layer}
             ), None
         src, dst = self.store.update(txn)
+        motif_hits = self.motifs.observe(txn)
+        self.graph.add(txn)
+        scored, shap = self._score(txn, src, dst, motif_hits, record=True)
+        self.store.after_score(txn)
+        self._remember(scored)
 
-        hits = detectors.run(txn, self.store, src, dst, self.pack) + self.motifs.observe(txn)
+        case = None
+        if scored.is_alert:
+            self.alerts += 1
+            self.shap[txn.txn_id] = shap
+            if scored.layer_scores[Layer.DETECTOR] >= DETECTOR_EVIDENCE:
+                self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
+            case = self.cases.add(scored)
+            self._onward.setdefault(scored.dst_account, (case.case_id, 1))
+        self.processed += 1
+        self._latency_ms.append((time.perf_counter() - began) * 1000)
+        return scored, case
+
+    def _score(self, txn: Transaction, src, dst, motif_hits: list[Reason],
+               record: bool) -> tuple[ScoredTransaction, list[ShapValue]]:
+        """Runs every layer on a payment whose accounts' state already includes it, and fuses them."""
+        hits = detectors.run(txn, self.store, src, dst, self.pack) + motif_hits
         detector_score = 1.0
         for r in hits:
             detector_score *= 1 - r.strength
         detector_score = 1 - detector_score
         baseline_score, baseline_reasons, has_history = detectors.baseline.score(txn, src, dst)
 
-        self.graph.add(txn)
         graph_score, graph_reason = self.graph.score(txn)
         if self.external is not None and (shared := self.external(txn)) is not None and shared.strength > graph_score:
             graph_score, graph_reason = shared.strength, shared
@@ -135,7 +155,7 @@ class Engine:
         features = feature_vector(txn, src, dst) | {f"src_{k}": v for k, v in self.graph.features(txn.src_account).items()} | {
             f"dst_{k}": v for k, v in self.graph.features(txn.dst_account).items()
         }
-        if self.on_features:
+        if record and self.on_features:
             self.on_features(txn, features)
         model_score, shap = self.model.score(txn, features) if self.model else (0.0, [])
 
@@ -154,20 +174,30 @@ class Engine:
             reasons=reasons,
             is_alert=p >= self.alert_at and not self.warming_up(txn.ts),
         )
-        self.store.after_score(txn)
-        self._remember(scored)
+        return scored, shap
 
-        case = None
-        if scored.is_alert:
-            self.alerts += 1
-            self.shap[txn.txn_id] = shap
-            if detector_score >= DETECTOR_EVIDENCE:
-                self.graph.mark_alert(txn.ts, txn.src_account, txn.dst_account)
-            case = self.cases.add(scored)
-            self._onward.setdefault(scored.dst_account, (case.case_id, 1))
-        self.processed += 1
-        self._latency_ms.append((time.perf_counter() - began) * 1000)
-        return scored, case
+    def preview(self, txn: Transaction) -> ScoredTransaction:
+        """Scores a payment the bank has not executed yet, for a check at authorisation. Nothing is recorded: both
+        accounts' state is put back afterwards, and the payment joins no case, graph or learned-pattern memory."""
+        if txn.src_account == txn.dst_account:
+            return ScoredTransaction(**txn.model_dump(), probability=0.0, confidence=1.0,
+                                     layer_scores={layer: 0.0 for layer in Layer})
+        originals = {a: self.store.accounts.get(a) for a in {txn.src_account, txn.dst_account}}
+        for account, state in originals.items():  # score against copies, so the real state is never touched
+            if state is not None:
+                self.store.accounts[account] = copy.deepcopy(state)
+        now = self.store.now
+        try:
+            src, dst = self.store.update(txn)
+            scored, _ = self._score(txn, src, dst, self.motifs.preview(txn), record=False)
+            return scored
+        finally:
+            for account, state in originals.items():
+                if state is None:
+                    self.store.accounts.pop(account, None)
+                else:
+                    self.store.accounts[account] = state
+            self.store.now = now
 
     def _remember(self, scored: ScoredTransaction) -> None:
         if scored.is_alert:

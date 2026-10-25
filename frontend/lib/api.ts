@@ -106,6 +106,36 @@ export interface FreezeAction {
   by_rule?: Partial<Record<"haircut" | "fifo" | "libr", number>>;
   hold_low?: number | null;
   hold_high?: number | null;
+  bank?: string | null;
+  own_bank?: boolean | null;
+}
+
+export interface Lien {
+  lien_id: string;
+  plan_id: string;
+  account_id: string;
+  bank: string;
+  amount: number;
+  placed_at: string;
+  status: "placed" | "released";
+}
+
+export interface CheckRequest {
+  src_account: string;
+  dst_account: string;
+  amount: number;
+  rail: string;
+}
+
+export interface CheckResult {
+  decision: "allow" | "cooling_off" | "hold_and_call";
+  headline: string;
+  probability: number;
+  tier?: Tier | null;
+  reasons: Reason[];
+  hold_minutes?: number | null;
+  customer_message?: string | null;
+  checked_in_ms: number;
 }
 
 export interface RecoveryPoint {
@@ -289,6 +319,7 @@ export interface InjectResult {
   txn_ids: string[];
   victim_account?: string | null;
   victim_paid_at?: string | null;
+  customer_account?: string | null;
 }
 
 export interface StreamEvent {
@@ -335,6 +366,11 @@ export const api = {
   retire: (id: string) => request<LearnedPattern>(`/motifs/${encodeURIComponent(id)}/retire`, post()),
   oneshot: () => request<OneShotReport>("/oneshot"),
   oneshotIbm: () => request<OneShotIbmReport>("/oneshot/ibm"),
+  check: (body: CheckRequest) => request<CheckResult>("/check", post(body)),
+  liens: (planId: string) => request<Lien[]>(`/liens?plan_id=${encodeURIComponent(planId)}`),
+  placeLien: (planId: string, accountId: string, amount: number) =>
+    request<Lien>("/liens", post({ plan_id: planId, account_id: accountId, amount })),
+  releaseLien: (lienId: string) => request<Lien>(`/liens/${encodeURIComponent(lienId)}/release`, post()),
 };
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });

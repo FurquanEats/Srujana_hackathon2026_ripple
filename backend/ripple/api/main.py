@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+import time
 import contextlib
 import json
 import os
@@ -21,11 +22,13 @@ from pathlib import Path
 from fastapi import Body, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from ripple import feedback, fixtures, interdiction, trace
+from ripple import banks, feedback, fixtures, interdiction, precheck, trace
 from ripple.cases import queue_order
 from ripple.engine import Engine
 from ripple.schema import (
     CaseDetail,
+    CheckRequest,
+    CheckResult,
     CaseSummary,
     EvalReport,
     Feedback,
@@ -35,6 +38,8 @@ from ripple.schema import (
     Layer,
     LearnedPattern,
     LearnRequest,
+    Lien,
+    LienRequest,
     MotifRule,
     ScoredTransaction,
     TraceRequest,
@@ -92,6 +97,15 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
             end = top_up(world, feed, end)
             await asyncio.sleep(1)
 
+    checks = 0
+    liens: dict[str, dict[str, Lien]] = {}  # plan id -> account -> lien
+
+    def with_banks(plan: InterdictionPlan) -> InterdictionPlan:
+        for hold in plan.freeze:
+            hold.bank = banks.bank_of(hold.account_id)
+            hold.own_bank = hold.bank == banks.OWN
+        return plan
+
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         tasks = [asyncio.create_task(replay_feed(engine, bus, feed, speed, fast_until=fast_until))] if engine else []
@@ -143,14 +157,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         if case is None:
             raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
         if engine is None:
-            return interdiction.plan(case)
+            return with_banks(interdiction.plan(case))
         evidence = interdiction.plan(case)  # first pass: which accounts hold traced money
         holders = {h.account_id for h in evidence.holdings}
         trail = [t for t in case.timeline if t.dst_account in holders or t.src_account in holders]
         onward = trace.onward(engine, trail)
         accounts = {t.dst_account for t in case.timeline + onward}
-        return interdiction.plan(case, onward=onward, own_funds=trace.own_funds(engine, accounts),
-                                 merchants=trace.merchants(engine, accounts))
+        return with_banks(interdiction.plan(case, onward=onward, own_funds=trace.own_funds(engine, accounts),
+                                            merchants=trace.merchants(engine, accounts)))
 
     @app.post("/cases/{case_id}/feedback")
     async def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:
@@ -217,7 +231,8 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         victim = next((row for row in world.rows[before:] if row.victim_account), None)
         return InjectResult(kind=kind, at=at, txn_ids=[t.txn_id for t in txns],
                             victim_account=victim.victim_account if victim else None,
-                            victim_paid_at=victim.txn.ts if victim else None)
+                            victim_paid_at=victim.txn.ts if victim else None,
+                            customer_account=txns[0].dst_account if kind == "fd_broken" else None)
 
     @app.post("/trace")
     async def post_trace(report: TraceRequest) -> InterdictionPlan:
@@ -239,7 +254,54 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
             raise HTTPException(status_code=404, detail=f"{account} made no payments to a new payee after "
                                 f"{from_ts:%d %b %Y, %H:%M}. Tracing reads the last 72 hours of payments, so for an older "
                                 "scam enter its case number instead.")
-        return result
+        return with_banks(result)
+
+    @app.post("/check")
+    async def post_check(request: CheckRequest) -> CheckResult:
+        """Checks a payment before the bank executes it: allow it, pause it for the customer to confirm, or hold it and
+        call the customer. Nothing is recorded; the payment is scored only if it is later sent through /ingest."""
+        if engine is None:
+            raise HTTPException(status_code=409, detail="check needs RIPPLE_SOURCE=engine")
+        nonlocal checks
+        checks += 1
+        ts = (request.ts or engine.store.now or datetime.now()).replace(tzinfo=None)
+        txn = Transaction(txn_id=f"CHECK-{checks}", ts=ts, **request.model_dump(exclude={"ts"}))
+        began = time.perf_counter()
+        scored = engine.preview(txn)
+        decision, headline, tier, minutes, message = precheck.decide(scored, engine.pack["tiers"])
+        return CheckResult(decision=decision, headline=headline, probability=scored.probability, tier=tier,
+                           reasons=scored.reasons, hold_minutes=minutes, customer_message=message,
+                           checked_in_ms=round((time.perf_counter() - began) * 1000, 2))
+
+    @app.post("/liens")
+    async def post_lien(request: LienRequest) -> Lien:
+        """Records a lien on the traced amount in one of this bank's accounts, once an officer has approved it. An
+        account at another bank gets its lien through CFCFRMS instead (the hold plan's export)."""
+        bank = banks.bank_of(request.account_id)
+        if bank != banks.OWN:
+            raise HTTPException(status_code=409, detail=f"{request.account_id} is at {bank}, so its lien goes through "
+                                "CFCFRMS: use Export for CFCFRMS.")
+        placed = liens.setdefault(request.plan_id, {})
+        if request.account_id in placed and placed[request.account_id].status == "placed":
+            return placed[request.account_id]
+        lien = Lien(lien_id=f"L-{sum(len(v) for v in liens.values()) + 1:04d}", plan_id=request.plan_id,
+                    account_id=request.account_id, bank=bank, amount=round(request.amount, 2),
+                    placed_at=(engine.store.now if engine and engine.store.now else datetime.now()), status="placed")
+        placed[request.account_id] = lien
+        return lien
+
+    @app.get("/liens")
+    async def list_liens(plan_id: str) -> list[Lien]:
+        return list(liens.get(plan_id, {}).values())
+
+    @app.post("/liens/{lien_id}/release")
+    async def release_lien(lien_id: str) -> Lien:
+        for placed in liens.values():
+            for lien in placed.values():
+                if lien.lien_id == lien_id:
+                    lien.status = "released"
+                    return lien
+        raise HTTPException(status_code=404, detail=f"unknown lien: {lien_id}")
 
     def pattern(motif) -> LearnedPattern:
         return LearnedPattern(

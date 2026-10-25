@@ -37,8 +37,8 @@ START = datetime(2026, 10, 10)
 DAYS = 30
 DIWALI = datetime(2026, 11, 8)  # Diwali (Lakshmi Puja) 2026
 INJECTORS = ["mule_ring", "scam_fanout", "sim_swap_takeover", "cash_structuring", "diwali_spike", "digital_arrest",
-             "patient_ring"]
-LABELS = {"mule_ring": 1, "scam_fanout": 1, "sim_swap_takeover": 1, "cash_structuring": 1, "diwali_spike": 0,
+             "patient_ring", "fd_broken"]
+LABELS = {"fd_broken": 0, "mule_ring": 1, "scam_fanout": 1, "sim_swap_takeover": 1, "cash_structuring": 1, "diwali_spike": 0,
           "digital_arrest": 1, "patient_ring": 1}
 
 
@@ -260,6 +260,12 @@ class World:
                             device=f"D-{first}", location="Kolkata", label=label, scenario=scenario)
             self.pay(sent.ts + timedelta(hours=r.randint(25, 30)), mule, f"ATM-{mule}", sent.amount * 0.98, Rail.CASH,
                      location="Kolkata", label=label, scenario=scenario)
+
+    def _fd_broken(self, t: datetime, label: int, scenario: str) -> None:
+        """A pensioner breaks a fixed deposit early, the first step of a digital arrest. Nothing else happens, so a
+        pre-payment check can judge the transfer a scammer would ask for next."""
+        v = self.rng.choice([p for p in self.people if p.kind == "pensioner"] or [p for p in self.people if p.kind == "salaried"])
+        self.pay(t, f"FD-{v.account}", v.account, 800000, Rail.NEFT, location=v.city, label=label, scenario=scenario)
 
     def sorted_rows(self) -> list[Row]:
         return sorted(self.rows, key=lambda row: row.txn.ts)
