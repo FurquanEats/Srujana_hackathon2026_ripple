@@ -39,8 +39,9 @@ CASES = HERE / "cases"
 FONT_DIR = HERE / ".fonts"
 IST = timezone(timedelta(hours=5, minutes=30))
 
-LATIN = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-LATIN_BOLD = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+DEJAVU_URL = "https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/"
+LATIN = FONT_DIR / "DejaVuSans.ttf"
+LATIN_BOLD = FONT_DIR / "DejaVuSans-Bold.ttf"
 NOTO_URL = "https://raw.githubusercontent.com/notofonts/notofonts.github.io/main/fonts/NotoSansDevanagari/hinted/ttf/"
 DEVANAGARI = FONT_DIR / "NotoSansDevanagari-Regular.ttf"
 DEVANAGARI_BOLD = FONT_DIR / "NotoSansDevanagari-Bold.ttf"
@@ -474,9 +475,10 @@ def layout(doc: Doc) -> list[tuple[str, Any]]:  # noqa: PLR0912  one branch per 
 
 def ensure_fonts() -> None:
     FONT_DIR.mkdir(exist_ok=True)
-    for path in (DEVANAGARI, DEVANAGARI_BOLD):
-        if not path.exists():
-            urllib.request.urlretrieve(NOTO_URL + path.name, path)  # noqa: S310  fixed https URL
+    for url, paths in ((DEJAVU_URL, (LATIN, LATIN_BOLD)), (NOTO_URL, (DEVANAGARI, DEVANAGARI_BOLD))):
+        for path in paths:
+            if not path.exists():
+                urllib.request.urlretrieve(url + path.name, path)  # noqa: S310  fixed https URL
     pdfmetrics.registerFont(TTFont("Latin", str(LATIN)))
     pdfmetrics.registerFont(TTFont("LatinBold", str(LATIN_BOLD)))
 
