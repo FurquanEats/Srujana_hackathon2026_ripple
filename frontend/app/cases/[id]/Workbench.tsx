@@ -17,7 +17,7 @@ const SECTIONS = [
   ["evidence", "Evidence"],
   ["money-flow", "Money flow"],
   ["recovery", "Recovery over time"],
-  ["freeze-plan", "Freeze plan"],
+  ["freeze-plan", "Hold plan"],
   ["timeline", "Timeline"],
 ] as const;
 
@@ -45,7 +45,7 @@ function DecisionDialog({ verdict, caseId, onCancel, onConfirm, busy }: {
             }>
       <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted">
         <li>Your decision is used as feedback: Ripple re-weights its signal layers and re-ranks other open cases.</li>
-        <li>It does <strong className="text-ink">not</strong> freeze any account, send a hold request or file a report. Those remain separate steps for an officer.</li>      </ul>
+        <li>It does <strong className="text-ink">not</strong> place a lien on any account, send a hold request or file a report. Those remain separate steps for an officer.</li>      </ul>
     </Dialog>
   );
 }
@@ -205,7 +205,7 @@ export function Workbench() {
         <RecoveryChart plan={plan} currency={currency} />
       </div>
 
-      {/* 6. Freeze plan */}
+      {/* 6. Hold plan */}
       <div id="freeze-plan" className="scroll-mt-20">
         <FreezeList plan={plan} currency={currency} />
       </div>

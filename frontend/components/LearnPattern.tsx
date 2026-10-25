@@ -106,7 +106,7 @@ export function PatternCard({ pattern, onChange }: { pattern: LearnedPattern; on
       {error && <ErrorNote title="Could not change the pattern" error={error} />}
       {pattern.deployed && (
         <Notice tone="success" title="Live on every payment">
-          A match counts as pattern-detector evidence, so it goes through the same scoring, cases, freeze plans and feedback as the built-in detectors.
+          A match counts as pattern-detector evidence, so it goes through the same scoring, cases, hold plans and feedback as the built-in detectors.
         </Notice>
       )}
     </div>

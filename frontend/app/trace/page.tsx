@@ -175,7 +175,7 @@ function ReportForm() {
               <Button type="submit" variant="primary" size="lg" disabled={busy} className="w-full sm:w-auto">
                 {busy ? <><Spinner /> Tracing the money…</> : <><Icon name="search" className="h-5 w-5" /> Trace the money</>}
               </Button>
-              <p className="text-xs text-subtle">Tracing reads payments only. It does not freeze accounts or contact anyone.</p>
+              <p className="text-xs text-subtle">Tracing reads payments only. It does not place holds on accounts or contact anyone.</p>
             </div>
           </form>
         </Card>

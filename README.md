@@ -2,15 +2,15 @@
 
 **Stop the scam, then follow the money.**
 
-Ripple protects people from payment scams in India at the two moments that matter. Before the money leaves, it spots a customer being coached into draining their savings (a "digital arrest" or fake-investment scam) and recommends a cooling-off hold. After the money leaves, it follows the stolen funds hop by hop through mule accounts while they are still moving, shows where the money sits right now, and gives the bank's nodal officer the smallest set of accounts to freeze to recover the most, with a drafted hold request for each. And when a scam gets past every detector, Ripple learns its shape from that one confirmed trail and catches the next run of it, after checking against the bank's own traffic that ordinary customers almost never match.
+Ripple protects people from payment scams in India at the two moments that matter. Before the money leaves, it spots a customer being coached into draining their savings (a "digital arrest" or fake-investment scam) and recommends a cooling-off hold. After the money leaves, it follows the stolen funds hop by hop through mule accounts while they are still moving, shows where the money sits right now, and gives the bank's nodal officer the smallest set of liens on traced amounts that recovers the most, with a drafted hold request for each. And when a scam gets past every detector, Ripple learns its shape from that one confirmed trail and catches the next run of it, after checking against the bank's own traffic that ordinary customers almost never match.
 
 Built for Srujana Tech Fest 2026, Finance theme, problem statement F-01: Financial Fraud and Transaction Risk Detection.
 
-Ripple gives risk indicators and drafts for a human officer to review. It does not decide that anyone committed fraud, does not freeze accounts or file reports itself, and uses only synthetic and public data.
+Ripple gives risk indicators and drafts for a human officer to review. It does not decide that anyone committed fraud, does not place liens on accounts or file reports itself, and uses only synthetic and public data.
 
 ## Why this matters
 
-When a scam victim reports to the 1930 helpline or the cybercrime portal, the money has usually passed through two or three mule accounts within minutes, and some of it is already withdrawn or turned into crypto. Banks act on these reports by placing holds on receiving accounts, but tracing the money by hand across hops takes longer than the money takes to leave. Fraud scoring tools tell a bank which transaction looks risky; they do not tell an officer where the money is now and what to freeze first.
+When a scam victim reports to the 1930 helpline or the cybercrime portal, the money has usually passed through two or three mule accounts within minutes, and some of it is already withdrawn or turned into crypto. Banks act on these reports by placing holds on receiving accounts, but tracing the money by hand across hops takes longer than the money takes to leave. Fraud scoring tools tell a bank which transaction looks risky; they do not tell an officer where the money is now and what to hold first.
 
 ## What Ripple does
 
@@ -20,7 +20,7 @@ When a scam victim reports to the 1930 helpline or the cybercrime portal, the mo
 | During | Streaming detection | Every payment is scored as it arrives by nine typology detectors (pass-through, fan-in then out, fan-out burst, scatter-gather, temporal cycle, cash structuring under the Rs 50,000 PAN-quote limit, device takeover, coerced transfer, rapid cash-out) and any patterns learned from confirmed trails, a behavioural baseline, a graph layer and an optional ML model, fused into one probability. |
 | After | Golden-hour tracing | From a victim's report or an alerted case, Ripple follows the money forward through every hop it can see, using haircut taint tracking (the method used to trace mixed funds in crypto forensics). Money that reached an ATM withdrawal or a crypto off-ramp counts as escaped. |
 | After | One-shot learning | When a victim reports a scam that no detector caught, the officer traces it and clicks "Learn this pattern". Ripple describes every account on the trail that received money and passed it on (how long the money sat, how much moved on, how many senders and payees, how old the account is, whether it has any spending of its own). It starts from the tightest description of those payments, frees the knobs a criminal changes cheaply between runs (amounts, waits, splits, hops), and stops before more than one ordinary payment every two days in the bank's last 30 days would match. The officer sees each rule with how rare it is, and the expected false alarms, before deploying it as a live detector. |
-| After | Freeze plan | The freeze set is a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each freeze would be, plus any account holding a large share of the traced money. When a mule's own money is mixed with stolen money, each hold is shown as a range under three accepted tracing rules (haircut, first in first out, and lowest intermediate balance), and the drafted hold request asks for the lowest figure, which every rule supports. |
+| After | Hold plan | Ripple proposes liens on the traced amount only, never a freeze of the whole account, in line with MHA's CFCFRMS procedure and recent High Court rulings. The accounts to hold are a minimum vertex cut between the traced money and cash-out points, weighted by how disruptive each hold would be, plus any account holding a large share of the traced money. When a mule's own money is mixed with stolen money, each hold is shown as a range under three accepted tracing rules (haircut, first in first out, and lowest intermediate balance), and the drafted hold request asks for the lowest figure, which every rule supports. |
 
 Every flag carries reason sentences that cite the transactions behind it and a counterfactual ("not flagged if the money had left more than 30 minutes after arriving"). Context signals alone (unusual for this account, near other alerts) can never push a case above Watch, so an unusual but honest customer, such as someone buying Diwali jewellery, is never escalated.
 
@@ -47,7 +47,7 @@ npm run dev                         # http://localhost:3000
 ```
 
 1. **Command centre:** live payments, engine throughput and latency, and the case queue. Click **Digital arrest** to inject a scam into the stream.
-2. **Case workbench:** open the new Critical case. The freeze plan shows money already escaped to an ATM and crypto, money still recoverable in mule accounts, and the accounts to freeze. The replay slider shows the money moving hop by hop.
+2. **Case workbench:** open the new Critical case. The hold plan shows money already escaped to an ATM and crypto, money still recoverable in mule accounts, and the traced amount to hold in each account. The replay slider shows the money moving hop by hop.
 3. **Report a scam:** enter the victim's account to trace the money forward from the report.
 4. **One-shot learning:** click **Patient mule ring**. Its mules wait just long enough that no built-in detector acts. About 20 seconds later, follow **Report it and trace the money**, then **Learn this pattern** and **Deploy as a live detector**. Click **Patient mule ring** again: the new ring becomes a Critical case citing the learned pattern, and the first ring's mules are flagged before they withdraw.
 5. **Evaluation:** results on IBM's public AML dataset, the red team and one-shot learning.
@@ -60,7 +60,7 @@ Run the tests with `cd backend && pytest -q`. Without `RIPPLE_SOURCE=engine`, th
 simulator or file replay -> ordered feed -> per-account feature store
     -> typology detectors | behavioural baseline | graph layer | ML model (optional)
     -> fusion -> alerts -> incremental case engine
-    -> taint tracking + minimum-cut freeze plan
+    -> taint tracking + minimum-cut hold plan
     -> REST + WebSocket -> Next.js UI
 ```
 
@@ -78,8 +78,8 @@ simulator or file replay -> ordered feed -> per-account feature store
 | --- | --- |
 | `GET /cases?budget=N` | Top N open cases, by tier then expected loss |
 | `GET /cases/{id}` | Case detail: reasons, model contributions, money-flow graph, timeline, account profiles |
-| `GET /cases/{id}/interdiction` | Freeze plan: traced money, holdings, accounts to freeze, money escaped, recovery over time |
-| `POST /trace` | Freeze plan for a victim's report: `{account, from_ts?, amount?}` |
+| `GET /cases/{id}/interdiction` | Hold plan: traced money, holdings, liens to request with their range across tracing rules, money escaped, recovery over time |
+| `POST /trace` | Hold plan for a victim's report: `{account, from_ts?, amount?}` |
 | `POST /inject/{kind}` | Adds a simulated scenario to the live stream (`digital_arrest`, `mule_ring`, `scam_fanout`, `sim_swap_takeover`, `cash_structuring`, `diwali_spike`, `patient_ring`) |
 | `POST /motifs/learn` | Learns a pattern from one trail: `{case_id}` or a victim's report `{account, from_ts?, amount?}` |
 | `GET /motifs`, `POST /motifs/{id}/deploy`, `POST /motifs/{id}/retire` | Learned patterns with their live matches; put one live or take it down |
@@ -98,7 +98,7 @@ Shapes are defined in `backend/ripple/schema.py`.
 | `backend/ripple/detectors` | Typology detectors and the behavioural baseline |
 | `backend/ripple/graph.py`, `fusion.py`, `cases.py`, `feedback.py` | Graph layer, fusion, case engine, feedback learning |
 | `backend/ripple/motifs.py`, `redteam.py` | One-shot pattern learning; the adaptive red team |
-| `backend/ripple/interdiction.py`, `trace.py`, `cash.py` | Taint tracking, freeze plans, victim-report tracing, cash-in and cash-out rules |
+| `backend/ripple/interdiction.py`, `trace.py`, `cash.py` | Taint tracking, hold plans, victim-report tracing, cash-in and cash-out rules |
 | `backend/ripple/sim` | India payment simulator and scam scenarios |
 | `backend/ripple/data`, `eval`, `models` | IBM AML loader, evaluation, LightGBM model |
 | `backend/ripple/packs` | Thresholds per region as YAML (India; IBM AML evaluation in USD) |

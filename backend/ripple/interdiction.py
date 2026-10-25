@@ -5,6 +5,9 @@ when an account holding a mix of traced and other funds sends money on, each rup
 share as its holdings. Money enters the trail from outside (the victims' payments, or cash deposits) and leaves it
 when a holder pays an account outside the trail.
 
+A "freeze" here is a lien on the traced amount in an account, never a freeze of the whole account: MHA's
+CFCFRMS procedure limits a lien to the disputed amount, and High Courts have ruled against whole-account freezes.
+
 The freeze set is a minimum cut. Each holder is a node whose capacity is its collateral cost (how much ordinary
 activity a freeze would disrupt); traced money starts at every holder that has some, and must not reach an exit
 (a payment out of the trail, or a collector, which is where mule money is cashed out). The cheapest set of holders
@@ -202,8 +205,8 @@ def plan_trail(case_id: str, trail: list[ScoredTransaction], profiles: list[Acco
         edges=[GraphEdge(txn_id=t.txn_id, source=t.src_account, target=t.dst_account, amount=t.amount, ts=t.ts)
                for t in txns],
         method="haircut taint tracking over the case's money trail, with FIFO and lowest-intermediate-balance figures "
-        "for each hold; freeze set = minimum vertex cut weighted by collateral cost, plus any holder with at least 5% "
-        "of the traced money",
+        "for each hold; accounts to hold = minimum vertex cut weighted by collateral cost, plus any holder with at least "
+        "5% of the traced money; each hold is a lien on the traced amount only",
     )
 
 
