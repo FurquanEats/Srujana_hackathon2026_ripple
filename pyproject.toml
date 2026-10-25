@@ -1,0 +1,68 @@
+[project]
+name = "ripple"
+version = "0.1.0"
+description = "Cross-bank fraud tracing for India: the bank node, the simulated CFCFRMS and DPIP hubs, and the payment network simulator"
+requires-python = ">=3.12,<3.13"
+dependencies = ["ripple-core"]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.112",
+    "mypy>=1.13",
+    "pip-audit>=2.7",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["packages/*/src", "packages/*/tests"]
+extend-exclude = ["backend", "frontend"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",  # pycodestyle, pyflakes
+    "I",            # import order
+    "B",            # bugbear
+    "UP",           # modern syntax
+    "S",            # bandit security checks
+    "SIM", "RUF", "PT", "DTZ", "N", "A", "C4", "PL", "TRY", "ERA",
+]
+ignore = ["PLR2004", "TRY003", "PLR0913", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120  # code is formatted to 110; comments and docstrings may run a little longer
+
+[tool.ruff.lint.per-file-ignores]
+"packages/*/tests/**" = ["S101", "PLR2004", "S311"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = ["packages/ripple-core/src"]
+plugins = ["pydantic.mypy"]
+exclude = ["^backend/", "^frontend/"]
+
+[tool.pytest.ini_options]
+testpaths = ["packages"]
+addopts = "-q --strict-markers --import-mode=importlib"
+
+[tool.coverage.run]
+branch = true
+source = ["ripple_core"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
