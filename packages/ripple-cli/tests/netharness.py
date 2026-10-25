@@ -19,6 +19,7 @@ from ripple_core.network import Kind, Network, load_network
 from ripple_core.signing import Keyring, MemoryReplayGuard, Opened, SigningKey
 from ripple_hubs.cfcfrms import HubBase, Tracer
 from ripple_hubs.cfcfrms import build_app as build_hub
+from ripple_hubs.dpip import Dpip, DpipBase
 from ripple_node.app import NodeContext
 from ripple_node.app import build_app as build_node
 from ripple_node.ledger import NodeBase
@@ -27,6 +28,9 @@ from ripple_service.db import init_db, make_engine
 from ripple_service.transport import Courier, Envelopes, RemoteError
 
 ROOT = Path(__file__).resolve().parents[3]
+
+
+DPIP_KEY = b"ripple-test-dpip-key"  # the gateway's default key in tests
 
 
 @dataclass
@@ -47,11 +51,12 @@ class Net:
             self.keyring.add(key.kid, party, key.public_pem())
         for member in self.network.members:
             if member.kind is Kind.HUB:
-                factory = init_db(make_engine(None), HubBase.metadata)
+                factory = init_db(make_engine(None), HubBase.metadata, DpipBase.metadata)
                 self.tracer = Tracer(
                     factory, Courier(self.envelopes(member.id), self.post), self.network, self.clock
                 )
-                app = build_hub(self.tracer, self.envelopes(member.id))
+                dpip = Dpip(factory, DPIP_KEY, self.clock)
+                app = build_hub(self.tracer, self.envelopes(member.id), dpip)
             else:
                 factory = init_db(make_engine(None), NodeBase.metadata)
                 ctx = NodeContext(member.id, factory, self.envelopes(member.id), self.clock)

@@ -179,3 +179,106 @@ def test_the_shadow_run_proposes_settings_the_frm_head_approves(gw: TestClient) 
     )
     assert approved.status_code == 200, approved.text
     assert gw.get("/v1/detection/thresholds", headers=FRM_D).json() == run["proposal"]
+
+
+def place_m3_hold(gw: TestClient) -> tuple[str, str]:
+    [case] = gw.get("/v1/mule-cases", headers=FRM_D).json()
+    body = {"account_number": case["account_number"], "flag_keys": [f["key"] for f in case["flags"]],
+            "contact": "Fraud Risk desk, Bank D, 1800 000 0004"}  # fmt: skip
+    hold = gw.post("/v1/holds", headers=FRM_D, json=body).json()
+    return case["account_number"], hold["hold_id"]
+
+
+def victim_and_m1(gw: TestClient) -> tuple[dict[str, str], dict[str, str]]:
+    """The victim's and M1's account references, as M1's bank statement shows them."""
+    notices = gw.get("/v1/notices", headers=BANK_B).json()
+    m1 = next(n for n in notices if n["holder_name"] == "M1 (mule)")
+    detail = gw.get(f"/v1/notices/{m1['notice_id']}", headers=BANK_B).json()
+    victim = next(line["counterparty"] for line in detail["statement"] if line["direction"] == "credit")
+    m1_ref = {"ifsc": "BKBB0000001", "account_number": m1["account_number"], "vpa": None}
+    return victim, m1_ref
+
+
+def test_the_payment_check_stops_the_next_victim_paying_a_reported_mule(gw: TestClient) -> None:
+    run_demo(gw)
+    victim, m1 = victim_and_m1(gw)
+    frm_a = headers(Role.FRM_ANALYST, "bank-a")
+    body = {"sender_account": victim["account_number"], "payee": m1, "amount": 40_000_000}
+    answer = gw.post("/v1/payment-check", headers=frm_a, json=body)
+    assert answer.status_code == 200, answer.text
+    result = answer.json()
+    assert result["decision"] == "hold_and_call"
+    assert result["dpip_level"] == "very_high"
+    assert any("suspect registry" in r["text"] for r in result["reasons"])
+    assert gw.post("/v1/payment-check", headers=POLICE, json=body).status_code == 403
+
+
+def test_a_hold_publishes_a_dpip_signal_by_hashes_only(gw: TestClient) -> None:
+    run_demo(gw)
+    m3_account, _hold_id = place_m3_hold(gw)
+    victim, _m1 = victim_and_m1(gw)
+    m3 = {"ifsc": "BKDD0000001", "account_number": m3_account, "vpa": None}
+    body = {"sender_account": victim["account_number"], "payee": m3, "amount": 1_000_000}
+    result = gw.post("/v1/payment-check", headers=headers(Role.NODAL_OFFICER, "bank-a"), json=body).json()
+    assert any("member bank reported it" in r["text"] for r in result["reasons"])
+    assert result["decision"] == "hold_and_call"
+
+
+def test_the_audit_log_shows_each_hold_step_and_an_intact_chain(gw: TestClient) -> None:
+    run_demo(gw)
+    place_m3_hold(gw)
+    audit = gw.get("/v1/audit", headers=FRM_D).json()
+    assert audit["broken_at"] is None
+    assert "hold.place" in {e["action"] for e in audit["entries"]}
+    assert gw.get("/v1/audit", headers=POLICE).status_code == 403
+
+
+def test_the_account_holder_sees_the_notice_and_explains(gw: TestClient) -> None:
+    run_demo(gw)
+    account, hold_id = place_m3_hold(gw)
+    holder = {
+        "X-Ripple-Session": issue(SECRET, sub=account, role=Role.ACCOUNT_HOLDER, member="bank-d", now=NOW)
+    }
+    [mine] = gw.get("/v1/my-holds", headers=holder).json()
+    assert mine["hold_id"] == hold_id
+    assert "str_draft" not in mine
+    assert "Dear M3 General Store" in mine["customer_notice"]
+    sent = gw.post(
+        f"/v1/my-holds/{hold_id}/explanation", headers=holder, json={"summary": "Shop sales; bills attached"}
+    )
+    assert sent.json()["status"] == "explanation_received"
+    stranger = {
+        "X-Ripple-Session": issue(
+            SECRET, sub="1234567890", role=Role.ACCOUNT_HOLDER, member="bank-d", now=NOW
+        )
+    }
+    assert gw.get("/v1/my-holds", headers=stranger).json() == []
+    assert (
+        gw.post(f"/v1/my-holds/{hold_id}/explanation", headers=stranger, json={"summary": "x"}).status_code
+        == 404
+    )
+
+
+def test_the_victim_sees_what_is_held_without_the_mules_details(gw: TestClient) -> None:
+    ack = run_demo(gw)
+    victim = {"X-Ripple-Session": issue(SECRET, sub=ack, role=Role.VICTIM, member=None, now=NOW)}
+    status = gw.get("/v1/my-complaint", headers=victim).json()
+    assert (status["reported"], status["held"], status["cashed_out"]) == (80_000_000, 60_000_000, 20_000_000)
+    assert all("account" not in p and "holder_name" not in p for p in status["places"])
+    assert gw.get("/v1/my-complaint", headers=POLICE).status_code == 403
+
+
+def test_the_police_see_reported_holds_and_instruct_the_bank(gw: TestClient) -> None:
+    run_demo(gw)
+    _account, hold_id = place_m3_hold(gw)
+    police = headers(Role.POLICE_OFFICER)
+    assert gw.get("/v1/hold-reports", headers=police).json() == []
+    gw.post(f"/v1/holds/{hold_id}/explanation", headers=FRM_D, json={"summary": "None that fits the credits"})
+    gw.post(f"/v1/holds/{hold_id}/decision", headers=FRM_D, json={"decision": "report", "reason": "No fit"})
+    [report] = gw.get("/v1/hold-reports", headers=police).json()
+    assert (report["member"], report["hold_id"]) == ("bank-d", hold_id)
+    done = gw.post(f"/v1/hold-reports/bank-d/{hold_id}/instruction", headers=police,
+                   json={"instruction": "continue", "authority": "Cyber Crime PS, Hyderabad"})  # fmt: skip
+    assert done.json()["status"] == "held_on_police_instruction"
+    assert gw.post(f"/v1/hold-reports/bank-z/{hold_id}/instruction", headers=police,
+                   json={"instruction": "continue", "authority": "x" * 5}).status_code == 404  # fmt: skip

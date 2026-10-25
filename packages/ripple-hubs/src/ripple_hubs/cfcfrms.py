@@ -22,8 +22,10 @@ from sqlalchemy import Integer, String, Text, func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from ripple_core.clock import Clock
-from ripple_core.messages import AccountRef, Complaint, Exit, Notice, NoticeResponse, Payment
+from ripple_core.dpip import load_key
+from ripple_core.messages import AccountRef, Complaint, Exit, Notice, NoticeResponse, Payment, RiskSignal
 from ripple_core.network import Network
+from ripple_hubs.dpip import CheckQuery, Dpip, DpipBase, registry_from
 from ripple_service.config import load_keyring, load_service_config, load_signing_key
 from ripple_service.db import SqlReplayGuard, UtcDateTime, append_audit, init_db, make_engine, transaction
 from ripple_service.transport import Courier, Envelopes, Sealed, mtls_post
@@ -31,6 +33,7 @@ from ripple_service.transport import Courier, Envelopes, Sealed, mtls_post
 log = logging.getLogger(__name__)
 
 FILERS = frozenset({"web", "sim"})  # parties allowed to push complaints and read trails
+DPIP_PARTIES = frozenset({"web"})  # each bank's web gateway publishes and checks for its bank
 MAX_NOTICES_PER_CASE = 500
 
 
@@ -316,7 +319,7 @@ def _trail_account(row: NoticeOut) -> TrailAccount:
     )
 
 
-def build_app(tracer: Tracer, envelopes: Envelopes) -> FastAPI:
+def build_app(tracer: Tracer, envelopes: Envelopes, dpip: Dpip | None = None) -> FastAPI:
     app = FastAPI(title="Simulated CFCFRMS hub", docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.get("/v1/health")
@@ -352,13 +355,38 @@ def build_app(tracer: Tracer, envelopes: Envelopes) -> FastAPI:
         opened = envelopes.open(body, FILERS)
         return envelopes.seal({"cases": [c.model_dump(mode="json") for c in tracer.cases()]}, opened.sender)
 
+    if dpip is None:
+        return app
+
+    @app.post("/v1/dpip/signals")
+    def publish_signal(body: Sealed) -> Sealed:
+        """A bank publishes keyed hashes of a suspected mule's identifiers (PRD P3)."""
+        opened = envelopes.open(body, DPIP_PARTIES)
+        try:
+            signal = RiskSignal.model_validate(opened.payload)
+        except ValidationError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "not a valid risk signal") from exc
+        return envelopes.seal({"stored": dpip.publish(signal, opened.sender)}, opened.sender)
+
+    @app.post("/v1/dpip/check")
+    def check_payee(body: Sealed) -> Sealed:
+        """A bank asks for a payee's risk before a payment leaves (PRD P1)."""
+        opened = envelopes.open(body, DPIP_PARTIES)
+        try:
+            query = CheckQuery.model_validate(opened.payload)
+        except ValidationError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "not a valid check") from exc
+        trails = [t for c in tracer.cases() if (t := tracer.trail(c.ack_number)) is not None]
+        answer = dpip.check(query.identifier_hashes, registry_from(trails, dpip.key))
+        return envelopes.seal(answer.model_dump(mode="json"), opened.sender)
+
     return app
 
 
 def create_app() -> FastAPI:
     """The app `ripple up` starts, configured from the environment and `.ripple/`."""
     config = load_service_config("cfcfrms")
-    factory = init_db(make_engine(config.paths.database("cfcfrms")), HubBase.metadata)
+    factory = init_db(make_engine(config.paths.database("cfcfrms")), HubBase.metadata, DpipBase.metadata)
     envelopes = Envelopes(
         load_signing_key(config.paths, "cfcfrms"),
         load_keyring(config.paths),
@@ -366,4 +394,5 @@ def create_app() -> FastAPI:
         SqlReplayGuard(factory),
     )
     courier = Courier(envelopes, mtls_post(config.network, config.paths, "cfcfrms"))
-    return build_app(Tracer(factory, courier, config.network, config.clock), envelopes)
+    dpip = Dpip(factory, load_key(config.paths.home / "dpip.key"), config.clock)
+    return build_app(Tracer(factory, courier, config.network, config.clock), envelopes, dpip)

@@ -11,6 +11,7 @@ Each new batch of postings, and each notice, reruns the red-flag rules on the ac
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from typing import Annotated, Any, Literal
@@ -21,13 +22,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from ripple_core.clock import Clock
-from ripple_core.messages import AccountOpening, LedgerPosting, Notice
+from ripple_core.messages import AccountOpening, AccountRef, LedgerPosting, Notice
 from ripple_core.signing import Opened
 from ripple_core.tracing import LedgerError
-from ripple_node import detection, holds, ledger, monitoring, officer, responder
+from ripple_node import detection, holds, ledger, monitoring, officer, payments, responder
 from ripple_node.detection import Thresholds
 from ripple_service.config import load_keyring, load_service_config, load_signing_key
-from ripple_service.db import SqlReplayGuard, init_db, make_engine, transaction
+from ripple_service.db import AuditEntry, SqlReplayGuard, init_db, make_engine, transaction, verify_audit
 from ripple_service.transport import Envelopes, Sealed
 
 SIMULATOR = "sim"
@@ -113,6 +114,18 @@ class Approval(Request):
     profile_multiple: Annotated[float, Field(gt=0, le=1_000)]
     dormant_days: Annotated[int, Field(ge=1, le=3_650)]
     cash_out_minutes: Annotated[int, Field(ge=1, le=10_080)]
+
+
+class AuditQuery(Request):
+    limit: Annotated[int, Field(ge=1, le=1000)] = 200
+
+
+class PaymentCheck(Request):
+    sender_account: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
+    payee: AccountRef
+    amount: Annotated[int, Field(gt=0, le=10**13)]
+    dpip_level: Literal["none", "medium", "high", "very_high"] = "none"
+    dpip_reasons: Annotated[tuple[Annotated[str, Field(max_length=400)], ...], Field(max_length=10)] = ()
 
 
 @dataclass(frozen=True)
@@ -208,7 +221,16 @@ def build_app(ctx: NodeContext) -> FastAPI:  # noqa: PLR0915 - one short functio
         return ctx.envelopes.seal(result, opened.sender)
 
     def hold_view(session: Session, row: ledger.HoldRow) -> dict[str, Any]:
-        return holds.view(session, row, ctx.clock.now()).model_dump(mode="json")
+        """The hold, with the account's identifiers so the bank's gateway can publish a DPIP signal."""
+        view = holds.view(session, row, ctx.clock.now()).model_dump(mode="json")
+        account = session.get(ledger.Account, row.account_number)
+        if account is not None:
+            view["account_ref"] = {
+                "ifsc": account.ifsc,
+                "account_number": account.account_number,
+                "vpa": account.vpa,
+            }
+        return view
 
     @app.post("/v1/officer/cases")
     def mule_cases(body: Sealed) -> Sealed:
@@ -321,6 +343,32 @@ def build_app(ctx: NodeContext) -> FastAPI:  # noqa: PLR0915 - one short functio
             return asdict(settings)
 
         return frm(body, Approval, act)
+
+    @app.post("/v1/officer/audit")
+    def audit(body: Sealed) -> Sealed:
+        """The newest audit entries, and whether the hash chain is intact from the first row."""
+
+        def act(session: Session, q: AuditQuery) -> dict[str, Any]:
+            rows = session.scalars(select(AuditEntry).order_by(AuditEntry.seq.desc()).limit(q.limit))
+            entries = [
+                {"seq": r.seq, "at": r.at.isoformat(), "actor": r.actor, "action": r.action,
+                 "record": json.loads(r.record), "hash": r.hash}
+                for r in rows
+            ]  # fmt: skip
+            return {"entries": entries, "broken_at": verify_audit(session)}
+
+        return frm(body, AuditQuery, act)
+
+    @app.post("/v1/officer/payment-check")
+    def payment_check(body: Sealed) -> Sealed:
+        def act(session: Session, q: PaymentCheck) -> dict[str, Any]:
+            result = payments.check(
+                session, sender_account=q.sender_account, payee=q.payee, amount=q.amount,
+                now=ctx.clock.now(), dpip_level=q.dpip_level, dpip_reasons=q.dpip_reasons,
+            )  # fmt: skip
+            return asdict(result)
+
+        return frm(body, PaymentCheck, act)
 
     return app
 
