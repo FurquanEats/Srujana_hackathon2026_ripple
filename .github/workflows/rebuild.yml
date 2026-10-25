@@ -19,7 +19,7 @@ jobs:
       - run: uv sync --locked
       - run: uv run ruff format --check packages
       - run: uv run ruff check packages
-      - run: uv run mypy packages/ripple-core
+      - run: uv run mypy packages/ripple-core packages/ripple-sim
       - run: uv run pytest --cov --cov-report=term-missing
 
   dependencies:

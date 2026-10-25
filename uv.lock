@@ -1,11 +1,12 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = "==3.12.*"
 
 [manifest]
 members = [
     "ripple",
     "ripple-core",
+    "ripple-sim",
 ]
 
 [[package]]
@@ -709,6 +710,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "ripple-core" },
+    { name = "ripple-sim" },
 ]
 
 [package.dev-dependencies]
@@ -722,7 +724,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "ripple-core", editable = "packages/ripple-core" }]
+requires-dist = [
+    { name = "ripple-core", editable = "packages/ripple-core" },
+    { name = "ripple-sim", editable = "packages/ripple-sim" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -748,6 +753,17 @@ requires-dist = [
     { name = "cryptography", specifier = ">=43" },
     { name = "pydantic", specifier = ">=2.9" },
 ]
+
+[[package]]
+name = "ripple-sim"
+version = "0.1.0"
+source = { editable = "packages/ripple-sim" }
+dependencies = [
+    { name = "ripple-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "ripple-core", editable = "packages/ripple-core" }]
 
 [[package]]
 name = "ruff"

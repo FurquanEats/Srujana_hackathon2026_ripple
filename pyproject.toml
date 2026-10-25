@@ -3,7 +3,7 @@ name = "ripple"
 version = "0.1.0"
 description = "Cross-bank fraud tracing for India: the bank node, the simulated CFCFRMS and DPIP hubs, and the payment network simulator"
 requires-python = ">=3.12,<3.13"
-dependencies = ["ripple-core"]
+dependencies = ["ripple-core", "ripple-sim"]
 
 [tool.uv]
 package = false
@@ -13,6 +13,7 @@ members = ["packages/*"]
 
 [tool.uv.sources]
 ripple-core = { workspace = true }
+ripple-sim = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -50,7 +51,7 @@ max-line-length = 120  # code is formatted to 110; comments and docstrings may r
 [tool.mypy]
 python_version = "3.12"
 strict = true
-mypy_path = ["packages/ripple-core/src"]
+mypy_path = ["packages/ripple-core/src", "packages/ripple-sim/src"]
 plugins = ["pydantic.mypy"]
 exclude = ["^backend/", "^frontend/"]
 
@@ -60,7 +61,7 @@ addopts = "-q --strict-markers --import-mode=importlib"
 
 [tool.coverage.run]
 branch = true
-source = ["ripple_core"]
+source = ["ripple_core", "ripple_sim"]
 
 [tool.coverage.report]
 fail_under = 85
