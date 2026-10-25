@@ -1,0 +1,1915 @@
+{
+  "/v1/notices": [
+    {
+      "account_number": "7539646002",
+      "ack_number": "31575867494554",
+      "exit_count": 0,
+      "held": 0,
+      "holder_name": "M3 General Store (mule)",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "31575867494554-003",
+      "onward_count": 2,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:33.731652Z",
+      "status": "matched",
+      "traced_in": 25000000
+    },
+    {
+      "account_number": "25118677952238",
+      "ack_number": "25300428205673",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "25300428205673-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:30.166271Z",
+      "status": "matched",
+      "traced_in": 300000
+    },
+    {
+      "account_number": "25118677952238",
+      "ack_number": "28858815922556",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "28858815922556-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.955362Z",
+      "status": "matched",
+      "traced_in": 1000000
+    },
+    {
+      "account_number": "25118677952238",
+      "ack_number": "29162403489284",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "29162403489284-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.782295Z",
+      "status": "matched",
+      "traced_in": 500000
+    },
+    {
+      "account_number": "25118677952238",
+      "ack_number": "22928096743133",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "22928096743133-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.366286Z",
+      "status": "matched",
+      "traced_in": 200000
+    },
+    {
+      "account_number": "39185176670281",
+      "ack_number": "30391446601247",
+      "exit_count": 0,
+      "held": 0,
+      "holder_name": "Sagar Mobile Point",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "30391446601247-003",
+      "onward_count": 2,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:28.596877Z",
+      "status": "matched",
+      "traced_in": 25000000
+    }
+  ],
+  "/v1/notices/31575867494554-003": {
+    "credit": {
+      "amount": 25000000,
+      "at": "2026-10-25T18:26:29.761079Z",
+      "rail": "imps",
+      "reference": "539646000003"
+    },
+    "exits": [],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [
+      {
+        "payment": {
+          "amount": 20000000,
+          "at": "2026-10-25T18:28:29.761079Z",
+          "rail": "neft",
+          "reference": "BKDDN53964600006"
+        },
+        "to": {
+          "account_number": "2539646004",
+          "ifsc": "BKAA0000001",
+          "vpa": null
+        },
+        "traced_amount": 20000000
+      },
+      {
+        "payment": {
+          "amount": 12000000,
+          "at": "2026-10-25T18:29:29.761079Z",
+          "rail": "imps",
+          "reference": "539646000008"
+        },
+        "to": {
+          "account_number": "4539646006",
+          "ifsc": "BKBB0000001",
+          "vpa": "galaxy539646@bkbb"
+        },
+        "traced_amount": 5000000
+      }
+    ],
+    "statement": [
+      {
+        "amount": 25000000,
+        "at": "2026-10-25T18:26:29.761079Z",
+        "counterparty": {
+          "account_number": "3539646002",
+          "ifsc": "BKBB0000001",
+          "vpa": "m1shop539646@bkbb"
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "539646000003",
+        "txn_id": "C539646000003",
+        "victim_money": {
+          "31575867494554": 25000000
+        }
+      },
+      {
+        "amount": 20000000,
+        "at": "2026-10-25T18:28:29.761079Z",
+        "counterparty": {
+          "account_number": "2539646004",
+          "ifsc": "BKAA0000001",
+          "vpa": null
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "neft",
+        "reference": "BKDDN53964600006",
+        "txn_id": "DBKDDN53964600006",
+        "victim_money": {
+          "31575867494554": 20000000
+        }
+      },
+      {
+        "amount": 12000000,
+        "at": "2026-10-25T18:29:29.761079Z",
+        "counterparty": {
+          "account_number": "4539646006",
+          "ifsc": "BKBB0000001",
+          "vpa": "galaxy539646@bkbb"
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "539646000008",
+        "txn_id": "D539646000008",
+        "victim_money": {
+          "31575867494554": 5000000
+        }
+      },
+      {
+        "amount": 1500000,
+        "at": "2026-10-25T18:31:29.761079Z",
+        "counterparty": {
+          "account_number": "6539646009",
+          "ifsc": "BKCC0000001",
+          "vpa": null
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "539646000010",
+        "txn_id": "D539646000010",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "7539646002",
+      "ack_number": "31575867494554",
+      "exit_count": 0,
+      "held": 0,
+      "holder_name": "M3 General Store (mule)",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "31575867494554-003",
+      "onward_count": 2,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:33.731652Z",
+      "status": "matched",
+      "traced_in": 25000000
+    }
+  },
+  "/v1/notices/25300428205673-002": {
+    "credit": {
+      "amount": 15000000,
+      "at": "2026-09-23T10:40:00Z",
+      "rail": "imps",
+      "reference": "856062676279"
+    },
+    "exits": [
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "identifier": "BKDD1539",
+        "location": "Sector 18, Noida",
+        "mode": "atm",
+        "reference": "365591936596",
+        "traced_amount": 300000
+      }
+    ],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 5000000,
+        "at": "2026-09-22T11:50:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "255549649402",
+        "txn_id": "BKDD-7-000004731",
+        "victim_money": {
+          "22928096743133": 200000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 15000000,
+        "at": "2026-09-23T10:40:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "856062676279",
+        "txn_id": "BKDD-7-000004921",
+        "victim_money": {
+          "25300428205673": 300000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD1539",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "365591936596"
+        },
+        "rail": "internal",
+        "reference": "365591936596",
+        "txn_id": "BKDD-7-000004939",
+        "victim_money": {
+          "22928096743133": 200000,
+          "25300428205673": 300000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T13:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD9187",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "567637871791"
+        },
+        "rail": "internal",
+        "reference": "567637871791",
+        "txn_id": "BKDD-7-000004950",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T14:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD0519",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "742239434536"
+        },
+        "rail": "internal",
+        "reference": "742239434536",
+        "txn_id": "BKDD-7-000004963",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T15:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD8023",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "284897355119"
+        },
+        "rail": "internal",
+        "reference": "284897355119",
+        "txn_id": "BKDD-7-000004978",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "25118677952238",
+      "ack_number": "25300428205673",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "25300428205673-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:30.166271Z",
+      "status": "matched",
+      "traced_in": 300000
+    }
+  },
+  "/v1/notices/28858815922556-002": {
+    "credit": {
+      "amount": 5000000,
+      "at": "2026-09-22T11:50:00Z",
+      "rail": "imps",
+      "reference": "255549649402"
+    },
+    "exits": [
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "identifier": "BKDD1539",
+        "location": "Sector 18, Noida",
+        "mode": "atm",
+        "reference": "365591936596",
+        "traced_amount": 1000000
+      }
+    ],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 5000000,
+        "at": "2026-09-22T11:50:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "255549649402",
+        "txn_id": "BKDD-7-000004731",
+        "victim_money": {
+          "22928096743133": 200000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 15000000,
+        "at": "2026-09-23T10:40:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "856062676279",
+        "txn_id": "BKDD-7-000004921",
+        "victim_money": {
+          "25300428205673": 300000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD1539",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "365591936596"
+        },
+        "rail": "internal",
+        "reference": "365591936596",
+        "txn_id": "BKDD-7-000004939",
+        "victim_money": {
+          "22928096743133": 200000,
+          "25300428205673": 300000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T13:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD9187",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "567637871791"
+        },
+        "rail": "internal",
+        "reference": "567637871791",
+        "txn_id": "BKDD-7-000004950",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T14:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD0519",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "742239434536"
+        },
+        "rail": "internal",
+        "reference": "742239434536",
+        "txn_id": "BKDD-7-000004963",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T15:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD8023",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "284897355119"
+        },
+        "rail": "internal",
+        "reference": "284897355119",
+        "txn_id": "BKDD-7-000004978",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "25118677952238",
+      "ack_number": "28858815922556",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "28858815922556-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.955362Z",
+      "status": "matched",
+      "traced_in": 1000000
+    }
+  },
+  "/v1/notices/29162403489284-002": {
+    "credit": {
+      "amount": 5000000,
+      "at": "2026-09-22T11:50:00Z",
+      "rail": "imps",
+      "reference": "255549649402"
+    },
+    "exits": [
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "identifier": "BKDD1539",
+        "location": "Sector 18, Noida",
+        "mode": "atm",
+        "reference": "365591936596",
+        "traced_amount": 500000
+      }
+    ],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 5000000,
+        "at": "2026-09-22T11:50:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "255549649402",
+        "txn_id": "BKDD-7-000004731",
+        "victim_money": {
+          "22928096743133": 200000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 15000000,
+        "at": "2026-09-23T10:40:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "856062676279",
+        "txn_id": "BKDD-7-000004921",
+        "victim_money": {
+          "25300428205673": 300000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD1539",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "365591936596"
+        },
+        "rail": "internal",
+        "reference": "365591936596",
+        "txn_id": "BKDD-7-000004939",
+        "victim_money": {
+          "22928096743133": 200000,
+          "25300428205673": 300000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T13:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD9187",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "567637871791"
+        },
+        "rail": "internal",
+        "reference": "567637871791",
+        "txn_id": "BKDD-7-000004950",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T14:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD0519",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "742239434536"
+        },
+        "rail": "internal",
+        "reference": "742239434536",
+        "txn_id": "BKDD-7-000004963",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T15:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD8023",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "284897355119"
+        },
+        "rail": "internal",
+        "reference": "284897355119",
+        "txn_id": "BKDD-7-000004978",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "25118677952238",
+      "ack_number": "29162403489284",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "29162403489284-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.782295Z",
+      "status": "matched",
+      "traced_in": 500000
+    }
+  },
+  "/v1/notices/22928096743133-002": {
+    "credit": {
+      "amount": 5000000,
+      "at": "2026-09-22T11:50:00Z",
+      "rail": "imps",
+      "reference": "255549649402"
+    },
+    "exits": [
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "identifier": "BKDD1539",
+        "location": "Sector 18, Noida",
+        "mode": "atm",
+        "reference": "365591936596",
+        "traced_amount": 200000
+      }
+    ],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 5000000,
+        "at": "2026-09-22T11:50:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "255549649402",
+        "txn_id": "BKDD-7-000004731",
+        "victim_money": {
+          "22928096743133": 200000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 15000000,
+        "at": "2026-09-23T10:40:00Z",
+        "counterparty": {
+          "account_number": "21003942577828",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "856062676279",
+        "txn_id": "BKDD-7-000004921",
+        "victim_money": {
+          "25300428205673": 300000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T12:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD1539",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "365591936596"
+        },
+        "rail": "internal",
+        "reference": "365591936596",
+        "txn_id": "BKDD-7-000004939",
+        "victim_money": {
+          "22928096743133": 200000,
+          "25300428205673": 300000,
+          "28858815922556": 1000000,
+          "29162403489284": 500000
+        }
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T13:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD9187",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "567637871791"
+        },
+        "rail": "internal",
+        "reference": "567637871791",
+        "txn_id": "BKDD-7-000004950",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T14:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD0519",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "742239434536"
+        },
+        "rail": "internal",
+        "reference": "742239434536",
+        "txn_id": "BKDD-7-000004963",
+        "victim_money": {}
+      },
+      {
+        "amount": 2000000,
+        "at": "2026-09-23T15:35:00Z",
+        "counterparty": null,
+        "direction": "debit",
+        "exit": {
+          "identifier": "BKDD8023",
+          "location": "Sector 18, Noida",
+          "mode": "atm",
+          "reference": "284897355119"
+        },
+        "rail": "internal",
+        "reference": "284897355119",
+        "txn_id": "BKDD-7-000004978",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "25118677952238",
+      "ack_number": "22928096743133",
+      "exit_count": 1,
+      "held": 0,
+      "holder_name": "Sanjay Kumar",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "22928096743133-002",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:29.366286Z",
+      "status": "matched",
+      "traced_in": 200000
+    }
+  },
+  "/v1/notices/30391446601247-003": {
+    "credit": {
+      "amount": 25000000,
+      "at": "2026-09-18T05:35:00Z",
+      "rail": "imps",
+      "reference": "385220500118"
+    },
+    "exits": [],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [
+      {
+        "payment": {
+          "amount": 20000000,
+          "at": "2026-09-18T05:37:00Z",
+          "rail": "neft",
+          "reference": "BKDDN50556661782"
+        },
+        "to": {
+          "account_number": "28684417143731",
+          "ifsc": "BKAA0260181",
+          "vpa": null
+        },
+        "traced_amount": 20000000
+      },
+      {
+        "payment": {
+          "amount": 12000000,
+          "at": "2026-09-18T05:38:00Z",
+          "rail": "imps",
+          "reference": "345059367388"
+        },
+        "to": {
+          "account_number": "68021018459754",
+          "ifsc": "BKBB0723143",
+          "vpa": null
+        },
+        "traced_amount": 5000000
+      }
+    ],
+    "statement": [
+      {
+        "amount": 25000000,
+        "at": "2026-09-18T05:35:00Z",
+        "counterparty": {
+          "account_number": "97748343517098",
+          "ifsc": "BKBB0723143",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "385220500118",
+        "txn_id": "BKDD-7-000003844",
+        "victim_money": {
+          "30391446601247": 25000000
+        }
+      },
+      {
+        "amount": 20000000,
+        "at": "2026-09-18T05:37:00Z",
+        "counterparty": {
+          "account_number": "28684417143731",
+          "ifsc": "BKAA0260181",
+          "vpa": null
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "neft",
+        "reference": "BKDDN50556661782",
+        "txn_id": "BKDD-7-000003846",
+        "victim_money": {
+          "30391446601247": 20000000
+        }
+      },
+      {
+        "amount": 12000000,
+        "at": "2026-09-18T05:38:00Z",
+        "counterparty": {
+          "account_number": "68021018459754",
+          "ifsc": "BKBB0723143",
+          "vpa": null
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "345059367388",
+        "txn_id": "BKDD-7-000003849",
+        "victim_money": {
+          "30391446601247": 5000000
+        }
+      },
+      {
+        "amount": 1500000,
+        "at": "2026-09-18T05:40:00Z",
+        "counterparty": {
+          "account_number": "18616018890854",
+          "ifsc": "BKCC0818460",
+          "vpa": null
+        },
+        "direction": "debit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "788744835929",
+        "txn_id": "BKDD-7-000003850",
+        "victim_money": {}
+      }
+    ],
+    "summary": {
+      "account_number": "39185176670281",
+      "ack_number": "30391446601247",
+      "exit_count": 0,
+      "held": 0,
+      "holder_name": "Sagar Mobile Point",
+      "layer": 2,
+      "lien_id": null,
+      "notice_id": "30391446601247-003",
+      "onward_count": 2,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:28.596877Z",
+      "status": "matched",
+      "traced_in": 25000000
+    }
+  },
+  "/v1/liens": [],
+  "/v1/mule-cases": [
+    {
+      "account_number": "7539646002",
+      "active_hold_id": "H5B9F2C8E64080E28",
+      "declared_annual_income": 60000000,
+      "declared_profile": "proprietorship; general store; declared annual turnover Rs 6,00,000",
+      "first_at": "2026-10-25T18:26:29.761079Z",
+      "flagged_amount": 25000000,
+      "flags": [
+        {
+          "amount": 25000000,
+          "at": "2026-10-25T18:26:29.761079Z",
+          "cited_txns": ["C539646000003"],
+          "credit_txns": ["C539646000003"],
+          "dismissed_reason": null,
+          "key": "out_of_profile:7539646002:C539646000003",
+          "reason": "Credits of ₹2,50,000 arrived in the 30 days to 25 Oct 2026, 11:56 PM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
+          "rule": "out_of_profile",
+          "status": "held",
+          "title": "Out of profile"
+        },
+        {
+          "amount": 25000000,
+          "at": "2026-10-25T18:28:29.761079Z",
+          "cited_txns": ["C539646000003", "DBKDDN53964600006"],
+          "credit_txns": ["C539646000003"],
+          "dismissed_reason": null,
+          "key": "pass_through:7539646002:C539646000003",
+          "reason": "₹2,50,000 arrived on 25 Oct 2026, 11:56 PM IST, and 80% of it left the account within 2 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "held",
+          "title": "Pass-through"
+        }
+      ],
+      "holder_name": "M3 General Store (mule)",
+      "last_at": "2026-10-25T18:28:29.761079Z",
+      "priority": "high",
+      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+      "reported": true,
+      "rules": ["out_of_profile", "pass_through"]
+    },
+    {
+      "account_number": "25118677952238",
+      "active_hold_id": "HC4DE90ED00A47B1C",
+      "declared_annual_income": 0,
+      "declared_profile": "individual; Unemployed; declared annual income ₹0",
+      "first_at": "2026-09-22T11:50:00Z",
+      "flagged_amount": 5000000,
+      "flags": [
+        {
+          "amount": 5000000,
+          "at": "2026-09-22T11:50:00Z",
+          "cited_txns": ["BKDD-7-000004731"],
+          "credit_txns": ["BKDD-7-000004731"],
+          "dismissed_reason": null,
+          "key": "out_of_profile:25118677952238:BKDD-7-000004731",
+          "reason": "Credits of ₹50,000 arrived in the 30 days to 22 Sep 2026, 05:20 PM IST, and the customer declared no income or turnover at account opening.",
+          "rule": "out_of_profile",
+          "status": "held",
+          "title": "Out of profile"
+        },
+        {
+          "amount": 5000000,
+          "at": "2026-09-22T11:50:00Z",
+          "cited_txns": ["BKDD-7-000004731"],
+          "credit_txns": ["BKDD-7-000004731"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:25118677952238:BKDD-7-000004731",
+          "reason": "The account had no transactions for 204 days, then received ₹50,000 on 22 Sep 2026, 05:20 PM IST.",
+          "rule": "dormant_then_busy",
+          "status": "held",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Sanjay Kumar",
+      "last_at": "2026-09-22T11:50:00Z",
+      "priority": "high",
+      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+      "reported": true,
+      "rules": ["out_of_profile", "dormant_then_busy"]
+    },
+    {
+      "account_number": "39185176670281",
+      "active_hold_id": null,
+      "declared_annual_income": 450000000,
+      "declared_profile": "proprietorship; Mobile accessories retail; declared annual turnover ₹45,00,000",
+      "first_at": "2026-09-18T05:35:00Z",
+      "flagged_amount": 25000000,
+      "flags": [
+        {
+          "amount": 25000000,
+          "at": "2026-09-18T05:35:00Z",
+          "cited_txns": ["BKDD-7-000003844"],
+          "credit_txns": ["BKDD-7-000003844"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:39185176670281:BKDD-7-000003844",
+          "reason": "The account had no transactions for 200 days, then received ₹2,50,000 on 18 Sep 2026, 11:05 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        },
+        {
+          "amount": 25000000,
+          "at": "2026-09-18T05:37:00Z",
+          "cited_txns": ["BKDD-7-000003844", "BKDD-7-000003846"],
+          "credit_txns": ["BKDD-7-000003844"],
+          "dismissed_reason": null,
+          "key": "pass_through:39185176670281:BKDD-7-000003844",
+          "reason": "₹2,50,000 arrived on 18 Sep 2026, 11:05 AM IST, and 80% of it left the account within 2 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        }
+      ],
+      "holder_name": "Sagar Mobile Point",
+      "last_at": "2026-09-18T05:37:00Z",
+      "priority": "high",
+      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+      "reported": true,
+      "rules": ["dormant_then_busy", "pass_through"]
+    },
+    {
+      "account_number": "88065717037906",
+      "active_hold_id": null,
+      "declared_annual_income": 0,
+      "declared_profile": "individual; Homemaker; declared annual income ₹0",
+      "first_at": "2026-09-03T10:10:00Z",
+      "flagged_amount": 34700000,
+      "flags": [
+        {
+          "amount": 5000000,
+          "at": "2026-09-03T10:10:00Z",
+          "cited_txns": ["BKDD-7-000000598"],
+          "credit_txns": ["BKDD-7-000000598"],
+          "dismissed_reason": null,
+          "key": "out_of_profile:88065717037906:BKDD-7-000000598",
+          "reason": "Credits of ₹50,000 arrived in the 30 days to 03 Sep 2026, 03:40 PM IST, and the customer declared no income or turnover at account opening.",
+          "rule": "out_of_profile",
+          "status": "open",
+          "title": "Out of profile"
+        },
+        {
+          "amount": 5000000,
+          "at": "2026-09-03T10:10:00Z",
+          "cited_txns": ["BKDD-7-000000598"],
+          "credit_txns": ["BKDD-7-000000598"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:88065717037906:BKDD-7-000000598",
+          "reason": "The account had no transactions for 185 days, then received ₹50,000 on 03 Sep 2026, 03:40 PM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        },
+        {
+          "amount": 9900000,
+          "at": "2026-09-04T06:20:00Z",
+          "cited_txns": ["BKDD-7-000000774", "BKDD-7-000000777"],
+          "credit_txns": ["BKDD-7-000000774"],
+          "dismissed_reason": null,
+          "key": "pass_through:88065717037906:BKDD-7-000000774",
+          "reason": "₹99,000 arrived on 04 Sep 2026, 11:30 AM IST, and 97% of it left the account within 20 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        },
+        {
+          "amount": 9900000,
+          "at": "2026-09-05T06:55:00Z",
+          "cited_txns": ["BKDD-7-000001004", "BKDD-7-000001009"],
+          "credit_txns": ["BKDD-7-000001004"],
+          "dismissed_reason": null,
+          "key": "pass_through:88065717037906:BKDD-7-000001004",
+          "reason": "₹99,000 arrived on 05 Sep 2026, 12:05 PM IST, and 97% of it left the account within 20 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        },
+        {
+          "amount": 9900000,
+          "at": "2026-09-06T06:35:00Z",
+          "cited_txns": ["BKDD-7-000001205", "BKDD-7-000001212"],
+          "credit_txns": ["BKDD-7-000001205"],
+          "dismissed_reason": null,
+          "key": "pass_through:88065717037906:BKDD-7-000001205",
+          "reason": "₹99,000 arrived on 06 Sep 2026, 11:45 AM IST, and 97% of it left the account within 20 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        }
+      ],
+      "holder_name": "Sunita Yadav",
+      "last_at": "2026-09-06T06:35:00Z",
+      "priority": "high",
+      "priority_reason": "3 different red flags on one account.",
+      "reported": false,
+      "rules": ["out_of_profile", "dormant_then_busy", "pass_through"]
+    },
+    {
+      "account_number": "88625024878614",
+      "active_hold_id": null,
+      "declared_annual_income": 12000000000,
+      "declared_profile": "partnership firm; Wholesale distribution; declared annual turnover ₹12,00,00,000",
+      "first_at": "2026-09-07T06:47:00Z",
+      "flagged_amount": 50850000,
+      "flags": [
+        {
+          "amount": 4500000,
+          "at": "2026-09-07T06:47:00Z",
+          "cited_txns": ["BKDD-7-000001428"],
+          "credit_txns": ["BKDD-7-000001428"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:88625024878614:BKDD-7-000001428",
+          "reason": "The account had no transactions for 406 days, then received ₹45,000 on 07 Sep 2026, 12:17 PM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        },
+        {
+          "amount": 46350000,
+          "at": "2026-09-14T11:16:00Z",
+          "cited_txns": [
+            "BKDD-7-000003005",
+            "BKDD-7-000003024",
+            "BKDD-7-000003042",
+            "BKDD-7-000003067",
+            "BKDD-7-000003078"
+          ],
+          "credit_txns": [
+            "BKDD-7-000003005",
+            "BKDD-7-000003024",
+            "BKDD-7-000003042",
+            "BKDD-7-000003067",
+            "BKDD-7-000003078"
+          ],
+          "dismissed_reason": null,
+          "key": "many_new_senders:88625024878614:BKDD-7-000003005",
+          "reason": "5 senders who had never paid this account before sent ₹4,63,500 between 14 Sep 2026, 11:38 AM IST and 14 Sep 2026, 04:46 PM IST.",
+          "rule": "many_new_senders",
+          "status": "open",
+          "title": "Many new senders"
+        }
+      ],
+      "holder_name": "Sharma Wholesale Traders",
+      "last_at": "2026-09-14T11:16:00Z",
+      "priority": "medium",
+      "priority_reason": "Two different red flags on one account.",
+      "reported": false,
+      "rules": ["dormant_then_busy", "many_new_senders"]
+    },
+    {
+      "account_number": "50951405832237",
+      "active_hold_id": null,
+      "declared_annual_income": 48000000,
+      "declared_profile": "individual; Nurse; declared annual income ₹4,80,000",
+      "first_at": "2026-09-27T13:06:00Z",
+      "flagged_amount": 12227900,
+      "flags": [
+        {
+          "amount": 12227900,
+          "at": "2026-09-27T13:06:00Z",
+          "cited_txns": [
+            "BKDD-7-000000172",
+            "BKDD-7-000000569",
+            "BKDD-7-000000978",
+            "BKDD-7-000001059",
+            "BKDD-7-000001425",
+            "BKDD-7-000002448",
+            "BKDD-7-000002762",
+            "BKDD-7-000003727",
+            "BKDD-7-000004528",
+            "BKDD-7-000005587",
+            "BKDD-7-000005775"
+          ],
+          "credit_txns": [
+            "BKDD-7-000000172",
+            "BKDD-7-000000569",
+            "BKDD-7-000000978",
+            "BKDD-7-000001059",
+            "BKDD-7-000001425",
+            "BKDD-7-000002448",
+            "BKDD-7-000002762",
+            "BKDD-7-000003727",
+            "BKDD-7-000004528",
+            "BKDD-7-000005587",
+            "BKDD-7-000005775"
+          ],
+          "dismissed_reason": null,
+          "key": "out_of_profile:50951405832237:BKDD-7-000000172",
+          "reason": "Credits of ₹1,22,279 arrived in the 30 days to 27 Sep 2026, 06:36 PM IST, and that is 3.1 times the declared monthly income or turnover of ₹40,000 (₹4,80,000 a year).",
+          "rule": "out_of_profile",
+          "status": "open",
+          "title": "Out of profile"
+        }
+      ],
+      "holder_name": "Meena Mishra",
+      "last_at": "2026-09-27T13:06:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["out_of_profile"]
+    },
+    {
+      "account_number": "57395761456567",
+      "active_hold_id": null,
+      "declared_annual_income": 400000000,
+      "declared_profile": "proprietorship; Restaurant; declared annual turnover ₹40,00,000",
+      "first_at": "2026-09-21T09:27:00Z",
+      "flagged_amount": 186100,
+      "flags": [
+        {
+          "amount": 186100,
+          "at": "2026-09-21T09:27:00Z",
+          "cited_txns": ["BKDD-7-000004490", "BKDD-7-000004493"],
+          "credit_txns": ["BKDD-7-000004490"],
+          "dismissed_reason": null,
+          "key": "pass_through:57395761456567:BKDD-7-000004490",
+          "reason": "₹1,861 arrived on 21 Sep 2026, 02:34 PM IST, and 100% of it left the account within 23 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        }
+      ],
+      "holder_name": "Verma Dhaba",
+      "last_at": "2026-09-21T09:27:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["pass_through"]
+    },
+    {
+      "account_number": "80852380248240",
+      "active_hold_id": null,
+      "declared_annual_income": 350000000,
+      "declared_profile": "proprietorship; Sweet shop; declared annual turnover ₹35,00,000",
+      "first_at": "2026-09-04T14:30:00Z",
+      "flagged_amount": 2494900,
+      "flags": [
+        {
+          "amount": 2494900,
+          "at": "2026-09-04T14:30:00Z",
+          "cited_txns": [
+            "BKDD-7-000000816",
+            "BKDD-7-000000834",
+            "BKDD-7-000000840",
+            "BKDD-7-000000871",
+            "BKDD-7-000000884"
+          ],
+          "credit_txns": [
+            "BKDD-7-000000816",
+            "BKDD-7-000000834",
+            "BKDD-7-000000840",
+            "BKDD-7-000000871",
+            "BKDD-7-000000884"
+          ],
+          "dismissed_reason": null,
+          "key": "many_new_senders:80852380248240:BKDD-7-000000816",
+          "reason": "5 senders who had never paid this account before sent ₹24,949 between 04 Sep 2026, 02:55 PM IST and 04 Sep 2026, 08:00 PM IST.",
+          "rule": "many_new_senders",
+          "status": "open",
+          "title": "Many new senders"
+        }
+      ],
+      "holder_name": "Jain Sweets",
+      "last_at": "2026-09-04T14:30:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["many_new_senders"]
+    },
+    {
+      "account_number": "45403486626220",
+      "active_hold_id": null,
+      "declared_annual_income": 30000000,
+      "declared_profile": "individual; Machine operator; declared annual income ₹3,00,000",
+      "first_at": "2026-09-03T16:21:00Z",
+      "flagged_amount": 7766300,
+      "flags": [
+        {
+          "amount": 7766300,
+          "at": "2026-09-03T16:21:00Z",
+          "cited_txns": [
+            "BKDD-7-000000069",
+            "BKDD-7-000000316",
+            "BKDD-7-000000355",
+            "BKDD-7-000000396",
+            "BKDD-7-000000443",
+            "BKDD-7-000000692"
+          ],
+          "credit_txns": [
+            "BKDD-7-000000069",
+            "BKDD-7-000000316",
+            "BKDD-7-000000355",
+            "BKDD-7-000000396",
+            "BKDD-7-000000443",
+            "BKDD-7-000000692"
+          ],
+          "dismissed_reason": null,
+          "key": "out_of_profile:45403486626220:BKDD-7-000000069",
+          "reason": "Credits of ₹77,663 arrived in the 30 days to 03 Sep 2026, 09:51 PM IST, and that is 3.1 times the declared monthly income or turnover of ₹25,000 (₹3,00,000 a year).",
+          "rule": "out_of_profile",
+          "status": "open",
+          "title": "Out of profile"
+        }
+      ],
+      "holder_name": "Usha Jain",
+      "last_at": "2026-09-03T16:21:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["out_of_profile"]
+    },
+    {
+      "account_number": "19523029497788",
+      "active_hold_id": null,
+      "declared_annual_income": 60000000,
+      "declared_profile": "individual; Accountant; declared annual income ₹6,00,000",
+      "first_at": "2026-09-02T11:19:00Z",
+      "flagged_amount": 370100,
+      "flags": [
+        {
+          "amount": 370100,
+          "at": "2026-09-02T11:19:00Z",
+          "cited_txns": ["BKDD-7-000000345", "BKDD-7-000000347"],
+          "credit_txns": ["BKDD-7-000000345"],
+          "dismissed_reason": null,
+          "key": "pass_through:19523029497788:BKDD-7-000000345",
+          "reason": "₹3,701 arrived on 02 Sep 2026, 04:41 PM IST, and 100% of it left the account within 8 minutes in 1 debit.",
+          "rule": "pass_through",
+          "status": "open",
+          "title": "Pass-through"
+        }
+      ],
+      "holder_name": "Nandini Nair",
+      "last_at": "2026-09-02T11:19:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["pass_through"]
+    },
+    {
+      "account_number": "40232430011132",
+      "active_hold_id": null,
+      "declared_annual_income": 120000000,
+      "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
+      "first_at": "2026-09-01T05:29:00Z",
+      "flagged_amount": 8100000,
+      "flags": [
+        {
+          "amount": 8100000,
+          "at": "2026-09-01T05:29:00Z",
+          "cited_txns": ["BKDD-7-000000068"],
+          "credit_txns": ["BKDD-7-000000068"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:40232430011132:BKDD-7-000000068",
+          "reason": "The account had no transactions for 400 days, then received ₹81,000 on 01 Sep 2026, 10:59 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Aarti Fernandes",
+      "last_at": "2026-09-01T05:29:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "43069303130070",
+      "active_hold_id": null,
+      "declared_annual_income": 120000000,
+      "declared_profile": "individual; Software engineer; declared annual income ₹12,00,000",
+      "first_at": "2026-09-01T05:12:00Z",
+      "flagged_amount": 8600000,
+      "flags": [
+        {
+          "amount": 8600000,
+          "at": "2026-09-01T05:12:00Z",
+          "cited_txns": ["BKDD-7-000000064"],
+          "credit_txns": ["BKDD-7-000000064"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:43069303130070:BKDD-7-000000064",
+          "reason": "The account had no transactions for 400 days, then received ₹86,000 on 01 Sep 2026, 10:42 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Sangeeta Sharma",
+      "last_at": "2026-09-01T05:12:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "68933834980320",
+      "active_hold_id": null,
+      "declared_annual_income": 42000000,
+      "declared_profile": "individual; Warehouse supervisor; declared annual income ₹4,20,000",
+      "first_at": "2026-09-01T04:35:00Z",
+      "flagged_amount": 2940000,
+      "flags": [
+        {
+          "amount": 2940000,
+          "at": "2026-09-01T04:35:00Z",
+          "cited_txns": ["BKDD-7-000000051"],
+          "credit_txns": ["BKDD-7-000000051"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:68933834980320:BKDD-7-000000051",
+          "reason": "The account had no transactions for 399 days, then received ₹29,400 on 01 Sep 2026, 10:05 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Jaya Khan",
+      "last_at": "2026-09-01T04:35:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "49504900535454",
+      "active_hold_id": null,
+      "declared_annual_income": 54000000,
+      "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+      "first_at": "2026-09-01T04:28:00Z",
+      "flagged_amount": 3870000,
+      "flags": [
+        {
+          "amount": 3870000,
+          "at": "2026-09-01T04:28:00Z",
+          "cited_txns": ["BKDD-7-000000047"],
+          "credit_txns": ["BKDD-7-000000047"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:49504900535454:BKDD-7-000000047",
+          "reason": "The account had no transactions for 399 days, then received ₹38,700 on 01 Sep 2026, 09:58 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Priya Banerjee",
+      "last_at": "2026-09-01T04:28:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "19015360848529",
+      "active_hold_id": null,
+      "declared_annual_income": 60000000,
+      "declared_profile": "individual; Accountant; declared annual income ₹6,00,000",
+      "first_at": "2026-09-01T04:21:00Z",
+      "flagged_amount": 4450000,
+      "flags": [
+        {
+          "amount": 4450000,
+          "at": "2026-09-01T04:21:00Z",
+          "cited_txns": ["BKDD-7-000000045"],
+          "credit_txns": ["BKDD-7-000000045"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:19015360848529:BKDD-7-000000045",
+          "reason": "The account had no transactions for 399 days, then received ₹44,500 on 01 Sep 2026, 09:51 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Tanvir Verma",
+      "last_at": "2026-09-01T04:21:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "12664034171192",
+      "active_hold_id": null,
+      "declared_annual_income": 42000000,
+      "declared_profile": "individual; Warehouse supervisor; declared annual income ₹4,20,000",
+      "first_at": "2026-09-01T04:05:00Z",
+      "flagged_amount": 3150000,
+      "flags": [
+        {
+          "amount": 3150000,
+          "at": "2026-09-01T04:05:00Z",
+          "cited_txns": ["BKDD-7-000000042"],
+          "credit_txns": ["BKDD-7-000000042"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:12664034171192:BKDD-7-000000042",
+          "reason": "The account had no transactions for 399 days, then received ₹31,500 on 01 Sep 2026, 09:35 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Farhan Gupta",
+      "last_at": "2026-09-01T04:05:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "13843793234422",
+      "active_hold_id": null,
+      "declared_annual_income": 54000000,
+      "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+      "first_at": "2026-09-01T04:04:00Z",
+      "flagged_amount": 3960000,
+      "flags": [
+        {
+          "amount": 3960000,
+          "at": "2026-09-01T04:04:00Z",
+          "cited_txns": ["BKDD-7-000000041"],
+          "credit_txns": ["BKDD-7-000000041"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:13843793234422:BKDD-7-000000041",
+          "reason": "The account had no transactions for 399 days, then received ₹39,600 on 01 Sep 2026, 09:34 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Amit Agarwal",
+      "last_at": "2026-09-01T04:04:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "75513781146732",
+      "active_hold_id": null,
+      "declared_annual_income": 42000000,
+      "declared_profile": "individual; Warehouse supervisor; declared annual income ₹4,20,000",
+      "first_at": "2026-09-01T03:44:00Z",
+      "flagged_amount": 2870000,
+      "flags": [
+        {
+          "amount": 2870000,
+          "at": "2026-09-01T03:44:00Z",
+          "cited_txns": ["BKDD-7-000000033"],
+          "credit_txns": ["BKDD-7-000000033"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:75513781146732:BKDD-7-000000033",
+          "reason": "The account had no transactions for 399 days, then received ₹28,700 on 01 Sep 2026, 09:14 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Gaurav Iyer",
+      "last_at": "2026-09-01T03:44:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    },
+    {
+      "account_number": "85901714208217",
+      "active_hold_id": null,
+      "declared_annual_income": 54000000,
+      "declared_profile": "individual; Teacher; declared annual income ₹5,40,000",
+      "first_at": "2026-09-01T03:40:00Z",
+      "flagged_amount": 3690000,
+      "flags": [
+        {
+          "amount": 3690000,
+          "at": "2026-09-01T03:40:00Z",
+          "cited_txns": ["BKDD-7-000000031"],
+          "credit_txns": ["BKDD-7-000000031"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:85901714208217:BKDD-7-000000031",
+          "reason": "The account had no transactions for 399 days, then received ₹36,900 on 01 Sep 2026, 09:10 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Priya Verma",
+      "last_at": "2026-09-01T03:40:00Z",
+      "priority": "low",
+      "priority_reason": "One red flag. A single unusual pattern is often legitimate.",
+      "reported": false,
+      "rules": ["dormant_then_busy"]
+    }
+  ],
+  "/v1/holds": [
+    {
+      "account_level_reason": null,
+      "account_number": "7539646002",
+      "amount": 21500000,
+      "compliance_breach": null,
+      "contact": "SMS and email to the registered mobile number and email",
+      "credit_txns": ["C539646000003"],
+      "customer_notice": "Dear M3 General Store (mule),\n\nBank D, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 6002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 25 Oct 2026, 11:56 PM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 25 Oct 2026, 11:56 PM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
+      "deadlines": [
+        {
+          "due": "2026-10-25T18:36:12.030607Z",
+          "met_at": "2026-10-25T18:36:12.030607Z",
+          "name": "Customer notified",
+          "rule": "Annex III Step 2: at once when the customer is reached digitally",
+          "state": "met"
+        },
+        {
+          "due": "2026-11-14T18:36:12.030607Z",
+          "met_at": null,
+          "name": "Customer explanation",
+          "rule": "Annex III Step 3: 20 days from the hold",
+          "state": "open"
+        },
+        {
+          "due": "2026-11-24T18:36:12.030607Z",
+          "met_at": null,
+          "name": "Bank decision",
+          "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
+          "state": "open"
+        },
+        {
+          "due": "2026-12-24T18:36:12.030607Z",
+          "met_at": null,
+          "name": "Maximum duration",
+          "rule": "Annex III: no temporary debit hold lasts more than 60 days",
+          "state": "open"
+        }
+      ],
+      "decision": null,
+      "decision_reason": null,
+      "expires_at": "2026-12-24T18:36:12.030607Z",
+      "explanation": null,
+      "explanation_at": null,
+      "hold_id": "H5B9F2C8E64080E28",
+      "holder_name": "M3 General Store (mule)",
+      "instruction": null,
+      "mule_confirmed_at": null,
+      "next_deadline": "2026-11-14T18:36:12.030607Z",
+      "placed_at": "2026-10-25T18:36:12.030607Z",
+      "placed_by": "demo-frm_analyst",
+      "reasons": [
+        "Credits of ₹2,50,000 arrived in the 30 days to 25 Oct 2026, 11:56 PM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
+        "₹2,50,000 arrived on 25 Oct 2026, 11:56 PM IST, and 80% of it left the account within 2 minutes in 1 debit."
+      ],
+      "release_reason": null,
+      "released_at": null,
+      "reported_at": null,
+      "status": "awaiting_explanation",
+      "str_draft": null,
+      "str_due": null,
+      "str_filed_at": null,
+      "str_reference": null,
+      "whole_account": false
+    },
+    {
+      "account_level_reason": null,
+      "account_number": "25118677952238",
+      "amount": 5000000,
+      "compliance_breach": null,
+      "contact": "SMS and email to the registered mobile number and email",
+      "credit_txns": ["BKDD-7-000004731"],
+      "customer_notice": "Dear Sanjay Kumar,\n\nBank D, a co-operative bank has placed a temporary hold on debits of ₹50,000 from your account ending 2238, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹50,000 arrived in the 30 days to 22 Sep 2026, 05:20 PM IST, and the customer declared no income or turnover at account opening. The account had no transactions for 204 days, then received ₹50,000 on 22 Sep 2026, 05:20 PM IST.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: SMS and email to the registered mobile number and email",
+      "deadlines": [
+        {
+          "due": "2026-10-25T18:36:12.084562Z",
+          "met_at": "2026-10-25T18:36:12.084562Z",
+          "name": "Customer notified",
+          "rule": "Annex III Step 2: at once when the customer is reached digitally",
+          "state": "met"
+        },
+        {
+          "due": "2026-11-14T18:36:12.084562Z",
+          "met_at": null,
+          "name": "Customer explanation",
+          "rule": "Annex III Step 3: 20 days from the hold",
+          "state": "open"
+        },
+        {
+          "due": "2026-11-24T18:36:12.084562Z",
+          "met_at": null,
+          "name": "Bank decision",
+          "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
+          "state": "open"
+        },
+        {
+          "due": "2026-12-24T18:36:12.084562Z",
+          "met_at": null,
+          "name": "Maximum duration",
+          "rule": "Annex III: no temporary debit hold lasts more than 60 days",
+          "state": "open"
+        }
+      ],
+      "decision": null,
+      "decision_reason": null,
+      "expires_at": "2026-12-24T18:36:12.084562Z",
+      "explanation": null,
+      "explanation_at": null,
+      "hold_id": "HC4DE90ED00A47B1C",
+      "holder_name": "Sanjay Kumar",
+      "instruction": null,
+      "mule_confirmed_at": null,
+      "next_deadline": "2026-11-14T18:36:12.084562Z",
+      "placed_at": "2026-10-25T18:36:12.084562Z",
+      "placed_by": "demo-frm_analyst",
+      "reasons": [
+        "Credits of ₹50,000 arrived in the 30 days to 22 Sep 2026, 05:20 PM IST, and the customer declared no income or turnover at account opening.",
+        "The account had no transactions for 204 days, then received ₹50,000 on 22 Sep 2026, 05:20 PM IST."
+      ],
+      "release_reason": null,
+      "released_at": null,
+      "reported_at": null,
+      "status": "awaiting_explanation",
+      "str_draft": null,
+      "str_due": null,
+      "str_filed_at": null,
+      "str_reference": null,
+      "whole_account": false
+    }
+  ],
+  "/v1/detection/thresholds": {
+    "cash_out_minutes": 60,
+    "dormant_days": 90,
+    "new_senders": 5,
+    "pass_through_minutes": 30,
+    "profile_multiple": 3.0
+  },
+  "/v1/detection/shadow-run": {
+    "accounts": 68,
+    "budget_per_day": 5.0,
+    "expected_flags_per_day": 0.43,
+    "known_bad": 3,
+    "proposal": {
+      "cash_out_minutes": 180,
+      "dormant_days": 30,
+      "new_senders": 3,
+      "pass_through_minutes": 180,
+      "profile_multiple": 1.5
+    },
+    "rules": [
+      {
+        "chosen": 180,
+        "rows": [
+          {
+            "accounts_flagged": 1,
+            "flags_per_day": 0.03,
+            "known_bad_flagged": 1,
+            "value": 10
+          },
+          {
+            "accounts_flagged": 1,
+            "flags_per_day": 0.03,
+            "known_bad_flagged": 1,
+            "value": 30
+          },
+          {
+            "accounts_flagged": 2,
+            "flags_per_day": 0.07,
+            "known_bad_flagged": 1,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 3,
+            "flags_per_day": 0.1,
+            "known_bad_flagged": 1,
+            "value": 180
+          }
+        ],
+        "rule": "pass_through",
+        "title": "Pass-through"
+      },
+      {
+        "chosen": 3,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 20
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 10
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 5
+          },
+          {
+            "accounts_flagged": 1,
+            "flags_per_day": 0.03,
+            "known_bad_flagged": 0,
+            "value": 3
+          }
+        ],
+        "rule": "many_new_senders",
+        "title": "Many new senders"
+      },
+      {
+        "chosen": 1.5,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 5.0
+          },
+          {
+            "accounts_flagged": 2,
+            "flags_per_day": 0.07,
+            "known_bad_flagged": 1,
+            "value": 3.0
+          },
+          {
+            "accounts_flagged": 9,
+            "flags_per_day": 0.3,
+            "known_bad_flagged": 1,
+            "value": 2.0
+          },
+          {
+            "accounts_flagged": 8,
+            "flags_per_day": 0.27,
+            "known_bad_flagged": 1,
+            "value": 1.5
+          }
+        ],
+        "rule": "out_of_profile",
+        "title": "Out of profile"
+      },
+      {
+        "chosen": 30,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 180
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 90
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 1,
+            "flags_per_day": 0.03,
+            "known_bad_flagged": 1,
+            "value": 30
+          }
+        ],
+        "rule": "dormant_then_busy",
+        "title": "Dormant, then busy"
+      },
+      {
+        "chosen": 180,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 15
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 30
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 180
+          }
+        ],
+        "rule": "quick_cash_out",
+        "title": "Quick cash-out"
+      }
+    ],
+    "since": "2026-09-25T18:36:44.940907+00:00",
+    "until": "2026-10-25T18:36:44.940907+00:00",
+    "within_budget": true
+  }
+}

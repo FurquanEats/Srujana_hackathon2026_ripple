@@ -126,3 +126,106 @@ export type GatewayError = {
   error: "unauthenticated" | "forbidden" | "not_found" | "conflict" | "invalid" | "upstream_error";
   message: string;
 };
+
+export type MuleFlag = {
+  key: string;
+  rule: string;
+  title: string;
+  reason: string;
+  amount: number;
+  at: string;
+  cited_txns: string[];
+  credit_txns: string[];
+  status: "open" | "dismissed" | "held";
+  dismissed_reason: string | null;
+};
+
+export type MuleCase = {
+  account_number: string;
+  holder_name: string | null;
+  declared_profile: string | null;
+  declared_annual_income: number | null;
+  priority: "high" | "medium" | "low";
+  priority_reason: string;
+  reported: boolean;
+  rules: string[];
+  flags: MuleFlag[];
+  flagged_amount: number;
+  first_at: string;
+  last_at: string;
+  active_hold_id: string | null;
+};
+
+export type HoldDeadline = {
+  name: string;
+  rule: string;
+  due: string;
+  met_at: string | null;
+  state: "open" | "met" | "lapsed" | "missed" | string;
+};
+
+export type HoldStatus =
+  | "awaiting_explanation"
+  | "explanation_received"
+  | "reported_to_police"
+  | "held_on_police_instruction"
+  | "released";
+
+export type Hold = {
+  hold_id: string;
+  account_number: string;
+  holder_name: string | null;
+  amount: number;
+  whole_account: boolean;
+  account_level_reason: string | null;
+  credit_txns: string[];
+  reasons: string[];
+  contact: string;
+  customer_notice: string;
+  placed_at: string;
+  placed_by: string;
+  status: HoldStatus | string;
+  deadlines: HoldDeadline[];
+  next_deadline: string | null;
+  expires_at: string;
+  explanation: string | null;
+  explanation_at: string | null;
+  decision: string | null;
+  decision_reason: string | null;
+  reported_at: string | null;
+  instruction: string | null;
+  released_at: string | null;
+  release_reason: string | null;
+  mule_confirmed_at: string | null;
+  str_due: string | null;
+  str_draft: Record<string, unknown> | null;
+  str_filed_at: string | null;
+  str_reference: string | null;
+  compliance_breach: string | null;
+};
+
+export type Thresholds = {
+  pass_through_minutes: number;
+  new_senders: number;
+  profile_multiple: number;
+  dormant_days: number;
+  cash_out_minutes: number;
+};
+
+export type ShadowRow = {
+  value: number;
+  accounts_flagged: number;
+  flags_per_day: number;
+  known_bad_flagged: number;
+};
+
+export type ShadowRun = {
+  accounts: number;
+  budget_per_day: number;
+  expected_flags_per_day: number;
+  known_bad: number;
+  proposal: Thresholds;
+  rules: { rule: string; title: string; chosen: number; rows: ShadowRow[] }[];
+  note?: string | null;
+  [extra: string]: unknown;
+};

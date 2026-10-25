@@ -1,0 +1,479 @@
+{
+  "/v1/notices": [
+    {
+      "account_number": "8539646006",
+      "ack_number": "31575867494554",
+      "exit_count": 0,
+      "held": 15000000,
+      "holder_name": "Wallet W holder",
+      "layer": 2,
+      "lien_id": "L3FE6E44A97D6A40D",
+      "notice_id": "31575867494554-004",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:33.954218Z",
+      "status": "matched",
+      "traced_in": 15000000
+    },
+    {
+      "account_number": "58835656277916",
+      "ack_number": "38069132210127",
+      "exit_count": 0,
+      "held": 14000000,
+      "holder_name": "Imran Sheikh",
+      "layer": 3,
+      "lien_id": "L22DBFB76DD2D79A3",
+      "notice_id": "38069132210127-003",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:30.070156Z",
+      "status": "matched",
+      "traced_in": 14000000
+    },
+    {
+      "account_number": "92809843109452",
+      "ack_number": "30391446601247",
+      "exit_count": 0,
+      "held": 15000000,
+      "holder_name": "Arjun Mondal",
+      "layer": 2,
+      "lien_id": "L03F47376255B13FA",
+      "notice_id": "30391446601247-004",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:28.969953Z",
+      "status": "matched",
+      "traced_in": 15000000
+    }
+  ],
+  "/v1/notices/31575867494554-004": {
+    "credit": {
+      "amount": 15000000,
+      "at": "2026-10-25T18:27:29.761079Z",
+      "rail": "imps",
+      "reference": "539646000004"
+    },
+    "exits": [],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 15000000,
+        "at": "2026-10-25T18:27:29.761079Z",
+        "counterparty": {
+          "account_number": "3539646002",
+          "ifsc": "BKBB0000001",
+          "vpa": "m1shop539646@bkbb"
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "539646000004",
+        "txn_id": "C539646000004",
+        "victim_money": {
+          "31575867494554": 15000000
+        }
+      }
+    ],
+    "summary": {
+      "account_number": "8539646006",
+      "ack_number": "31575867494554",
+      "exit_count": 0,
+      "held": 15000000,
+      "holder_name": "Wallet W holder",
+      "layer": 2,
+      "lien_id": "L3FE6E44A97D6A40D",
+      "notice_id": "31575867494554-004",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:33.954218Z",
+      "status": "matched",
+      "traced_in": 15000000
+    }
+  },
+  "/v1/notices/38069132210127-003": {
+    "credit": {
+      "amount": 14000000,
+      "at": "2026-09-12T06:05:00Z",
+      "rail": "imps",
+      "reference": "603854344950"
+    },
+    "exits": [],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 14000000,
+        "at": "2026-09-12T06:05:00Z",
+        "counterparty": {
+          "account_number": "22489366128616",
+          "ifsc": "BKAA0260181",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "603854344950",
+        "txn_id": "WLTW-7-000000065",
+        "victim_money": {
+          "38069132210127": 14000000
+        }
+      }
+    ],
+    "summary": {
+      "account_number": "58835656277916",
+      "ack_number": "38069132210127",
+      "exit_count": 0,
+      "held": 14000000,
+      "holder_name": "Imran Sheikh",
+      "layer": 3,
+      "lien_id": "L22DBFB76DD2D79A3",
+      "notice_id": "38069132210127-003",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:30.070156Z",
+      "status": "matched",
+      "traced_in": 14000000
+    }
+  },
+  "/v1/notices/30391446601247-004": {
+    "credit": {
+      "amount": 15000000,
+      "at": "2026-09-18T05:36:00Z",
+      "rail": "imps",
+      "reference": "102080842859"
+    },
+    "exits": [],
+    "legal_basis": "BNSS s.168 read with s.94",
+    "onward": [],
+    "statement": [
+      {
+        "amount": 15000000,
+        "at": "2026-09-18T05:36:00Z",
+        "counterparty": {
+          "account_number": "97748343517098",
+          "ifsc": "BKBB0723143",
+          "vpa": null
+        },
+        "direction": "credit",
+        "exit": null,
+        "rail": "imps",
+        "reference": "102080842859",
+        "txn_id": "WLTW-7-000000105",
+        "victim_money": {
+          "30391446601247": 15000000
+        }
+      }
+    ],
+    "summary": {
+      "account_number": "92809843109452",
+      "ack_number": "30391446601247",
+      "exit_count": 0,
+      "held": 15000000,
+      "holder_name": "Arjun Mondal",
+      "layer": 2,
+      "lien_id": "L03F47376255B13FA",
+      "notice_id": "30391446601247-004",
+      "onward_count": 0,
+      "reason": null,
+      "received_at": "2026-10-25T18:35:28.969953Z",
+      "status": "matched",
+      "traced_in": 15000000
+    }
+  },
+  "/v1/liens": [
+    {
+      "account_number": "8539646006",
+      "ack_number": "31575867494554",
+      "amount": 15000000,
+      "basis": "BNSS s.168 read with s.94",
+      "holder_name": "Wallet W holder",
+      "lien_id": "L3FE6E44A97D6A40D",
+      "placed_at": "2026-10-25T18:35:33.954218Z",
+      "released_at": null
+    },
+    {
+      "account_number": "58835656277916",
+      "ack_number": "38069132210127",
+      "amount": 14000000,
+      "basis": "BNSS s.168 read with s.94",
+      "holder_name": "Imran Sheikh",
+      "lien_id": "L22DBFB76DD2D79A3",
+      "placed_at": "2026-10-25T18:35:30.070156Z",
+      "released_at": null
+    },
+    {
+      "account_number": "92809843109452",
+      "ack_number": "30391446601247",
+      "amount": 15000000,
+      "basis": "BNSS s.168 read with s.94",
+      "holder_name": "Arjun Mondal",
+      "lien_id": "L03F47376255B13FA",
+      "placed_at": "2026-10-25T18:35:28.969953Z",
+      "released_at": null
+    }
+  ],
+  "/v1/mule-cases": [
+    {
+      "account_number": "92809843109452",
+      "active_hold_id": null,
+      "declared_annual_income": 0,
+      "declared_profile": "individual; Student; declared annual income ₹0",
+      "first_at": "2026-09-18T05:36:00Z",
+      "flagged_amount": 15000000,
+      "flags": [
+        {
+          "amount": 15000000,
+          "at": "2026-09-18T05:36:00Z",
+          "cited_txns": ["WLTW-7-000000105"],
+          "credit_txns": ["WLTW-7-000000105"],
+          "dismissed_reason": null,
+          "key": "out_of_profile:92809843109452:WLTW-7-000000105",
+          "reason": "Credits of ₹1,50,000 arrived in the 30 days to 18 Sep 2026, 11:06 AM IST, and the customer declared no income or turnover at account opening.",
+          "rule": "out_of_profile",
+          "status": "open",
+          "title": "Out of profile"
+        },
+        {
+          "amount": 15000000,
+          "at": "2026-09-18T05:36:00Z",
+          "cited_txns": ["WLTW-7-000000105"],
+          "credit_txns": ["WLTW-7-000000105"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:92809843109452:WLTW-7-000000105",
+          "reason": "The account had no transactions for 200 days, then received ₹1,50,000 on 18 Sep 2026, 11:06 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Arjun Mondal",
+      "last_at": "2026-09-18T05:36:00Z",
+      "priority": "high",
+      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+      "reported": true,
+      "rules": ["out_of_profile", "dormant_then_busy"]
+    },
+    {
+      "account_number": "58835656277916",
+      "active_hold_id": null,
+      "declared_annual_income": 18000000,
+      "declared_profile": "individual; Labourer; declared annual income ₹1,80,000",
+      "first_at": "2026-09-12T06:05:00Z",
+      "flagged_amount": 14000000,
+      "flags": [
+        {
+          "amount": 14000000,
+          "at": "2026-09-12T06:05:00Z",
+          "cited_txns": ["WLTW-7-000000065"],
+          "credit_txns": ["WLTW-7-000000065"],
+          "dismissed_reason": null,
+          "key": "out_of_profile:58835656277916:WLTW-7-000000065",
+          "reason": "Credits of ₹1,40,000 arrived in the 30 days to 12 Sep 2026, 11:35 AM IST, and that is 9.3 times the declared monthly income or turnover of ₹15,000 (₹1,80,000 a year).",
+          "rule": "out_of_profile",
+          "status": "open",
+          "title": "Out of profile"
+        },
+        {
+          "amount": 14000000,
+          "at": "2026-09-12T06:05:00Z",
+          "cited_txns": ["WLTW-7-000000065"],
+          "credit_txns": ["WLTW-7-000000065"],
+          "dismissed_reason": null,
+          "key": "dormant_then_busy:58835656277916:WLTW-7-000000065",
+          "reason": "The account had no transactions for 194 days, then received ₹1,40,000 on 12 Sep 2026, 11:35 AM IST.",
+          "rule": "dormant_then_busy",
+          "status": "open",
+          "title": "Dormant, then busy"
+        }
+      ],
+      "holder_name": "Imran Sheikh",
+      "last_at": "2026-09-12T06:05:00Z",
+      "priority": "high",
+      "priority_reason": "Money moved to or from an account with a CFCFRMS notice, or this account has one.",
+      "reported": true,
+      "rules": ["out_of_profile", "dormant_then_busy"]
+    }
+  ],
+  "/v1/holds": [],
+  "/v1/detection/thresholds": {
+    "cash_out_minutes": 60,
+    "dormant_days": 90,
+    "new_senders": 5,
+    "pass_through_minutes": 30,
+    "profile_multiple": 3.0
+  },
+  "/v1/detection/shadow-run": {
+    "accounts": 8,
+    "budget_per_day": 5.0,
+    "expected_flags_per_day": 0.03,
+    "known_bad": 3,
+    "proposal": {
+      "cash_out_minutes": 180,
+      "dormant_days": 30,
+      "new_senders": 3,
+      "pass_through_minutes": 180,
+      "profile_multiple": 1.5
+    },
+    "rules": [
+      {
+        "chosen": 180,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 10
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 30
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 180
+          }
+        ],
+        "rule": "pass_through",
+        "title": "Pass-through"
+      },
+      {
+        "chosen": 3,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 20
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 10
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 5
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 3
+          }
+        ],
+        "rule": "many_new_senders",
+        "title": "Many new senders"
+      },
+      {
+        "chosen": 1.5,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 5.0
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 3.0
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 2.0
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 1.5
+          }
+        ],
+        "rule": "out_of_profile",
+        "title": "Out of profile"
+      },
+      {
+        "chosen": 30,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 180
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 90
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 1,
+            "flags_per_day": 0.03,
+            "known_bad_flagged": 1,
+            "value": 30
+          }
+        ],
+        "rule": "dormant_then_busy",
+        "title": "Dormant, then busy"
+      },
+      {
+        "chosen": 180,
+        "rows": [
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 15
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 30
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 60
+          },
+          {
+            "accounts_flagged": 0,
+            "flags_per_day": 0.0,
+            "known_bad_flagged": 0,
+            "value": 180
+          }
+        ],
+        "rule": "quick_cash_out",
+        "title": "Quick cash-out"
+      }
+    ],
+    "since": "2026-09-25T18:36:45.675689+00:00",
+    "until": "2026-10-25T18:36:45.675689+00:00",
+    "within_budget": true
+  }
+}
