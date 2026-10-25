@@ -103,19 +103,58 @@ def test_traffic_stays_in_the_month(sim: Simulation) -> None:
         assert p.payment.at.astimezone(sim.story.reported_at.tzinfo).date() in days
 
 
+def test_the_month_matches_the_published_figures(sim: Simulation) -> None:
+    """The figures README.md cites, within sampling noise for a month of 80 people."""
+    pop = sim.population
+    people = {p.number for p in pop.people}
+    shops = {s.number for s in pop.shops}
+    p2m: list[int] = []
+    p2p: list[int] = []
+    atm: list[int] = []
+    for _, p in postings(sim):
+        if p.direction != "debit" or p.account_number not in people:
+            continue
+        if p.exit is not None and p.exit.mode is ExitMode.ATM:
+            atm.append(p.payment.amount)
+        elif p.payment.rail is Rail.UPI and p.counterparty is not None:
+            if p.counterparty.account_number in shops:
+                p2m.append(p.payment.amount)
+            elif (
+                p.counterparty.account_number in people and p.payment.amount % 50_000
+            ):  # rent is whole Rs 500s
+                p2p.append(p.payment.amount)
+
+    def mean_rupees(amounts: list[int]) -> float:
+        return sum(amounts) / len(amounts) / 100
+
+    def share_under_500(amounts: list[int]) -> float:
+        return sum(a < 500_00 for a in amounts) / len(amounts)
+
+    assert 0.55 < len(p2m) / (len(p2m) + len(p2p)) < 0.72  # published: 63% of UPI volume to merchants
+    assert 0.80 < share_under_500(p2m) < 0.92  # published: 86%
+    assert 0.50 < share_under_500(p2p) < 0.68  # published: 59%
+    assert 450 < mean_rupees(p2m) < 800  # published: Rs 589
+    assert 1_800 < mean_rupees(p2p) < 3_300  # NPCI February 2026: about Rs 2,500
+    assert 4_500 < mean_rupees(atm) < 7_000  # published: Rs 5,835
+
+
 def test_salary_arrives_once_and_rent_is_paid_once(sim: Simulation) -> None:
     pop = sim.population
     employers = {e.number for e in pop.employers}
     salary_credits: Counter[str] = Counter()
     rents: Counter[str] = Counter()
-    landlords = {t: landlord.number for t, (landlord, _) in pop.landlord_of.items()}
+    # Tenants also send ordinary transfers to their landlords, so rent is recognised by payee and amount.
+    landlords = {t: (landlord.number, rent) for t, (landlord, rent) in pop.landlord_of.items()}
     for _, p in postings(sim):
         cp = p.counterparty
         if not isinstance(cp, AccountRef):
             continue
         if p.direction == "credit" and cp.account_number in employers:
             salary_credits[p.account_number] += 1
-        if p.direction == "debit" and landlords.get(p.account_number) == cp.account_number:
+        if p.direction == "debit" and landlords.get(p.account_number) == (
+            cp.account_number,
+            p.payment.amount,
+        ):
             rents[p.account_number] += 1
     assert salary_credits == Counter({p.number: 1 for p in pop.people})
     assert all(n <= 1 for n in rents.values())

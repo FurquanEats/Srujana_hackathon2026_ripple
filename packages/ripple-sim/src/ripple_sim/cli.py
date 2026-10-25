@@ -5,6 +5,7 @@
 
 `deliveries.jsonl` has one message per line for one member's node, in time order. `story.json` names the demo
 story's accounts and payments, and the traced amounts the PRD expects, so an end-to-end test can find them.
+`scams.json` does the same for the other scam shapes (`scams.py`), with each victim's complaint.
 `--post` also sends every delivery to its member's node over mutual TLS, signed as the party "sim"; start the
 network with `uv run ripple up` first. Without `--month` it then simulates the last full month before the
 network's clock, because nodes trace only what has already happened. Each node refuses an account it already
@@ -26,9 +27,11 @@ from ripple_core.messages import AccountOpening
 from ripple_core.money import fmt_inr, rupees
 from ripple_service.config import repo_root
 from ripple_sim import post
-from ripple_sim.scenario import DemoStory
+from ripple_sim.scams import Scam
+from ripple_sim.scenario import DemoStory, Step
 from ripple_sim.simulation import DEFAULT_MONTH, simulate
 from ripple_sim.traffic import TrafficConfig
+from ripple_sim.world import Account
 
 # What the PRD's demo story must trace, under the SOP's victims-first rule.
 EXPECTED_TRACED = {
@@ -38,35 +41,63 @@ EXPECTED_TRACED = {
 }
 
 
+def _accounts_json(accounts: dict[str, Account]) -> dict[str, Any]:
+    return {
+        role: {
+            "member": a.member.id,
+            "holder": a.holder,
+            "ifsc": a.ifsc,
+            "account_number": a.number,
+            "vpa": a.vpa,
+        }
+        for role, a in accounts.items()
+    }
+
+
+def _steps_json(steps: tuple[Step, ...]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": s.name,
+            "payer": s.payer,
+            "payee": s.payee,
+            "rail": s.payment.rail.value,
+            "reference": s.payment.reference,
+            "amount": s.payment.amount,
+            "at": s.payment.at.isoformat(),
+            "exit_identifier": s.exit_identifier,
+        }
+        for s in steps
+    ]
+
+
 def story_json(story: DemoStory) -> dict[str, Any]:
     return {
         "ack_number": story.ack_number,
         "reported_at": story.reported_at.isoformat(),
-        "accounts": {
-            role: {
-                "member": a.member.id,
-                "holder": a.holder,
-                "ifsc": a.ifsc,
-                "account_number": a.number,
-                "vpa": a.vpa,
-            }
-            for role, a in story.accounts.items()
-        },
-        "steps": [
-            {
-                "name": s.name,
-                "payer": s.payer,
-                "payee": s.payee,
-                "rail": s.payment.rail.value,
-                "reference": s.payment.reference,
-                "amount": s.payment.amount,
-                "at": s.payment.at.isoformat(),
-                "exit_identifier": s.exit_identifier,
-            }
-            for s in story.steps
-        ],
+        "accounts": _accounts_json(story.accounts),
+        "steps": _steps_json(story.steps),
         "expected_traced": EXPECTED_TRACED,
     }
+
+
+def scams_json(scams: tuple[Scam, ...]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": scam.name,
+            "accounts": _accounts_json(scam.accounts),
+            "steps": _steps_json(scam.steps),
+            "reports": [
+                {
+                    "ack_number": r.ack_number,
+                    "victim": r.victim,
+                    "steps": list(r.steps),
+                    "reported_at": r.reported_at.isoformat(),
+                }
+                for r in scam.reports
+            ],
+        }
+        for scam in scams
+    ]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -105,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
             line = {"member": d.member, "kind": kind, "message": d.message.model_dump(mode="json")}
             f.write(json.dumps(line, ensure_ascii=False) + "\n")
     (args.out / "story.json").write_text(json.dumps(story_json(sim.story), indent=2) + "\n", encoding="utf-8")
+    (args.out / "scams.json").write_text(json.dumps(scams_json(sim.scams), indent=2) + "\n", encoding="utf-8")
 
     openings = sum(isinstance(d.message, AccountOpening) for d in sim.deliveries)
     print(
