@@ -1,0 +1,91 @@
+{
+  "case_id": "D13",
+  "title": "Invoice buyer is not the person who paid",
+  "account_holder": {
+    "name": "Rohini Auto Parts",
+    "address": "Transport Nagar, Lucknow, Uttar Pradesh 226012",
+    "ifsc": "PRNB0000650",
+    "account_number": "65165907623413",
+    "gstin": "09IVCFZ8069U1ZE",
+    "kyc": {
+      "occupation": "Auto parts dealer",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 1400000000
+    }
+  },
+  "explanation": "Verma Motors paid for brake pads and clutch plates.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "imps",
+      "reference": "065945794805",
+      "amount": 18624000,
+      "at": "2026-10-11T17:32:00+05:30",
+      "remitter": {
+        "name": "KUNAL SINGH",
+        "ifsc": "NVBK0000729",
+        "account_number": "74589698777445"
+      },
+      "traced_amount": 18624000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_RAP-0904.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Rohini Auto Parts",
+        "issuer_gstin": "09IVCFZ8069U1ZE",
+        "recipient": "Verma Motors",
+        "recipient_gstin": "09KHPFN6856G1ZY",
+        "number": "RAP/0904",
+        "date": "2026-10-10",
+        "taxable_value": 14550000,
+        "tax": 4074000,
+        "total": 18624000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Brake pads, front set",
+          "hsn": "8708",
+          "qty": 60,
+          "unit": "set",
+          "rate": 145000,
+          "amount": 8700000
+        },
+        {
+          "description": "Clutch plate assembly",
+          "hsn": "8708",
+          "qty": 15,
+          "unit": "nos",
+          "rate": 390000,
+          "amount": 5850000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "conflicting",
+      "explained_amount": 0,
+      "unexplained_amount": 18624000,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 18624000,
+      "failed_checks": [
+        "payer_match"
+      ],
+      "why": "The amount matches, but the invoice names Verma Motors while the payment came from an individual, KUNAL SINGH, with no link to Verma Motors shown."
+    }
+  ]
+}

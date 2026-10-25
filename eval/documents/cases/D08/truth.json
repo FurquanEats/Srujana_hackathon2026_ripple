@@ -1,0 +1,84 @@
+{
+  "case_id": "D08",
+  "title": "Invoice sent as an unreadable scan",
+  "account_holder": {
+    "name": "Gurukrupa Hardware",
+    "address": "Market Yard, Satara, Maharashtra 415002",
+    "ifsc": "AKSB0000410",
+    "account_number": "22856985645449",
+    "gstin": "27MDYFQ7932D1Z5",
+    "kyc": {
+      "occupation": "Hardware shop",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 400000000
+    }
+  },
+  "explanation": "Patil Engineering paid for bolts. Photo of the bill attached.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "imps",
+      "reference": "593823727066",
+      "amount": 5428000,
+      "at": "2026-10-07T18:44:00+05:30",
+      "remitter": {
+        "name": "Patil Engineering Works",
+        "ifsc": "KVSB0000877",
+        "account_number": "25550469826860"
+      },
+      "traced_amount": 5428000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_scan.jpg",
+      "language": "en",
+      "form": "photo",
+      "quality": "unreadable",
+      "readable": false,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Gurukrupa Hardware",
+        "issuer_gstin": "27MDYFQ7932D1Z5",
+        "recipient": "Patil Engineering Works",
+        "recipient_gstin": "27IUBFT1522M1ZT",
+        "number": "GKH/0712",
+        "date": "2026-10-06",
+        "taxable_value": 4600000,
+        "tax": 828000,
+        "total": 5428000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Hex bolts M12, box of 100",
+          "hsn": "7318",
+          "qty": 40,
+          "unit": "box",
+          "rate": 115000,
+          "amount": 4600000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "not_explained",
+      "explained_amount": 0,
+      "unexplained_amount": 5428000,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 5428000,
+      "failed_checks": [
+        "readable",
+        "quote_support"
+      ],
+      "why": "No figure on the scan can be read, so it cannot support the credit; ask for a clear copy."
+    }
+  ]
+}

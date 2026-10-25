@@ -1,0 +1,83 @@
+{
+  "case_id": "D05",
+  "title": "Invoice dated 45 days after the payment",
+  "account_holder": {
+    "name": "Nandini Electricals",
+    "address": "22 Station Road, Mysuru, Karnataka 570001",
+    "ifsc": "PRNB0000507",
+    "account_number": "06308547845251",
+    "gstin": "29JHRFT5092M1ZI",
+    "kyc": {
+      "occupation": "Electrical contractor",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 600000000
+    }
+  },
+  "explanation": "This was an order for starter panels from Coorg Coffee Curers.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "neft",
+      "reference": "KVSBN15029277671",
+      "amount": 9086000,
+      "at": "2026-10-03T16:20:00+05:30",
+      "remitter": {
+        "name": "Coorg Coffee Curers",
+        "ifsc": "KVSB0000611",
+        "account_number": "72266598189156"
+      },
+      "traced_amount": 9086000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_NE-0566.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Nandini Electricals",
+        "issuer_gstin": "29JHRFT5092M1ZI",
+        "recipient": "Coorg Coffee Curers",
+        "recipient_gstin": "29CKOCX6543D1Z8",
+        "number": "NE/0566",
+        "date": "2026-11-17",
+        "taxable_value": 7700000,
+        "tax": 1386000,
+        "total": 9086000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Three-phase motor starter panel",
+          "hsn": "8537",
+          "qty": 2,
+          "unit": "nos",
+          "rate": 3850000,
+          "amount": 7700000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "not_explained",
+      "explained_amount": 0,
+      "unexplained_amount": 9086000,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 9086000,
+      "failed_checks": [
+        "date_order"
+      ],
+      "why": "The amount and payer match, but the invoice is dated 45 days after the payment, beyond the 7-day allowance."
+    }
+  ]
+}
