@@ -1,28 +1,28 @@
 {
   "dataset": "IBM AML ibm_hi_small",
   "split": "time split: train on the first 7 of 10 days (2022-09-01 to 2022-09-07), test on the last 3",
-  "generated_at": "2026-10-25T00:47:22",
+  "generated_at": "2026-10-25T12:46:37",
   "overall": {
     "name": "Ripple (full)",
-    "precision": 0.6228,
-    "recall": 0.3737,
-    "pr_auc": 0.3939,
-    "precision_at_50": 0.98
+    "precision": 0.8801,
+    "recall": 0.4869,
+    "pr_auc": 0.5581,
+    "precision_at_50": 1.0
   },
   "baseline": {
     "name": "Single-transaction baseline",
-    "precision": 0.019,
-    "recall": 0.0114,
-    "pr_auc": 0.0054,
-    "precision_at_50": 0.02
+    "precision": 0.0969,
+    "recall": 0.0536,
+    "pr_auc": 0.0444,
+    "precision_at_50": 0.16
   },
   "ablation": [
     {
       "name": "Single-transaction baseline",
-      "precision": 0.019,
-      "recall": 0.0114,
-      "pr_auc": 0.0054,
-      "precision_at_50": 0.02
+      "precision": 0.0969,
+      "recall": 0.0536,
+      "pr_auc": 0.0444,
+      "precision_at_50": 0.16
     },
     {
       "name": "Detectors only",
@@ -47,149 +47,149 @@
     },
     {
       "name": "+ calibrated LightGBM",
-      "precision": 0.6228,
-      "recall": 0.3737,
-      "pr_auc": 0.3939,
-      "precision_at_50": 0.98
+      "precision": 0.8801,
+      "recall": 0.4869,
+      "pr_auc": 0.5581,
+      "precision_at_50": 1.0
     }
   ],
   "per_typology": [
     {
       "name": "untagged",
-      "precision": 0.0203,
-      "recall": 0.012,
-      "pr_auc": 0.0051,
+      "precision": 0.0294,
+      "recall": 0.0052,
+      "pr_auc": 0.0081,
       "precision_at_50": null
     },
     {
       "name": "bipartite (graph layer and model only)",
-      "precision": 0.0714,
-      "recall": 0.3824,
-      "pr_auc": 0.1621,
+      "precision": 0.3265,
+      "recall": 0.7059,
+      "pr_auc": 0.4305,
       "precision_at_50": null
     },
     {
       "name": "cycle (temporal_cycle)",
-      "precision": 0.1529,
-      "recall": 0.663,
-      "pr_auc": 0.3468,
+      "precision": 0.3926,
+      "recall": 0.6957,
+      "pr_auc": 0.602,
       "precision_at_50": null
     },
     {
       "name": "fan-in (fan_in_out)",
-      "precision": 0.1486,
-      "recall": 0.6484,
-      "pr_auc": 0.3529,
+      "precision": 0.4277,
+      "recall": 0.8132,
+      "pr_auc": 0.6622,
       "precision_at_50": null
     },
     {
       "name": "fan-out (fan_out_burst)",
-      "precision": 0.155,
-      "recall": 0.6596,
-      "pr_auc": 0.4751,
+      "precision": 0.4438,
+      "recall": 0.8404,
+      "pr_auc": 0.7522,
       "precision_at_50": null
     },
     {
       "name": "gather-scatter (fan_in_out)",
-      "precision": 0.2506,
-      "recall": 0.6313,
-      "pr_auc": 0.4373,
+      "precision": 0.604,
+      "recall": 0.8436,
+      "pr_auc": 0.8038,
       "precision_at_50": null
     },
     {
       "name": "random (graph layer and model only)",
-      "precision": 0.0765,
-      "recall": 0.5,
-      "pr_auc": 0.184,
+      "precision": 0.2929,
+      "recall": 0.7321,
+      "pr_auc": 0.5156,
       "precision_at_50": null
     },
     {
       "name": "scatter-gather (scatter_gather)",
-      "precision": 0.2212,
-      "recall": 0.5647,
-      "pr_auc": 0.4268,
+      "precision": 0.5909,
+      "recall": 0.8412,
+      "pr_auc": 0.7716,
       "precision_at_50": null
     },
     {
       "name": "stack (graph layer and model only)",
-      "precision": 0.2387,
-      "recall": 0.6584,
-      "pr_auc": 0.4215,
+      "precision": 0.5561,
+      "recall": 0.7702,
+      "pr_auc": 0.6973,
       "precision_at_50": null
     }
   ],
   "budget_curve": [
     {
       "alerts_per_day": 10,
-      "recall": 0.0194,
-      "precision": 0.9667,
+      "recall": 0.0201,
+      "precision": 1.0,
       "value_caught_share": 0.0005
     },
     {
       "alerts_per_day": 25,
       "recall": 0.0496,
       "precision": 0.9867,
-      "value_caught_share": 0.0014
+      "value_caught_share": 0.0781
     },
     {
       "alerts_per_day": 50,
       "recall": 0.0991,
       "precision": 0.9867,
-      "value_caught_share": 0.0213
+      "value_caught_share": 0.2534
     },
     {
       "alerts_per_day": 100,
-      "recall": 0.1862,
-      "precision": 0.9267,
-      "value_caught_share": 0.0237
+      "recall": 0.1976,
+      "precision": 0.9833,
+      "value_caught_share": 0.4748
     },
     {
       "alerts_per_day": 200,
-      "recall": 0.3041,
-      "precision": 0.7567,
-      "value_caught_share": 0.0904
+      "recall": 0.3838,
+      "precision": 0.955,
+      "value_caught_share": 0.6447
     },
     {
       "alerts_per_day": 500,
-      "recall": 0.3999,
-      "precision": 0.398,
-      "value_caught_share": 0.2849
+      "recall": 0.5579,
+      "precision": 0.5553,
+      "value_caught_share": 0.8976
     },
     {
       "alerts_per_day": 1000,
-      "recall": 0.5251,
-      "precision": 0.2613,
-      "value_caught_share": 0.7664
+      "recall": 0.5941,
+      "precision": 0.2957,
+      "value_caught_share": 0.8982
     },
     {
       "alerts_per_day": 2000,
-      "recall": 0.5459,
-      "precision": 0.1358,
-      "value_caught_share": 0.8821
+      "recall": 0.6316,
+      "precision": 0.1572,
+      "value_caught_share": 0.8987
     }
   ],
-  "suggested_budget": 2000,
+  "suggested_budget": 500,
   "throughput_tps": 756.5,
   "p95_latency_ms": 31.2,
   "money_recoverable": [
     {
       "name": "Ripple (full)",
       "attempts": 207,
-      "alerted_share": 0.7198,
-      "median_recoverable": 0.9356,
-      "mean_recoverable": 0.6414
+      "alerted_share": 0.8454,
+      "median_recoverable": 1.0,
+      "mean_recoverable": 0.811
     },
     {
       "name": "Single-transaction baseline",
       "attempts": 207,
-      "alerted_share": 0.0725,
+      "alerted_share": 0.2899,
       "median_recoverable": 0.0,
-      "mean_recoverable": 0.0443
+      "mean_recoverable": 0.2145
     }
   ],
   "notes": [
     "Test set: 1,317,508 transactions, 1,493 laundering. Warm-up rows and transfers to the same account are excluded because the engine never alerts on them.",
-    "Alert threshold 0.0174 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; the pack's hand-set weights rank far worse on IBM (see the contrast rows in eval_extra.json) because a detector hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
+    "Alert threshold 0.0292 is the F1-best threshold on a held-out training day, after Platt scaling of the fused probability on that day. Fusion weights are refitted on the same day by logistic regression; the pack's hand-set weights rank far worse on IBM (see the contrast rows in eval_extra.json) because a detector hit outweighs a confident model score. The LightGBM model is isotonic-calibrated on a separate unsampled day, so legitimate-row subsampling does not inflate it.",
     "The model's strongest feature is whether the payer has paid this payee before. It is computed from past payments only, but IBM's synthetic laundering may favour new payees more than real laundering does.",
     "On IBM the fused score ranks slightly below the LightGBM model alone, so fusion is not claimed to improve accuracy here. Ripple fuses because the detectors and graph layer give each alert its reasons and counterfactuals and cover behaviour the model has never seen; that second point is shown only on simulated traffic (the red-team and one-shot results), not on IBM.",
     "The single-transaction baseline is LightGBM on amount, hour and cash only, given as many alerts as the full system.",

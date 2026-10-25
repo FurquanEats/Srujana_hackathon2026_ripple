@@ -40,42 +40,42 @@
         "bias": -6.799
       },
       "+ calibrated LightGBM": {
-        "threshold": 0.01744,
-        "platt_a": 1.0002,
-        "platt_b": -0.1318,
+        "threshold": 0.02916,
+        "platt_a": 1.0218,
+        "platt_b": -0.1316,
         "weights": {
-          "detector": 3.324,
-          "baseline": 0.047,
-          "graph": 1.32,
-          "model": 14.983
+          "detector": 1.321,
+          "baseline": 0.37,
+          "graph": 0.565,
+          "model": 11.098
         },
-        "bias": -7.339
+        "bias": -7.477
       },
       "Full system, pack's hand-set fusion weights": {
-        "threshold": 0.01819,
-        "platt_a": 0.559,
-        "platt_b": -5.546
+        "threshold": 0.03398,
+        "platt_a": 0.7269,
+        "platt_b": -5.4262
       },
       "LightGBM model alone": {
-        "threshold": 0.18596,
-        "platt_a": 0.9943,
-        "platt_b": -0.0857
+        "threshold": 0.33269,
+        "platt_a": 0.9969,
+        "platt_b": -0.0789
       }
     },
     "contrast": [
       {
         "name": "Full system, pack's hand-set fusion weights",
-        "precision": 0.2308,
-        "recall": 0.1125,
-        "pr_auc": 0.0528,
-        "precision_at_50": 0.56
+        "precision": 0.3438,
+        "recall": 0.1467,
+        "pr_auc": 0.1019,
+        "precision_at_50": 0.8
       },
       {
         "name": "LightGBM model alone",
-        "precision": 0.5627,
-        "recall": 0.4206,
-        "pr_auc": 0.4173,
-        "precision_at_50": 1.0
+        "precision": 0.8544,
+        "recall": 0.499,
+        "pr_auc": 0.5778,
+        "precision_at_50": 0.98
       }
     ],
     "pack_fusion": {
@@ -87,108 +87,120 @@
       },
       "bias": -4.0
     },
-    "alert_rate_test": 0.00068,
+    "alert_rate_test": 0.00063,
     "pack_alert_at": 0.6
   },
   "calibration": {
     "bins": [
       {
         "bin": "[0, 0.01)",
-        "rows": 1315783,
-        "mean_predicted": 0.0006,
-        "observed_rate": 0.0006
+        "rows": 1316508,
+        "mean_predicted": 0.0005,
+        "observed_rate": 0.0005
       },
       {
         "bin": "[0.01, 0.05)",
-        "rows": 1091,
-        "mean_predicted": 0.0179,
-        "observed_rate": 0.1577
+        "rows": 219,
+        "mean_predicted": 0.0239,
+        "observed_rate": 0.3196
       },
       {
         "bin": "[0.05, 0.1)",
-        "rows": 22,
-        "mean_predicted": 0.0769,
-        "observed_rate": 0.6818
+        "rows": 49,
+        "mean_predicted": 0.0827,
+        "observed_rate": 0.6531
       },
       {
         "bin": "[0.1, 0.2)",
-        "rows": 21,
-        "mean_predicted": 0.1355,
-        "observed_rate": 0.381
+        "rows": 24,
+        "mean_predicted": 0.1229,
+        "observed_rate": 0.625
       },
       {
         "bin": "[0.2, 0.4)",
-        "rows": 54,
-        "mean_predicted": 0.2485,
-        "observed_rate": 0.5556
+        "rows": 5,
+        "mean_predicted": 0.2864,
+        "observed_rate": 0.6
       },
       {
         "bin": "[0.4, 0.6)",
-        "rows": 67,
-        "mean_predicted": 0.456,
-        "observed_rate": 0.597
+        "rows": 2,
+        "mean_predicted": 0.4161,
+        "observed_rate": 1.0
       },
       {
         "bin": "[0.6, 0.8)",
-        "rows": 55,
-        "mean_predicted": 0.7159,
-        "observed_rate": 0.4545
+        "rows": 41,
+        "mean_predicted": 0.6609,
+        "observed_rate": 0.8293
       },
       {
         "bin": "[0.8, 1)",
-        "rows": 415,
-        "mean_predicted": 0.9426,
-        "observed_rate": 0.8675
+        "rows": 660,
+        "mean_predicted": 0.9445,
+        "observed_rate": 0.9439
       }
     ],
-    "ece": 0.00023,
-    "brier": 0.000853
+    "ece": 0.00017,
+    "brier": 0.000653
   },
   "calibration_single_transaction": {
     "bins": [
       {
         "bin": "[0, 0.01)",
-        "rows": 1302118,
-        "mean_predicted": 0.001,
-        "observed_rate": 0.001
+        "rows": 1272015,
+        "mean_predicted": 0.0004,
+        "observed_rate": 0.0004
       },
       {
         "bin": "[0.01, 0.05)",
-        "rows": 15390,
-        "mean_predicted": 0.0118,
-        "observed_rate": 0.0125
+        "rows": 39530,
+        "mean_predicted": 0.014,
+        "observed_rate": 0.0137
+      },
+      {
+        "bin": "[0.05, 0.1)",
+        "rows": 3936,
+        "mean_predicted": 0.0615,
+        "observed_rate": 0.0582
+      },
+      {
+        "bin": "[0.1, 0.2)",
+        "rows": 2027,
+        "mean_predicted": 0.1151,
+        "observed_rate": 0.1021
       }
     ],
-    "ece": 1e-05,
-    "brier": 0.001129
+    "ece": 7e-05,
+    "brier": 0.001099
   },
   "case_level": [
     {
       "name": "Ripple (full)",
-      "alerts": 896,
-      "cases": 554,
-      "cases_with_laundering": 268,
+      "alerts": 826,
+      "cases": 376,
+      "cases_with_laundering": 319,
       "alerts_per_case_median": 1.0,
       "cases_per_day": 50,
       "days": 3,
       "cases_reviewed": 150,
-      "precision_any_laundering": 0.86,
-      "precision_majority_laundering": 0.86,
-      "attempts_touched": 99,
+      "precision_any_laundering": 0.9667,
+      "precision_majority_laundering": 0.9667,
+      "attempts_touched": 114,
       "attempts_in_test": 207
     },
     {
       "name": "Single-transaction baseline",
-      "alerts": 896,
-      "cases": 766,
-      "cases_with_laundering": 17,
+      "alerts": 826,
+      "cases": 764,
+      "cases_with_laundering": 73,
       "alerts_per_case_median": 1.0,
       "cases_per_day": 50,
-      "days": 2,
-      "cases_reviewed": 100,
-      "precision_any_laundering": 0.05,
-      "precision_majority_laundering": 0.05,
-      "attempts_touched": 4,
+      "days": 3,
+      "cases_reviewed": 150,
+      "precision_any_laundering": 0.1867,
+      "precision_majority_laundering": 0.1867,
+      "attempts_touched": 26,
       "attempts_in_test": 207
     }
   ],

@@ -12,6 +12,46 @@ from ripple.eval.ibm import recoverable_at_first_alert
 from ripple.schema import EvalReport
 
 
+def test_rail_features_match_between_training_and_serving():
+    from ripple.models.lgbm import RAIL_FEATURES, rail_features, rail_matrix
+    from ripple.schema import Rail
+
+    served = rail_features(Rail.ACH)
+    assert list(served) == RAIL_FEATURES and sum(served.values()) == 1.0 and served["rail_ach"] == 1.0
+    trained = rail_matrix(np.array(["ACH", "CASH"]))
+    assert trained.shape == (2, len(RAIL_FEATURES))
+    assert dict(zip(RAIL_FEATURES, trained[0])) == served
+
+
+def test_history_features_match_between_training_and_serving():
+    from ripple.eval.ibm import history_matrix
+    from ripple.models.history import HISTORY_FEATURES, AccountHistory
+    from ripple.schema import Rail, Transaction
+
+    t0 = datetime(2022, 9, 1)
+    rows = pd.DataFrame({
+        "txn_id": ["a", "b", "c", "d"],
+        "ts": pd.to_datetime([t0, t0 + timedelta(hours=1), t0 + timedelta(hours=2), t0 + timedelta(hours=5)]),
+        "src_account": ["X", "X", "Y", "X"],
+        "dst_account": ["Y", "X", "Z", "Z"],  # b is a transfer to the same account: history only, never scored
+        "amount": [100.0, 50.0, 90.0, 400.0],
+        "rail": ["ACH", "REINVESTMENT", "ACH", "WIRE"],
+    })
+    trained = history_matrix(rows)
+    served = AccountHistory()
+    for row in rows.itertuples():
+        txn = Transaction.model_construct(txn_id=row.txn_id, ts=row.ts.to_pydatetime(), src_account=row.src_account,
+                                          dst_account=row.dst_account, amount=row.amount, rail=Rail(row.rail))
+        if row.src_account == row.dst_account:
+            served.update(txn)  # what LightGBMModel.observe does
+            continue
+        f = served.observe(txn)
+        assert list(trained[row.Index]) == pytest.approx([f[k] for k in HISTORY_FEATURES])
+    f = dict(zip(HISTORY_FEATURES, trained[3]))
+    assert f["src_payments_before"] == 2 and f["src_ach_share"] == 0.5  # a (ACH) and the reinvestment b
+    assert f["src_hours_since_last"] == 4.0 and f["dst_receipts_before"] == 1
+
+
 def test_recoverable_counts_money_from_the_first_alert_on():
     t0 = datetime(2022, 9, 8)
     attempts = pd.DataFrame({

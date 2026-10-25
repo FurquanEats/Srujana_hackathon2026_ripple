@@ -28,6 +28,8 @@ import pandas as pd
 from ripple.engine import Engine
 from ripple.eval.extra import calibration_table, case_level_report
 from ripple.fusion import QUIET
+from ripple.models.history import HISTORY_FEATURES, AccountHistory
+from ripple.models.lgbm import RAIL_FEATURES, rail_matrix
 from ripple.schema import EvalReport, Layer, Rail, Transaction
 
 TRAIN_SHARE = 0.7
@@ -39,7 +41,7 @@ BUDGETS = [10, 25, 50, 100, 200, 500, 1000, 2000]
 # The Ripple detector aimed at each IBM pattern; bipartite, stack and random have none.
 DETECTOR_FOR = {"fan_in": "fan_in_out", "fan_out": "fan_out_burst", "cycle": "temporal_cycle",
                 "scatter_gather": "scatter_gather", "gather_scatter": "fan_in_out"}
-SINGLE_TXN =["log_amount", "hour", "is_cash"]  # what a rule on one transaction alone can see
+SINGLE_TXN = ["log_amount", "hour", "is_cash"] + RAIL_FEATURES  # what a rule on one transaction alone can see
 LGB_PARAMS = {"objective": "binary", "learning_rate": 0.05, "num_leaves": 63, "min_data_in_leaf": 50,
               "feature_fraction": 0.9, "bagging_fraction": 0.8, "bagging_freq": 1, "verbose": -1, "seed": 7}
 
@@ -81,6 +83,24 @@ def replay(df: pd.DataFrame, pack: str = "ibm_aml", log_every: int = 250_000) ->
             "p95_latency_ms": stats["p95_latency_ms"]}
 
 
+def history_matrix(df: pd.DataFrame) -> np.ndarray:
+    """Account-history features for every row, built with the serving class over the same stream order. Transfers
+    to the same account join the history (the engine passes them to LightGBMModel.observe) but are never scored."""
+    history = AccountHistory()
+    out = np.zeros((len(df), len(HISTORY_FEATURES)), dtype=np.float32)
+    rails = {r.value: r for r in Rail}
+    cols = zip(df["txn_id"], df["ts"], df["src_account"], df["dst_account"], df["amount"], df["rail"])
+    for i, (txn_id, ts, src, dst, amount, rail) in enumerate(cols):
+        txn = Transaction.model_construct(txn_id=txn_id, ts=ts.to_pydatetime(), src_account=src, dst_account=dst,
+                                          amount=float(amount), rail=rails[rail])
+        if src == dst:
+            history.update(txn)
+        else:
+            f = history.observe(txn)
+            out[i] = [f[k] for k in HISTORY_FEATURES]
+    return out
+
+
 def fuse(fusion, det, base, graph, model, weights: dict | None = None, bias: float | None = None) -> np.ndarray:
     """Vectorised Fusion.probability, including the baseline-only cap. weights and bias override the pack's."""
     w = weights or fusion.weights
@@ -110,9 +130,9 @@ def train_lgbm(X: np.ndarray, y: np.ndarray, fit_mask: np.ndarray, calib_mask: n
 
     from ripple.models.lgbm import LightGBMModel
 
-    pos = y[fit_mask].sum()
-    params = LGB_PARAMS | {"scale_pos_weight": min(50.0, (fit_mask.sum() - pos) / max(pos, 1))}
-    booster = lgb.train(params, lgb.Dataset(X[fit_mask], y[fit_mask], feature_name=names), num_boost_round=300)
+    # No class weighting: negative sampling already rebalances the classes, and weighting on top of it ranked worse
+    # on every seed tried.
+    booster = lgb.train(LGB_PARAMS, lgb.Dataset(X[fit_mask], y[fit_mask], feature_name=names), num_boost_round=300)
     raw = booster.predict(X[calib_mask])
     iso = IsotonicRegression(out_of_bounds="clip", y_min=0, y_max=1).fit(raw, y[calib_mask])
     return LightGBMModel(booster, names, list(iso.X_thresholds_), list(iso.y_thresholds_))
@@ -240,7 +260,13 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
     in_train, in_test = np.isin(day, train_days), np.isin(day, test_days)
     in_calib = np.isin(day, train_days[-n_calib:])
     scored = r["scored"]
-    X, names = r["features"], r["names"]
+    # The engine's features plus two groups LightGBMModel.score derives itself: the one-hot payment rail (on IBM most
+    # laundering is ACH, 0.75% of ACH payments against 0.11% overall, and the engine's features carry only whether a
+    # payment is cash), and each account's payment history (ripple.models.history).
+    t_hist = time.perf_counter()
+    X = np.hstack([r["features"], rail_matrix(df["rail"].to_numpy()), history_matrix(df)])
+    names = r["names"] + RAIL_FEATURES + HISTORY_FEATURES
+    print(f"rail and history features added in {time.perf_counter() - t_hist:.0f}s", flush=True)
     # Training leaves out the first COLD_HOURS (features there are cold-start noise) and keeps every positive but
     # only a seeded share of negatives. Testing always uses every row.
     warm = df["ts"].to_numpy() >= df["ts"].iloc[0] + pd.Timedelta(hours=COLD_HOURS)
@@ -261,7 +287,7 @@ def run(data: Path, out: Path, model_out: Path | None, rows: int | None, cache: 
     single_idx = [names.index(f) for f in SINGLE_TXN]
     single = train_lgbm(X[:, single_idx], y, in_fit & scored, in_model_cal & scored, SINGLE_TXN)
     if model_out:
-        full.save(model_out, {"trained_on": str(data), "train_days": [str(d)[:10] for d in train_days]})
+        full.save(model_out, {"trained_on": data.name, "train_days": [str(d)[:10] for d in train_days]})
 
     test, fuse_cal = in_test & scored, in_fuse_cal & scored
     yt, yc = y[test], y[fuse_cal]
