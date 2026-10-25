@@ -23,9 +23,9 @@ function outcome(a: TrailAccount): string {
 function Card({ account }: { account: TrailAccount }) {
   return (
     <div className="border border-grey-900 bg-[#171717] p-[0.9em]">
-      <p className="text-[0.75em] text-grey-500">{INSTITUTIONS[account.member ?? ""] ?? "Off network"}</p>
+      <p className="text-[0.75em] text-[#8f8f8f]">{INSTITUTIONS[account.member ?? ""] ?? "Off network"}</p>
       <p className="mt-[0.2em] truncate text-[0.95em] text-white">{account.holder_name}</p>
-      <p className="mt-[0.6em] text-[0.75em] text-grey-500">Victim money in</p>
+      <p className="mt-[0.6em] text-[0.75em] text-[#8f8f8f]">Victim money in</p>
       <p className="font-mono text-[0.9em] tabular-nums">{formatInr(account.traced_in)}</p>
       <div className="mt-[0.6em] flex items-center justify-between gap-[0.5em]">
         <span className="text-[0.75em] text-grey-300">{outcome(account)}</span>
@@ -84,12 +84,12 @@ export function Showcase() {
                   <span className="font-mono">{formatIst(lastEvent)}</span>
                 </div>
                 <div className="flex-1 overflow-hidden p-[1.4em]">
-                  <p className="text-[0.8em] text-grey-500">Case</p>
+                  <p className="text-[0.8em] text-[#8f8f8f]">Case</p>
                   <p className="font-mono text-[1.1em] text-white">{t.ack_number}</p>
                   <div className="mt-[1em] grid grid-cols-5 gap-px bg-grey-900">
                     {totals.map(([label, value]) => (
                       <div key={label} className="bg-ink p-[0.7em]">
-                        <p className="text-[0.7em] text-grey-500">{label}</p>
+                        <p className="text-[0.7em] text-[#8f8f8f]">{label}</p>
                         <p
                           className={`font-mono text-[0.95em] tabular-nums ${label === "Held" ? "text-accent" : "text-white"}`}
                         >
@@ -101,7 +101,7 @@ export function Showcase() {
                   <div className="mt-[1.2em] grid grid-cols-3 gap-[1em]">
                     {layers.map((layer) => (
                       <div key={layer} className="flex flex-col gap-[0.7em]">
-                        <p className="text-[0.7em] text-grey-500">Layer {layer}</p>
+                        <p className="text-[0.7em] text-[#8f8f8f]">Layer {layer}</p>
                         {t.accounts
                           .filter((a) => a.layer === layer)
                           .map((a) => (

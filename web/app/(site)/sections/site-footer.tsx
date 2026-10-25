@@ -26,6 +26,7 @@ export function SiteFooter() {
       </div>
       <p
         aria-hidden
+        data-decorative
         className="pixel mt-8 -mb-[0.18em] text-center text-[25vw] leading-none text-grey-900 select-none md:text-[24vw]"
       >
         Ripple

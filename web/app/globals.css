@@ -56,7 +56,7 @@
   .tone-dark {
     --fg: #ffffff;
     --muted: var(--color-grey-300);
-    --faint: var(--color-grey-500);
+    --faint: #8f8f8f; /* 5.6:1 on ink, so small captions pass WCAG AA */
     --surface: var(--color-ink);
     --line: var(--color-grey-900);
     --panel: #181818;
@@ -67,7 +67,7 @@
   .tone-light {
     --fg: var(--color-ink);
     --muted: var(--color-grey-500);
-    --faint: #8d8d8d;
+    --faint: #6b6b6b; /* 5.3:1 on white, so small captions pass WCAG AA */
     --surface: #ffffff;
     --line: #e4e4e4;
     --panel: #f6f6f6;
