@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import heapq
+import logging
 import time
 from collections.abc import Iterable
 from datetime import datetime
@@ -12,6 +13,8 @@ from pathlib import Path
 from ripple.engine import Engine
 from ripple.schema import StreamEvent, Transaction
 from ripple.stream.bus import EventBus
+
+log = logging.getLogger(__name__)
 
 MAX_SLEEP = 1.0  # seconds; long quiet gaps in the data are compressed to this
 STATS_EVERY = 1.0  # seconds between stats events
@@ -96,12 +99,14 @@ async def replay_feed(engine: Engine, bus: EventBus, feed: Feed, speed: float = 
                 if gap > 0:
                     await asyncio.sleep(min(gap, MAX_SLEEP))
             previous = max(previous, txn.ts) if previous else txn.ts
-            if fast:
-                engine.process(txn)  # history: scored and stored, not pushed to screens
-                if len(feed) % 500 == 0:
-                    await asyncio.sleep(0)
-            else:
-                ingest(engine, bus, txn)
+            try:
+                if fast:
+                    engine.process(txn)  # history: scored and stored, not pushed to screens
+                else:
+                    ingest(engine, bus, txn)
+            except Exception:  # one bad payment must not end the stream for every screen
+                log.exception("could not score %s; skipped", txn.txn_id)
+            if not fast or len(feed) % 500 == 0:
                 await asyncio.sleep(0)
         if time.monotonic() - last_stats >= STATS_EVERY:
             stats = engine.stats() | {"queued": float(len(feed))}

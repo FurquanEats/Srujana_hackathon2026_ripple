@@ -149,10 +149,10 @@ export function Workbench() {
           <div className="no-print flex w-full flex-col gap-2 sm:w-auto">
             <span className="text-xs font-semibold text-muted">Review decision</span>
             <div className="grid grid-cols-2 gap-2 sm:flex">
-              <Button variant="secondary" onClick={() => setAsking("confirmed")} disabled={decision !== null}>
+              <Button variant="secondary" onClick={() => setAsking("confirmed")} disabled={status !== "open"}>
                 <Icon name="check" className="h-4 w-4" /> Confirm fraud
               </Button>
-              <Button variant="secondary" onClick={() => setAsking("dismissed")} disabled={decision !== null}>
+              <Button variant="secondary" onClick={() => setAsking("dismissed")} disabled={status !== "open"}>
                 <Icon name="x" className="h-4 w-4" /> Dismiss
               </Button>
             </div>

@@ -17,7 +17,7 @@ from collections.abc import AsyncIterator
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Body, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from ripple import feedback, fixtures, interdiction, trace
@@ -41,6 +41,7 @@ from ripple.schema import (
 )
 from ripple.stream import EventBus, Feed, ingest, load_transactions, replay_feed
 
+MAX_INGEST = 5000  # transactions per POST /ingest, so one request cannot hold the event loop for long
 TOP_UP_BELOW = 500  # payments still queued: about a day of the simulated bank's ordinary traffic
 TOP_UP_DAYS = 2
 
@@ -110,12 +111,15 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         allow_headers=["*"],
     )
 
+    # Routes that read or change the engine are async: they run on the event loop between replayed payments, never in a
+    # worker thread racing the replay task over the engine's state and the stream queues.
+
     @app.get("/health")
-    def health() -> dict:
+    async def health() -> dict:
         return {"status": "ok", "source": source, **({"stats": engine.stats()} if engine else {})}
 
     @app.get("/cases")
-    def list_cases(budget: int = Query(50, ge=1, le=1000), status: str = Query("open")) -> list[CaseSummary]:
+    async def list_cases(budget: int = Query(50, ge=1, le=1000), status: str = Query("open")) -> list[CaseSummary]:
         """Cases with the given status, by tier then expected loss, cut to the alert budget. status=all for every case."""
         if engine is None:
             cases = queue_order(fixtures.cases())
@@ -124,14 +128,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         return cases[:budget]
 
     @app.get("/cases/{case_id}")
-    def get_case(case_id: str) -> CaseDetail:
+    async def get_case(case_id: str) -> CaseDetail:
         case = engine.detail(case_id) if engine else fixtures.case_detail(case_id)
         if case is None:
             raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
         return case
 
     @app.get("/cases/{case_id}/interdiction")
-    def get_interdiction(case_id: str) -> InterdictionPlan:
+    async def get_interdiction(case_id: str) -> InterdictionPlan:
         """Where the traced money sits now, and the freeze set that recovers the most of it."""
         case = engine.detail(case_id) if engine else fixtures.case_detail(case_id)
         if case is None:
@@ -147,12 +151,15 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
                                  merchants=trace.merchants(engine, accounts))
 
     @app.post("/cases/{case_id}/feedback")
-    def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:
+    async def post_feedback(case_id: str, verdict: Feedback) -> FeedbackResult:
         if engine is None:
             if case_id not in {c.case_id for c in fixtures.cases()}:
                 raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
             weights = {Layer.DETECTOR: 6.5, Layer.BASELINE: 4.5, Layer.GRAPH: 3.0, Layer.MODEL: 5.0}
             return FeedbackResult(case_id=case_id, status=verdict.verdict, weights_before=weights, weights_after=weights, requeued=0)
+        case = engine.cases.get(case_id)
+        if case is not None and case.status != "open":  # a second verdict would train the fusion weights twice
+            raise HTTPException(status_code=409, detail=f"{case.case_id} is already {case.status}")
         result = feedback.apply(engine, case_id, verdict.verdict)
         if result is None:
             raise HTTPException(status_code=404, detail=f"unknown case: {case_id}")
@@ -185,14 +192,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
                 "before": json.loads(before.read_text(encoding="utf-8")) if before.is_file() else None}
 
     @app.post("/ingest")
-    def post_ingest(txns: list[Transaction]) -> list[ScoredTransaction]:
+    async def post_ingest(txns: list[Transaction] = Body(max_length=MAX_INGEST)) -> list[ScoredTransaction]:
         """Scores transactions in the order given (for example from the simulator's inject buttons)."""
         if engine is None:
             raise HTTPException(status_code=409, detail="ingest needs RIPPLE_SOURCE=engine")
         return [ingest(engine, bus, t).txn for t in sorted(txns, key=lambda t: t.ts)]
 
     @app.post("/inject/{kind}")
-    def post_inject(kind: str) -> InjectResult:
+    async def post_inject(kind: str) -> InjectResult:
         """Adds a simulated scenario (mule_ring, scam_fanout, sim_swap_takeover, cash_structuring, diwali_spike,
         digital_arrest) at the stream's current time; it flows through the engine like any other traffic."""
         if engine is None or world is None:
@@ -211,7 +218,7 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
                             victim_paid_at=victim.txn.ts if victim else None)
 
     @app.post("/trace")
-    def post_trace(report: TraceRequest) -> InterdictionPlan:
+    async def post_trace(report: TraceRequest) -> InterdictionPlan:
         """Follows a victim's money forward from the reported time and returns where it sits and what to freeze."""
         if engine is None:
             raise HTTPException(status_code=409, detail="trace needs RIPPLE_SOURCE=engine")
@@ -238,12 +245,12 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         return engine.motifs.motifs[motif_id]
 
     @app.get("/motifs")
-    def list_motifs() -> list[LearnedPattern]:
+    async def list_motifs() -> list[LearnedPattern]:
         """Patterns learned from confirmed trails, newest first."""
         return [pattern(m) for m in reversed(engine.motifs.motifs.values())] if engine else []
 
     @app.post("/motifs/learn")
-    def learn_motif(request: LearnRequest) -> LearnedPattern:
+    async def learn_motif(request: LearnRequest) -> LearnedPattern:
         """Learns a pattern from one confirmed trail: a case's money trail, or the trace of a victim's report. The
         pattern is checked against the bank's last 30 days of traffic and returned undeployed for the officer to read."""
         if engine is None:
@@ -268,14 +275,14 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         return pattern(motif)
 
     @app.post("/motifs/{motif_id}/deploy")
-    def deploy_motif(motif_id: str) -> LearnedPattern:
+    async def deploy_motif(motif_id: str) -> LearnedPattern:
         """Puts a learned pattern live: from the next payment on, a match is detector evidence like any typology."""
         motif = motif_or_404(motif_id)
         motif.deployed = True
         return pattern(motif)
 
     @app.post("/motifs/{motif_id}/retire")
-    def retire_motif(motif_id: str) -> LearnedPattern:
+    async def retire_motif(motif_id: str) -> LearnedPattern:
         motif = motif_or_404(motif_id)
         motif.deployed = False
         return pattern(motif)
@@ -297,7 +304,7 @@ def create_app(source: str | None = None, data: str | None = None, speed: float 
         return json.loads(path.read_text(encoding="utf-8"))
 
     @app.get("/stats")
-    def stats() -> dict[str, float]:
+    async def stats() -> dict[str, float]:
         return engine.stats() if engine else {}
 
     @app.websocket("/ws/stream")
