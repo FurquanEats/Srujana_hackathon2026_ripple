@@ -1,10 +1,10 @@
 """The PRD's demo story as a fixed scenario, with its exact amounts.
 
-A victim at Bank A is coached into sending Rs 8,00,000 by RTGS to a first mule, M1, at Bank B. M1 keeps
-Rs 1,00,000 and sends Rs 3,00,000 to M2 at Bank C, Rs 2,50,000 to M3 at Bank D and Rs 1,50,000 to a wallet at
-Wallet W. M2 takes Rs 2,00,000 in cash at two ATMs and sends Rs 1,00,000 to Exchange X. M3 already holds
+A victim at Bank A is coached into sending Rs 8,00,000 by RTGS to a first mule, M1, at Bank B. Within 9 minutes,
+M1 keeps Rs 1,00,000 and sends Rs 3,00,000 to M2 at Bank C, Rs 2,50,000 to M3 at Bank D and Rs 1,50,000 to a
+wallet at Wallet W. M2 takes Rs 2,00,000 in cash at two ATMs and sends Rs 1,00,000 to Exchange X. M3 already holds
 Rs 3,00,000 of its own money, and pays Ravi Traders Rs 2,00,000, Galaxy Mobiles Rs 1,20,000 and a shop assistant's
-Rs 15,000 salary.
+Rs 15,000 salary. The victim calls 1930 at minute 12.
 
 Under the SOP's rule (victims' money leaves before the holder's own), Ravi Traders carries Rs 2,00,000 of traced
 money, Galaxy Mobiles Rs 50,000 and the salary Rs 0.
@@ -150,20 +150,22 @@ def play_demo_story(world: World, accounts: dict[str, Account], start: datetime)
         )
         steps.append(Step(name, payer, None, payment, atm_id))
 
+    # The PRD's timeline, step for step as `ripple demo` plays it (packages/ripple-cli/src/ripple_cli/demo.py):
+    # every payment by minute 8 and the 1930 call at minute 12. Transfers over UPI's Rs 1 lakh cap go by IMPS.
     pay("victim_to_m1", "victim", "m1", "8,00,000", 0, rail=Rail.RTGS)
-    pay("m1_to_m2", "m1", "m2", "3,00,000", 7, rail=Rail.IMPS)
-    pay("m1_to_m3", "m1", "m3", "2,50,000", 9, rail=Rail.RTGS)
-    pay("m1_to_wallet", "m1", "m1_wallet", "1,50,000", 12, rail=Rail.IMPS)
-    pay("m2_to_exchange", "m2", "m2_exchange", "1,00,000", 26, rail=Rail.IMPS)
-    atm("m2_atm_1", "m2", "1,00,000", 38, "Howrah Maidan, Kolkata")
-    atm("m2_atm_2", "m2", "1,00,000", 51, "Shibpur, Howrah")
-    pay("m3_to_ravi_traders", "m3", "ravi_traders", "2,00,000", 64, rail=Rail.NEFT)
-    pay("m3_to_galaxy_mobiles", "m3", "galaxy_mobiles", "1,20,000", 71, rail=Rail.IMPS)
-    pay("m3_salary", "m3", "shop_assistant", "15,000", 83, rail=Rail.UPI)
+    pay("m1_to_m2", "m1", "m2", "3,00,000", 2, rail=Rail.IMPS)
+    pay("m1_to_m3", "m1", "m3", "2,50,000", 3, rail=Rail.IMPS)
+    pay("m1_to_wallet", "m1", "m1_wallet", "1,50,000", 4, rail=Rail.IMPS)
+    atm("m2_atm_1", "m2", "1,00,000", 5, "Ameerpet, Hyderabad")
+    pay("m3_to_ravi_traders", "m3", "ravi_traders", "2,00,000", 5, rail=Rail.NEFT)
+    pay("m2_to_exchange", "m2", "m2_exchange", "1,00,000", 6, rail=Rail.IMPS)
+    pay("m3_to_galaxy_mobiles", "m3", "galaxy_mobiles", "1,20,000", 6, rail=Rail.IMPS)
+    atm("m2_atm_2", "m2", "1,00,000", 7, "Secunderabad")
+    pay("m3_salary", "m3", "shop_assistant", "15,000", 8, rail=Rail.IMPS)
 
     return DemoStory(
         ack_number=world.ids.ack_number(ids.ComplaintChannel.HELPLINE_1930),
-        reported_at=(t + timedelta(minutes=95)),
+        reported_at=(t + timedelta(minutes=12)),
         accounts=acc,
         steps=tuple(steps),
     )

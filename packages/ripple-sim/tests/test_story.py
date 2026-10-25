@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+from datetime import timedelta
 
 import pytest
 
@@ -55,14 +56,14 @@ def test_the_story_has_the_prds_amounts_and_rails(sim: Simulation) -> None:
     expected = {
         "victim_to_m1": ("8,00,000", Rail.RTGS),
         "m1_to_m2": ("3,00,000", Rail.IMPS),
-        "m1_to_m3": ("2,50,000", Rail.RTGS),
+        "m1_to_m3": ("2,50,000", Rail.IMPS),
         "m1_to_wallet": ("1,50,000", Rail.IMPS),
-        "m2_to_exchange": ("1,00,000", Rail.IMPS),
         "m2_atm_1": ("1,00,000", Rail.INTERNAL),
-        "m2_atm_2": ("1,00,000", Rail.INTERNAL),
         "m3_to_ravi_traders": ("2,00,000", Rail.NEFT),
+        "m2_to_exchange": ("1,00,000", Rail.IMPS),
         "m3_to_galaxy_mobiles": ("1,20,000", Rail.IMPS),
-        "m3_salary": ("15,000", Rail.UPI),
+        "m2_atm_2": ("1,00,000", Rail.INTERNAL),
+        "m3_salary": ("15,000", Rail.IMPS),
     }
     assert [s.name for s in sim.story.steps] == list(expected)
     for name, (amount, rail) in expected.items():
@@ -71,6 +72,9 @@ def test_the_story_has_the_prds_amounts_and_rails(sim: Simulation) -> None:
         assert step.payment.rail is rail, name
     times = [s.payment.at for s in sim.story.steps]
     assert times == sorted(times)
+    # The PRD's timeline, as demo.py plays it: every payment by minute 8, and the 1930 call at minute 12.
+    assert times[-1] - times[0] == timedelta(minutes=8)
+    assert sim.story.reported_at - times[0] == timedelta(minutes=12)
     assert ids.complaint_channel(sim.story.ack_number) is ids.ComplaintChannel.HELPLINE_1930
 
 

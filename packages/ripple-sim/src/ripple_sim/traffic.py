@@ -3,19 +3,24 @@
 Who is in it: salaried people and their employers, shops and their suppliers, landlords and tenants, an
 electricity board, and a few people who also keep a wallet or a crypto exchange account. What they do:
 
-- salaries by NEFT on the 1st (or an internal transfer when employer and employee share a bank)
+- salaries by NEFT on each employer's payday, between the 1st and the 7th (or an internal transfer when employer
+  and employee share a bank)
 - rent by UPI between the 1st and the 5th
 - UPI purchases at shops most days, and UPI transfers between people
 - shops paying suppliers weekly by NEFT or RTGS
 - electricity bills in the second week
-- cash at ATMs and card payments at shops, which leave the banking system (exits)
+- cash at ATMs and debit card payments at shops, which leave the banking system (exits)
 - wallet top-ups and wallet spending, and exchange deposits followed by crypto withdrawals
+
+The amounts and the mix follow published figures where one exists; the constants below name them, and
+packages/ripple-sim/README.md cites each source and says which figures are our own assumptions.
 
 A payment that the payer cannot afford at that moment is skipped, as a bank would decline it.
 """
 
 from __future__ import annotations
 
+import math
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -118,6 +123,29 @@ OCCUPATIONS = (
     ("Machine operator", "3,00,000"),
     ("Teacher", "5,40,000"),
 )
+
+
+# Published figures (sources in README.md, "Where the numbers come from").
+P2M_UNDER_500 = 0.86  # share of UPI shop payments below Rs 500 (NPCI via PIB, FY 2025-26)
+P2M_SPLIT_RUPEES = (
+    20,
+    500,
+    12_000,
+)  # log-uniform below and above Rs 500; mean about Rs 635 (published Rs 589)
+P2P_UNDER_500 = 0.59  # share of UPI transfers between people below Rs 500 (same source)
+P2P_SPLIT_RUPEES = (50, 500, 23_000)  # mean about Rs 2,500, as NPCI's February 2026 P2P value over volume
+P2P_PER_P2M = 37 / 63  # UPI volume: 63% to merchants, 37% between people (FY 2025-26)
+ATM_RUPEES = (500, 11_000)  # steps of Rs 500, mean Rs 5,750 (CMS Info Systems: Rs 5,835 average in 2025)
+POS_RUPEES = (
+    200,
+    15_000,
+)  # log-uniform, mean about Rs 3,430 (RBI: debit cards averaged about Rs 3,370 in 2025)
+POS_PER_DAY = 0.01  # debit card payments are about 0.6% of UPI volume (RBI Payment System Report, CY 2025)
+LAST_PAYDAY = 7  # monthly wages are due before the 7th day of the next month ends (Code on Wages, s.17(1))
+
+# Our own assumptions: no public per-person figure exists for these.
+SHOP_PAYMENTS_PER_DAY = ((0, 1, 2, 3), (35, 35, 20, 10))  # about 1.05 UPI shop payments per person per day
+ATM_PER_DAY = 0.03  # about one ATM visit a month
 
 
 @dataclass(frozen=True)
@@ -296,6 +324,25 @@ def _amount(rng: random.Random, low: int, high: int, step: int = 1) -> int:
     return rupees(rng.randrange(low, high + 1, step))
 
 
+def _log_uniform(rng: random.Random, low: int, high: int) -> int:
+    """A whole-rupee amount between `low` and `high`, spread evenly on a log scale (many small, few large), in paise."""
+    return rupees(round(math.exp(rng.uniform(math.log(low), math.log(high)))))
+
+
+def _split(rng: random.Random, under_share: float, bounds: tuple[int, int, int]) -> int:
+    """A UPI amount: below the middle bound with probability `under_share`, otherwise above it, in paise."""
+    low, middle, high = bounds
+    if rng.random() < under_share:
+        return _log_uniform(rng, low, middle - 1)
+    return _log_uniform(rng, middle, high)
+
+
+def _count(rng: random.Random, mean: float) -> int:
+    """How many times something happens in a day, for a daily mean below 3."""
+    whole, part = divmod(mean, 1)
+    return int(whole) + (rng.random() < part)
+
+
 def plan_month(world: World, rng: random.Random, pop: Population, config: TrafficConfig) -> list[Intent]:  # noqa: PLR0912
     intents: list[Intent] = []
 
@@ -313,12 +360,15 @@ def plan_month(world: World, rng: random.Random, pop: Population, config: Traffi
         return lambda at: world.exit(account, amount, at, mode=mode, identifier=ident, location=where)
 
     atm_ids = {b.code: [world.ids.atm_id(b.code) for _ in range(4)] for b in BANKS}
+    payday = {e.number: rng.randint(1, LAST_PAYDAY) for e in pop.employers}
+    p2p_per_day = sum(n * w for n, w in zip(*SHOP_PAYMENTS_PER_DAY, strict=True)) / 100 * P2P_PER_P2M
 
     for day in month_days(config.month):
-        if day.day == 1:
-            for p in pop.people:
-                employer = pop.employer_of[p.number]
+        for p in pop.people:
+            employer = pop.employer_of[p.number]
+            if day.day == payday[employer.number]:
                 add(_at(day, rng, 9, 11), pay(employer, p, pop.salary[p.number], Rail.NEFT))
+        if day.day == 1:
             for tenant in pop.people:  # rent once a month, on a day between the 1st and the 5th
                 if tenant.number in pop.landlord_of:
                     landlord, rent = pop.landlord_of[tenant.number]
@@ -341,24 +391,25 @@ def plan_month(world: World, rng: random.Random, pop: Population, config: Traffi
                 )
 
         for p in pop.people:
-            for _ in range(rng.choices((0, 1, 2, 3), (35, 35, 20, 10))[0]):
-                add(_at(day, rng), pay(p, rng.choice(pop.shops), _amount(rng, 30, 2_500), Rail.UPI))
-            roll = rng.random()
-            if roll < 0.04:
-                add(_at(day, rng), pay(p, rng.choice(pop.people), _amount(rng, 100, 8_000, 50), Rail.UPI))
-            elif roll < 0.07:
+            for _ in range(rng.choices(*SHOP_PAYMENTS_PER_DAY)[0]):
+                shop = rng.choice(pop.shops)
+                add(_at(day, rng), pay(p, shop, _split(rng, P2M_UNDER_500, P2M_SPLIT_RUPEES), Rail.UPI))
+            for _ in range(_count(rng, p2p_per_day)):
+                friend = rng.choice([q for q in pop.people if q is not p])
+                add(_at(day, rng), pay(p, friend, _split(rng, P2P_UNDER_500, P2P_SPLIT_RUPEES), Rail.UPI))
+            if rng.random() < ATM_PER_DAY:
                 atm = rng.choice(atm_ids[p.member.code])
                 add(
                     _at(day, rng, 6, 23),
-                    exit_(p, _amount(rng, 500, 10_000, 500), ExitMode.ATM, atm, p.member.city),
+                    exit_(p, _amount(rng, *ATM_RUPEES, 500), ExitMode.ATM, atm, p.member.city),
                 )
-            elif roll < 0.10:
+            if rng.random() < POS_PER_DAY:
                 shop = rng.choice(pop.shops)
                 add(
                     _at(day, rng, 10, 22),
                     exit_(
                         p,
-                        _amount(rng, 200, 15_000),
+                        _log_uniform(rng, *POS_RUPEES),
                         ExitMode.POS,
                         pop.merchant_ids[shop.number],
                         shop.member.city,

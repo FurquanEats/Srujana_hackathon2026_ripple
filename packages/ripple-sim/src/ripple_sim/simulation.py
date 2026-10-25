@@ -1,4 +1,4 @@
-"""Put the month and the demo story together into one ordered stream of deliveries."""
+"""Put the month, the demo story and the other scams together into one ordered stream of deliveries."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from ripple_core.messages import LedgerPosting
 from ripple_sim.events import Delivery
 from ripple_sim.identifiers import SeededIds
 from ripple_sim.network import member
+from ripple_sim.scams import Scam, play_scams
 from ripple_sim.scenario import DemoStory, open_story_accounts, play_demo_story
 from ripple_sim.traffic import Population, TrafficConfig, run_month
 from ripple_sim.world import World
@@ -28,6 +29,7 @@ class Simulation:
     population: Population
     posted: int
     skipped: int
+    scams: tuple[Scam, ...] = ()
 
     def for_member(self, name: str) -> list[Delivery]:
         return [d for d in self.deliveries if d.member == name]
@@ -42,9 +44,11 @@ def simulate(
     world = World(SeededIds(rng, seed))
 
     population, posted, skipped = run_month(world, rng, config)
-    story_accounts = open_story_accounts(world, story_at - timedelta(days=200))
-    story = play_demo_story(world, story_accounts, story_at)
-    return Simulation(seed, _in_ledger_order(world.deliveries, seed), story, population, posted, skipped)
+    opened_at = story_at - timedelta(days=200)
+    story = play_demo_story(world, open_story_accounts(world, opened_at), story_at)
+    scams = play_scams(world, config.month, opened_at)
+    deliveries = _in_ledger_order(world.deliveries, seed)
+    return Simulation(seed, deliveries, story, population, posted, skipped, scams)
 
 
 def _in_ledger_order(deliveries: list[Delivery], seed: int) -> tuple[Delivery, ...]:
