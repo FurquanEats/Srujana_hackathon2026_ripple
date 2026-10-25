@@ -238,7 +238,14 @@ export async function approveThresholds(s: DemoSession, t: Thresholds, budgetPer
 }
 
 export async function playDemoStory(s: DemoSession): Promise<string> {
-  if (!LIVE) return "31575867494554"; // the demo story's complaint in the saved run
+  if (!LIVE) {
+    // The demo story's complaint in the saved run: the one filed for the retired teacher.
+    const story = (police as Saved)["/v1/cases"] as CaseSummary[];
+    const found = story.find((c) => c.victim_name.startsWith("Retired teacher")) ?? story[0];
+    if (!found)
+      throw new GatewayFailure(404, { error: "not_found", message: "The saved run has no demo story." });
+    return found.ack_number;
+  }
   return (await gatewayFetch<{ ack_number: string }>(caller(s), "/v1/simulation/demo-story", {})).ack_number;
 }
 

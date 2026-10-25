@@ -43,6 +43,10 @@ export function HowItWorks() {
         <div className="md:order-2">
           <div className="md:sticky md:top-28">
             <TileArt className="w-full" />
+            <p className="mt-3 text-center text-[12px] text-muted">
+              Each square is ₹10,000 of the victim&apos;s money: green is held under a lien, grey was taken
+              out as cash.
+            </p>
           </div>
         </div>
         <ol className="flex flex-col gap-24 md:gap-[38vh] md:py-[12vh]">

@@ -160,3 +160,11 @@ test("an FRM analyst notes a hold, and a grievance officer files a grievance", a
   await page.getByRole("button", { name: "File the grievance with this evidence pack" }).click();
   await expect(page.getByText(/Grievance filed/).first()).toBeVisible();
 });
+
+test("the demo operator plays the demo story and lands on its trail", async ({ page }) => {
+  await signIn(page, "demo");
+  await page.goto("/app/simulation");
+  await page.getByRole("button", { name: "Play the demo story" }).click();
+  await expect(page).toHaveURL(/\/app\/cases\/[23]\d{13}$/);
+  await expect(page.getByRole("heading", { name: "Money trail" })).toBeVisible();
+});
