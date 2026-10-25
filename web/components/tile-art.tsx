@@ -1,6 +1,6 @@
 /**
- * The trail as tiles: each institution is a dark ridged tile and the victim's money is cyan pixels. Money that is
- * held under a lien sits inside a cyan outline; money cashed out at an ATM is grey. This static drawing is the hero
+ * The trail as tiles: each institution is a dark ridged tile and the victim's money is green pixels. Money that is
+ * held under a lien sits inside a green outline; money cashed out at an ATM is grey. This static drawing is the hero
  * art and the fallback for the 3D scene.
  */
 
@@ -74,7 +74,7 @@ export function TileArt({ className = "" }: { className?: string }) {
           key={d}
           d={d}
           fill="none"
-          stroke="#00a9cc"
+          stroke="#36a26b"
           strokeOpacity="0.45"
           strokeWidth="1.5"
           strokeDasharray="3 5"
@@ -83,7 +83,7 @@ export function TileArt({ className = "" }: { className?: string }) {
 
       {TILES.map((t, i) => {
         const cells = pixelCells(t.pixels, i * 17 + 5);
-        const colour = t.state === "cashed" ? "#6b6b6b" : "#00a9cc";
+        const colour = t.state === "cashed" ? "#6b6b6b" : "#36a26b";
         return (
           <g
             key={t.id}
@@ -92,7 +92,7 @@ export function TileArt({ className = "" }: { className?: string }) {
           >
             <rect width={SIZE} height={SIZE} rx="12" fill="url(#ridges)" stroke="#2f2f2f" />
             {t.state === "held" && (
-              <rect x="-4" y="-4" width={SIZE + 8} height={SIZE + 8} rx="15" fill="none" stroke="#00a9cc" />
+              <rect x="-4" y="-4" width={SIZE + 8} height={SIZE + 8} rx="15" fill="none" stroke="#36a26b" />
             )}
             <text
               x="14"

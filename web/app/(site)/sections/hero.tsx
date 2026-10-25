@@ -10,9 +10,9 @@ export function Hero() {
       <PixelHeading
         as="h1"
         text="Follow the money. Hold only what is traced."
-        className="max-w-[16ch] text-[34px] sm:text-5xl md:text-6xl"
+        className="max-w-[18ch] text-[28px] md:text-[34px]"
       />
-      <p className="mt-6 max-w-[46ch] text-[15px] leading-relaxed text-grey-300 md:text-base">
+      <p className="mt-6 max-w-[46ch] text-[14px] leading-relaxed text-muted md:text-base">
         Ripple answers cyber-fraud notices for banks in seconds, tracing a victim&apos;s money across
         institutions and placing liens on the traced amount only.
       </p>

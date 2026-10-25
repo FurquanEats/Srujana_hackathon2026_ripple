@@ -29,7 +29,7 @@ export function Term({ name, children }: { name: TermKey; children?: React.React
       <span
         id={id}
         role="tooltip"
-        className={`absolute bottom-full left-1/2 z-20 mb-2 w-72 -translate-x-1/2 border border-grey-700 bg-ink p-3 text-left text-[13px] leading-snug font-normal text-grey-300 normal-case tracking-normal shadow-xl ${open ? "block" : "sr-only"}`}
+        className={`absolute bottom-full left-1/2 z-20 mb-2 w-[min(18rem,80vw)] -translate-x-1/2 border border-grey-700 bg-ink p-3 text-left text-[13px] leading-snug font-normal text-grey-300 normal-case tracking-normal shadow-xl ${open ? "block" : "hidden"}`}
       >
         {term.text}
       </span>

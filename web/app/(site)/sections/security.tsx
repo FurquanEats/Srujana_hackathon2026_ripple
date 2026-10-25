@@ -23,16 +23,16 @@ export function Security() {
   return (
     <section id="security" aria-label="Security" className="relative z-10 scroll-mt-14 px-5 py-28 md:py-40">
       <div className="mx-auto max-w-6xl">
-        <PixelHeading text="Security" className="text-center text-3xl md:text-4xl" />
+        <PixelHeading text="Security" className="text-center text-[24px] md:text-[30px]" />
         <dl className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2">
           {FACTS.map((fact, i) => (
             <div key={fact.title} className="flex gap-5">
-              <span aria-hidden className="pixel text-sm text-grey-500">
+              <span aria-hidden className="pixel text-sm text-faint">
                 0{i + 1}
               </span>
               <div>
                 <dt className="pixel text-xl">{fact.title}</dt>
-                <dd className="mt-3 max-w-[44ch] text-sm leading-relaxed text-grey-300">{fact.body}</dd>
+                <dd className="mt-3 max-w-[44ch] text-sm leading-relaxed text-muted">{fact.body}</dd>
               </div>
             </div>
           ))}

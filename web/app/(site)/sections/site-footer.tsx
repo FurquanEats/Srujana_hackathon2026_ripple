@@ -12,7 +12,7 @@ export function SiteFooter() {
     <footer className="relative z-10 overflow-hidden px-5 pt-20 md:px-8">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <nav aria-label="Footer">
-          <ul className="pixel flex flex-wrap gap-x-6 gap-y-2 text-xs text-grey-300">
+          <ul className="pixel flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="hover:text-white">
@@ -22,7 +22,7 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-        <p className="text-xs text-grey-500">Prototype for Srujana Tech Fest 2026. All data is synthetic.</p>
+        <p className="text-xs text-faint">Prototype for Srujana Tech Fest 2026. All data is synthetic.</p>
       </div>
       <p
         aria-hidden

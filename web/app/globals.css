@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
-/* Design tokens (02 Web app design brief, section 1). Cyan marks money that is traced or held, nothing else. */
+/* Design tokens (02 Web app design brief, section 1, as corrected against mosaic.flabbergast.agency).
+   Green marks money that is traced or held, nothing else. With ink text on it, it passes WCAG AA. */
 @theme {
   --color-ink: #121212;
-  --color-cyan: #00a9cc;
+  --color-accent: #36a26b;
   --color-grey-900: #2a2a2a;
   --color-grey-700: #4b4b4b;
   --color-grey-500: #6b6b6b;
   --color-grey-300: #b3b3b3;
-  --color-paper: #f4f4f2;
+  --color-paper: #ffffff;
 
-  --font-pixel: var(--font-silkscreen), ui-monospace, monospace;
+  --font-pixel: var(--font-pixel-operator), ui-monospace, monospace;
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  --tracking-pixel: -0.04em;
+  --tracking-pixel: -0.03em;
 }
 
 @layer base {
@@ -32,7 +33,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-cyan);
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
@@ -48,6 +49,44 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+/* Each home page section is dark or light; components take their greys from the section they sit in. */
+@layer base {
+  .tone-dark {
+    --fg: #ffffff;
+    --muted: var(--color-grey-300);
+    --faint: var(--color-grey-500);
+    --surface: var(--color-ink);
+    --line: var(--color-grey-900);
+    background: var(--color-ink);
+    color: var(--fg);
+  }
+  .tone-light {
+    --fg: var(--color-ink);
+    --muted: var(--color-grey-500);
+    --faint: #8d8d8d;
+    --surface: #ffffff;
+    --line: #e4e4e4;
+    background: var(--color-paper);
+    color: var(--fg);
+  }
+}
+
+@utility text-muted {
+  color: var(--muted);
+}
+@utility text-faint {
+  color: var(--faint);
+}
+@utility bg-surface {
+  background-color: var(--surface);
+}
+@utility bg-line {
+  background-color: var(--line);
+}
+@utility border-line {
+  border-color: var(--line);
 }
 
 @layer components {
@@ -75,18 +114,17 @@
       color 150ms;
   }
   .button-solid {
-    background: #fff;
-    color: var(--color-ink);
-    border-color: #fff;
+    background: var(--fg, #fff);
+    color: var(--surface, var(--color-ink));
+    border-color: var(--fg, #fff);
   }
   .button-solid:hover {
-    background: var(--color-grey-300);
-    border-color: var(--color-grey-300);
+    opacity: 0.85;
   }
   .button-ghost:hover {
     background: rgb(255 255 255 / 0.08);
   }
-  .on-paper .button-ghost:hover {
+  .tone-light .button-ghost:hover {
     background: rgb(0 0 0 / 0.06);
   }
 }

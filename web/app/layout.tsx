@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
-import { silkscreen } from "./fonts";
+import { pixelOperator } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-IN" className={`${GeistSans.variable} ${GeistMono.variable} ${silkscreen.variable}`}>
+    <html lang="en-IN" className={`${GeistSans.variable} ${GeistMono.variable} ${pixelOperator.variable}`}>
       <body>{children}</body>
     </html>
   );

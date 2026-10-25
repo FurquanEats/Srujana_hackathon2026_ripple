@@ -1,5 +1,5 @@
 import { LaptopFrame } from "@/components/laptop-frame";
-import { PixelHeading } from "@/components/pixel-heading";
+import { Pinned } from "@/components/pinned";
 import { formatInr, formatIst } from "@/lib/format";
 import type { TrailAccount } from "@/lib/gateway/types";
 import { DEMO_TRAIL } from "@/lib/showcase";
@@ -30,7 +30,7 @@ function Card({ account }: { account: TrailAccount }) {
       <div className="mt-[0.6em] flex items-center justify-between gap-[0.5em]">
         <span className="text-[0.75em] text-grey-300">{outcome(account)}</span>
         {account.held > 0 && (
-          <span className="bg-cyan px-[0.4em] font-mono text-[0.8em] text-ink tabular-nums">
+          <span className="bg-accent px-[0.4em] font-mono text-[0.8em] text-ink tabular-nums">
             {formatInr(account.held)}
           </span>
         )}
@@ -38,6 +38,21 @@ function Card({ account }: { account: TrailAccount }) {
     </div>
   );
 }
+
+const CAPTIONS = [
+  {
+    title: "The whole trail, in one view",
+    body: "The investigating officer sees every account the money reached, what each bank holds, and what left the system.",
+  },
+  {
+    title: "Totals that always add up",
+    body: "Held, cashed out, off network and waiting always add up to the amount the victim reported, to the rupee.",
+  },
+  {
+    title: "Exits, named for the police",
+    body: "Cash withdrawals come with the ATM ID and place, so the police can follow the money that left the banks.",
+  },
+] as const;
 
 export function Showcase() {
   const t = DEMO_TRAIL;
@@ -53,18 +68,8 @@ export function Showcase() {
     ["Waiting", t.waiting],
   ] as const;
   return (
-    <section aria-labelledby="showcase-title" className="relative z-10 px-5 py-28 md:py-40">
-      <div className="mx-auto max-w-6xl text-center">
-        <PixelHeading text="The whole trail, in one view" className="text-3xl md:text-4xl" />
-        <p
-          id="showcase-title"
-          className="mx-auto mt-5 max-w-[50ch] text-[15px] leading-relaxed text-grey-300"
-        >
-          The investigating officer sees every account the money reached, what each bank holds, and what left
-          the system, with totals that always add up to the amount reported.
-        </p>
-      </div>
-      <div className="mt-16">
+    <section aria-label="The workspace" className="relative z-10">
+      <Pinned captions={CAPTIONS}>
         <LaptopFrame label="The Ripple workspace showing a case trail across six institutions">
           <div className="@container h-full">
             <div className="flex h-full text-left text-[1.15cqw] text-grey-300">
@@ -86,7 +91,7 @@ export function Showcase() {
                       <div key={label} className="bg-ink p-[0.7em]">
                         <p className="text-[0.7em] text-grey-500">{label}</p>
                         <p
-                          className={`font-mono text-[0.95em] tabular-nums ${label === "Held" ? "text-cyan" : "text-white"}`}
+                          className={`font-mono text-[0.95em] tabular-nums ${label === "Held" ? "text-accent" : "text-white"}`}
                         >
                           {formatInr(value)}
                         </p>
@@ -110,7 +115,7 @@ export function Showcase() {
             </div>
           </div>
         </LaptopFrame>
-      </div>
+      </Pinned>
     </section>
   );
 }

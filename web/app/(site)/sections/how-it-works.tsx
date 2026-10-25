@@ -48,9 +48,9 @@ export function HowItWorks() {
         <ol className="flex flex-col gap-24 md:gap-[38vh] md:py-[12vh]">
           {STEPS.map((step, i) => (
             <li key={step.title} className="max-w-md">
-              <p className="pixel text-sm text-grey-500">Step {i + 1}</p>
-              <PixelHeading as="h3" text={step.title} className="mt-3 text-3xl md:text-4xl" />
-              <p className="mt-5 text-[15px] leading-relaxed text-grey-300">{step.body}</p>
+              <p className="pixel text-sm text-faint">Step {i + 1}</p>
+              <PixelHeading as="h3" text={step.title} className="mt-3 text-[24px] md:text-[30px]" />
+              <p className="mt-5 text-[14px] leading-relaxed text-muted">{step.body}</p>
             </li>
           ))}
         </ol>
