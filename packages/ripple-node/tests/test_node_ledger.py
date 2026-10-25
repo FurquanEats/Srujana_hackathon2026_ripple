@@ -156,3 +156,27 @@ def test_two_victims_in_one_account_get_separate_liens(factory: sessionmaker[Ses
         assert ledger.held(s, "200000000001") == rupees(4_000)
     assert (a.held_amount, b.held_amount) == (rupees(1_000), rupees(3_000))
     assert a.lien_id != b.lien_id
+
+
+def test_a_credit_dated_after_the_banks_clock_is_not_found(factory: sessionmaker[Session]) -> None:
+    with transaction(factory) as s:
+        ledger.post(s, credit("c1", "111111111111", 1_000, 120))
+        response = responder.respond(
+            s, notice("111111111111", 1_000, 1_000), T0 + timedelta(minutes=5), "cfcfrms"
+        )
+    assert response.status == "not_found"
+    assert response.reason == "the credit is dated after this bank's current time"
+
+
+def test_a_upi_id_cannot_belong_to_two_accounts(factory: sessionmaker[Session]) -> None:
+    with transaction(factory) as s, pytest.raises(LedgerConflict, match="UPI ID"):
+        ledger.open_account(
+            s,
+            AccountOpening(
+                account_number="200000000002",
+                ifsc="BKBB0000001",
+                holder_name="Someone else",
+                vpa="mule@bkbb",
+                opened_at=T0,
+            ),
+        )

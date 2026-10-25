@@ -4,16 +4,23 @@ where the rest went (MHA SOP for NCRP-CFCFRMS, paras 6.1 g to k and 9.1).
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ripple_core.messages import AccountType, Exit, Notice, NoticeResponse, OnwardHop, Payment, Rail
-from ripple_core.tracing import trace_account
+from ripple_core.tracing import LedgerError, trace_account
 from ripple_node import ledger
 from ripple_node.ledger import NoticeRow, Posting
 from ripple_service.db import append_audit
+
+log = logging.getLogger(__name__)
+
+
+class TracingError(LedgerError):
+    """The trace did not account for every traced rupee. The node refuses to answer rather than answer wrongly."""
 
 
 def respond(session: Session, notice: Notice, now: datetime, actor: str) -> NoticeResponse:
@@ -35,9 +42,13 @@ def respond(session: Session, notice: Notice, now: datetime, actor: str) -> Noti
             Posting.amount == notice.credit.amount,
         )
     )
+    reason = None
     if credit is None:
         reason = "no credit with this reference and amount in the account"
-        response = _not_found(notice, now, reason)
+    elif credit.at > now:
+        reason = "the credit is dated after this bank's current time"
+    if credit is None or reason is not None:
+        response = _not_found(notice, now, reason or "")
         return _record(
             session,
             notice,
@@ -103,7 +114,10 @@ def respond(session: Session, notice: Notice, now: datetime, actor: str) -> Noti
         responded_at=now,
     )
     if response.traced_in != notice.traced_amount:
-        raise AssertionError("tracing lost money; refusing to answer")  # conservation is property-tested
+        log.error("trace for notice %s does not add up; not answering", notice.notice_id)
+        raise TracingError(
+            f"notice {notice.notice_id}: traced amounts do not add up"
+        )  # property-tested never to happen
     return _record(
         session,
         notice,

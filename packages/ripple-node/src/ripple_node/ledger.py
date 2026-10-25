@@ -98,6 +98,11 @@ class NoticeRow(NodeBase):
 def open_account(session: Session, opening: AccountOpening) -> Account:
     if session.get(Account, opening.account_number) is not None:
         raise LedgerConflict(f"account {opening.account_number} already exists")
+    if (
+        opening.vpa is not None
+        and session.scalar(select(Account).where(Account.vpa == opening.vpa)) is not None
+    ):
+        raise LedgerConflict(f"UPI ID {opening.vpa} already belongs to another account")
     account = Account(
         account_number=opening.account_number,
         ifsc=opening.ifsc,
