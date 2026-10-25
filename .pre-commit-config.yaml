@@ -25,7 +25,7 @@ repos:
         files: ^packages/
       - id: mypy
         name: mypy
-        entry: uv run mypy packages/ripple-core
+        entry: uv run mypy packages
         language: system
         pass_filenames: false
         files: ^packages/

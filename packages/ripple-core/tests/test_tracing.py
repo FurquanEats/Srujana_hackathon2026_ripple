@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 from ripple_core.clock import IST
 from ripple_core.money import rupees
-from ripple_core.tracing import Direction, Entry, LedgerError, trace_account
+from ripple_core.tracing import Direction, Entry, LedgerError, Lien, trace_account
 
 CREDIT, DEBIT = Direction.CREDIT, Direction.DEBIT
 
@@ -102,6 +102,30 @@ def test_as_of_ignores_later_entries() -> None:
 
     assert trace.remaining == {"A": rupees(500)}
     assert trace.debits == ()
+
+
+def test_a_lien_sets_victim_money_aside() -> None:
+    """After a lien, the holder's later payments come out of their own money, not the victim's."""
+    t0 = datetime(2026, 10, 20, 11, 0, tzinfo=IST)
+    entries = [
+        Entry("in", t0, CREDIT, rupees(1_000)),
+        Entry("salary", t0 + timedelta(minutes=5), CREDIT, rupees(500)),
+        Entry("out", t0 + timedelta(minutes=10), DEBIT, rupees(400)),
+    ]
+    lien = Lien(t0 + timedelta(minutes=1), "A", rupees(1_000))
+
+    trace = trace_account(entries, opening_balance=0, traced_in={"in": {"A": rupees(1_000)}}, liens=[lien])
+
+    assert trace.remaining == {"A": rupees(1_000)}
+    assert trace.debits[0].carried == {}
+    assert trace.own == rupees(100)
+    with pytest.raises(LedgerError, match="not under a lien"):
+        trace_account(
+            [*entries, Entry("big", t0 + timedelta(minutes=11), DEBIT, rupees(200))],
+            opening_balance=0,
+            traced_in={"in": {"A": rupees(1_000)}},
+            liens=[lien],
+        )
 
 
 def test_overdrawn_ledger_is_rejected() -> None:

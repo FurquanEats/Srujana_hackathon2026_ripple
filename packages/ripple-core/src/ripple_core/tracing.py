@@ -82,18 +82,29 @@ class AccountTrace:
         return sum(self.remaining.values())
 
 
+@dataclass(frozen=True)
+class Lien:
+    """From `at`, `amount` of a victim's money in the account is set aside, and no later debit can take it."""
+
+    at: datetime
+    claim: Claim
+    amount: int
+
+
 def trace_account(
     entries: Iterable[Entry],
     *,
     opening_balance: int,
     traced_in: Mapping[str, Mapping[Claim, int]],
+    liens: Iterable[Lien] = (),
     as_of: datetime | None = None,
 ) -> AccountTrace:
     """Trace victims' money through an account.
 
     `entries` is the statement from the moment `opening_balance` applies, in ledger order (entries with the same
     time keep their order). `traced_in` names the credits that carry victims' money: credit txn id -> claim -> paise.
-    A credit can carry several victims' money, and part of a credit can be untraced.
+    A credit can carry several victims' money, and part of a credit can be untraced. A lien applies to debits
+    after its time; entries at the same instant as a lien happened before it.
     """
     rows = sorted(entries, key=lambda e: e.at)  # stable, so same-time entries keep ledger order
     if as_of is not None:
@@ -101,25 +112,30 @@ def trace_account(
     if opening_balance < 0:
         raise LedgerError("opening balance cannot be negative")
     _check_traced_in(rows, traced_in)
+    pending = sorted(liens, key=lambda lien: lien.at)
 
     buckets: dict[Claim, int] = {}
+    locked: dict[Claim, int] = {}
     own = opening_balance
     debits: list[DebitTrace] = []
     for entry in rows:
+        while pending and pending[0].at < entry.at:
+            lien = pending.pop(0)
+            locked[lien.claim] = min(lien.amount, buckets.get(lien.claim, 0))
         if entry.direction is Direction.CREDIT:
             carried_in = traced_in.get(entry.txn_id, {})
             for claim, paise in carried_in.items():
                 buckets[claim] = buckets.get(claim, 0) + paise
             own += entry.amount - sum(carried_in.values())
             continue
-        victims_total = sum(buckets.values())
-        from_victims = min(entry.amount, victims_total)
-        taken = split_pro_rata(from_victims, buckets) if from_victims else {}
+        free = {c: b - locked.get(c, 0) for c, b in buckets.items()}
+        from_victims = min(entry.amount, sum(free.values()))
+        taken = split_pro_rata(from_victims, free) if from_victims else {}
         for claim, paise in taken.items():
             buckets[claim] -= paise
         own -= entry.amount - from_victims
         if own < 0:
-            raise LedgerError(f"{entry.txn_id}: the debit is larger than the balance")
+            raise LedgerError(f"{entry.txn_id}: the debit is larger than the balance not under a lien")
         debits.append(DebitTrace(entry.txn_id, entry.at, entry.amount, {c: p for c, p in taken.items() if p}))
 
     return AccountTrace(remaining=buckets, own=own, debits=tuple(debits))

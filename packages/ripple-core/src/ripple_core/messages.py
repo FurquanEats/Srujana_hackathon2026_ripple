@@ -190,6 +190,68 @@ class NoticeResponse(Model):
         return self
 
 
+class ExitDetail(Model):
+    """Where a debit left the banking system, as the bank's own records show it."""
+
+    mode: ExitMode
+    reference: Annotated[str, Field(min_length=1)]
+    identifier: Annotated[str, Field(min_length=1)]
+    location: str | None = None
+
+
+class AccountOpening(Model):
+    """An account the bank holds. In the simulation the node's ledger stands in for core banking."""
+
+    account_number: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
+    ifsc: str
+    holder_name: Annotated[str, Field(min_length=1, max_length=120)]
+    account_type: AccountType = AccountType.REGULAR
+    vpa: str | None = None
+    declared_profile: Annotated[str, Field(max_length=200)] = ""
+    opening_balance: PaiseAmount = 0
+    opened_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        AccountRef(ifsc=self.ifsc, account_number=self.account_number, vpa=self.vpa)
+        return self
+
+
+class LedgerPosting(Model):
+    """One line posted to an account: a transfer in or out, or money leaving the system through an exit."""
+
+    txn_id: Annotated[str, Field(min_length=1, max_length=64)]
+    account_number: Annotated[str, Field(pattern=r"^[0-9A-Z]{6,20}$")]
+    direction: Literal["credit", "debit"]
+    payment: Payment
+    counterparty: AccountRef | None = None
+    exit: ExitDetail | None = None
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if self.direction == "credit" and (self.counterparty is None or self.exit is not None):
+            raise ValueError("a credit names the account it came from and has no exit")
+        if self.direction == "debit" and (self.counterparty is None) == (self.exit is None):
+            raise ValueError("a debit goes either to another account or out through an exit")
+        return self
+
+
+class Complaint(Model):
+    """A complaint pushed to CFCFRMS by a police officer (SOP 6.1 f), naming the victim's payment."""
+
+    ack_number: str
+    victim_name: Annotated[str, Field(min_length=1, max_length=120)]
+    payment: Payment
+    beneficiary: AccountRef
+    filed_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if not ids.is_ncrp_ack(self.ack_number):
+            raise ValueError(f"not an NCRP acknowledgement number: {self.ack_number!r}")
+        return self
+
+
 class RiskLevel(StrEnum):
     MEDIUM = "medium"
     HIGH = "high"

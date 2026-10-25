@@ -26,18 +26,22 @@ class SystemClock:
 class SimClock:
     """A clock that starts at a chosen moment, runs `speed` times faster than real time, and can jump forward.
 
-    Time never goes backwards: `advance` only accepts positive steps and `set_speed` keeps the current reading.
+    Every process on the network builds its clock from the same `start`, `speed` and `real_anchor` (wall-clock
+    seconds when the network started), so they all read the same simulated time. Time never goes backwards:
+    `advance` only accepts positive steps, `set_speed` keeps the current reading, and a wall clock stepping back
+    is ignored.
     """
 
-    def __init__(self, start: datetime, speed: float = 1.0) -> None:
+    def __init__(self, start: datetime, speed: float = 1.0, real_anchor: float | None = None) -> None:
         if start.tzinfo is None:
             raise ValueError("start must be timezone-aware")
         if speed <= 0:
             raise ValueError("speed must be positive")
         self._lock = threading.Lock()
         self._anchor_sim = start.astimezone(UTC)
-        self._anchor_real = time.monotonic()
+        self._anchor_real = time.time() if real_anchor is None else real_anchor
         self._speed = speed
+        self._last = self._anchor_sim
 
     def now(self) -> datetime:
         with self._lock:
@@ -48,7 +52,8 @@ class SimClock:
             raise ValueError("the clock only moves forward")
         with self._lock:
             self._anchor_sim = self._reading() + step
-            self._anchor_real = time.monotonic()
+            self._anchor_real = time.time()
+            self._last = self._anchor_sim
             return self._anchor_sim
 
     def set_speed(self, speed: float) -> None:
@@ -56,12 +61,13 @@ class SimClock:
             raise ValueError("speed must be positive")
         with self._lock:
             self._anchor_sim = self._reading()
-            self._anchor_real = time.monotonic()
+            self._anchor_real = time.time()
             self._speed = speed
 
     def _reading(self) -> datetime:
-        elapsed = (time.monotonic() - self._anchor_real) * self._speed
-        return self._anchor_sim + timedelta(seconds=elapsed)
+        elapsed = (time.time() - self._anchor_real) * self._speed
+        self._last = max(self._last, self._anchor_sim + timedelta(seconds=elapsed))
+        return self._last
 
 
 class FixedClock:
