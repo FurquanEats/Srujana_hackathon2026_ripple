@@ -66,7 +66,7 @@ Checks:
 
 ```bash
 uv run ruff format --check packages && uv run ruff check packages && uv run mypy packages
-uv run pytest --cov                             # 193 tests, 87% coverage (the floor is 85%)
+uv run pytest --cov                             # 197 tests, 87% coverage (the floor is 85%)
 cd web && npm run lint && npm run typecheck && npm test && npm run build && npm run e2e
 ```
 
@@ -111,7 +111,7 @@ The two misses are safe ones: a salary slip and a rent agreement were marked "no
 
 ## The earlier version
 
-The first version of Ripple, built in the first day of the hackathon, is in the git history (commit `2b3fcb3`, folder `backup/`). It traced money inside a single bank only. We rebuilt Ripple because banks cannot see a payment once it leaves them, and the real-world fix is to make every bank's answer to CFCFRMS instant and exact.
+The first version of Ripple, built in the first day of the hackathon, is in the git history (commit `2b3fcb3`, in the folder `backup/` that was removed later). It traced money inside a single bank only. We rebuilt Ripple because banks cannot see a payment once it leaves them, and the real-world fix is to make every bank's answer to CFCFRMS instant and exact.
 
 ## AI usage
 

@@ -30,6 +30,8 @@ export default async function FlagPage({
   if (!found) notFound();
   const open = found.flags.filter((f) => f.status === "open");
   const profile = await accountView(session, found.account_number).catch(() => null);
+  // The node holds only money still in the account, so with nothing free there is nothing to hold.
+  const holdable = profile ? Math.min(profile.available, Math.max(0, ...open.map((f) => f.amount))) : null;
   const flow = profile ? creditsFlow(profile, [...new Set(found.flags.flatMap((f) => f.credit_txns))]) : null;
   return (
     <>
@@ -55,10 +57,29 @@ export default async function FlagPage({
         >
           Work the hold&apos;s deadlines from its page. New flags on this account will appear here.
         </Attention>
+      ) : open.length > 0 && holdable === 0 ? (
+        <Attention
+          tone="info"
+          title="The flagged money has already left this account"
+          actions={[
+            { label: "Dismiss with a reason", href: "#dismiss", primary: true },
+            { label: "Open the account", href: `/app/accounts/${found.account_number}` },
+          ]}
+          facts={[
+            { label: "Priority", value: <Priority level={found.priority} /> },
+            { label: "Flagged amount", value: <Money paise={found.flagged_amount} /> },
+            { label: "Free balance now", value: <Money paise={0} /> },
+            { label: "Last activity", value: formatIst(found.last_at) },
+          ]}
+        >
+          A temporary debit hold can only stop money that is still here. Follow where it went on the graph
+          below; if the account is part of a scam, report it through NCRP so CFCFRMS can trace it onward.
+          Dismiss the flags if the activity is ordinary.
+        </Attention>
       ) : open.length > 0 ? (
         <Attention
           tone={found.priority === "high" ? "urgent" : "action"}
-          title={`Decide: hold ${formatInr(Math.max(...open.map((f) => f.amount)))} or dismiss`}
+          title={`Decide: hold ${formatInr(holdable ?? Math.max(...open.map((f) => f.amount)))} or dismiss`}
           actions={[
             { label: "Place a temporary debit hold", href: "#hold", primary: true },
             { label: "Dismiss with a reason", href: "#dismiss" },
@@ -128,29 +149,39 @@ export default async function FlagPage({
         </p>
       ) : open.length > 0 ? (
         <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-          <section id="hold" aria-labelledby="hold-title" className="border-line scroll-mt-6 border p-5">
-            <h2 id="hold-title" className="pixel mb-1 text-lg">
-              Place a temporary debit hold
-            </h2>
-            <p className="text-muted mb-5 text-[13px]">
-              The hold covers the flagged amount only, unless you give a written reason for the whole account.
-              The customer is told at once and has 20 days to explain (RBI draft directions, Annex III).
-            </p>
-            <HoldForm
-              action={placeHold}
-              account={found.account_number}
-              holder={found.holder_name ?? "customer"}
-              bank={institutionName(session.member)}
-              today={await now(session)}
-              flags={open.map((f) => ({
-                key: f.key,
-                title: f.title,
-                reason: f.reason,
-                amount: f.amount,
-                label: formatInr(f.amount),
-              }))}
-            />
-          </section>
+          {holdable === 0 ? (
+            <section className="border-line border p-5 text-sm">
+              <h2 className="pixel mb-1 text-lg">Nothing left to hold</h2>
+              <p className="text-muted">
+                The account&apos;s free balance is ₹0, so a hold would stop nothing.
+              </p>
+            </section>
+          ) : (
+            <section id="hold" aria-labelledby="hold-title" className="border-line scroll-mt-6 border p-5">
+              <h2 id="hold-title" className="pixel mb-1 text-lg">
+                Place a temporary debit hold
+              </h2>
+              <p className="text-muted mb-5 text-[13px]">
+                The hold covers the flagged amount only, unless you give a written reason for the whole
+                account. The customer is told at once and has 20 days to explain (RBI draft directions, Annex
+                III).
+              </p>
+              <HoldForm
+                action={placeHold}
+                account={found.account_number}
+                holder={found.holder_name ?? "customer"}
+                bank={institutionName(session.member)}
+                today={await now(session)}
+                flags={open.map((f) => ({
+                  key: f.key,
+                  title: f.title,
+                  reason: f.reason,
+                  amount: f.amount,
+                  label: formatInr(f.amount),
+                }))}
+              />
+            </section>
+          )}
           <section
             id="dismiss"
             aria-labelledby="dismiss-title"

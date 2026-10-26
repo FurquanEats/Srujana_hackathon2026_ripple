@@ -10,10 +10,11 @@ import { GatewayFailure, releasedLiens, trail } from "@/lib/gateway/source";
 import type { Trail } from "@/lib/gateway/types";
 import { requireRole, type Outcome } from "@/lib/guard";
 
+import { INSTITUTIONS } from "@/lib/personas";
+
 import { policeReleaseAction } from "../../actions";
 
 const FIFTY_THOUSAND = 50_000_00;
-import { INSTITUTIONS } from "@/lib/personas";
 
 export const metadata: Metadata = { title: "Money trail" };
 
