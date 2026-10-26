@@ -170,10 +170,10 @@ export function TrailReplay({ trail, institutions }: { trail: Trail; institution
           .map((e, i) => (
             <li
               key={`${e.at}-${i}`}
-              className={`grid grid-cols-[150px_1fr] gap-3 text-[13px] ${e.at <= at ? "" : "opacity-40"}`}
+              className={`grid grid-cols-[150px_minmax(0,1fr)] gap-3 text-[13px] ${e.at <= at ? "" : "opacity-40"}`}
             >
               <span className="font-mono text-xs tabular-nums">{formatIstSeconds(e.at)}</span>
-              <span>
+              <span className="break-words">
                 <span
                   aria-hidden
                   className={`mr-2 inline-block size-2 ${e.exit ? "bg-red-500" : "bg-accent"}`}
@@ -195,7 +195,7 @@ export function TrailReplay({ trail, institutions }: { trail: Trail; institution
             a.exits.map((e) => (
               <li
                 key={e.reference}
-                className={`border-line border p-3 text-sm ${e.at <= at ? "" : "opacity-40"}`}
+                className={`border-line min-w-0 border p-3 text-sm break-words ${e.at <= at ? "" : "opacity-40"}`}
               >
                 {EXIT[e.mode]} of {formatInr(e.traced_amount)} at{" "}
                 <span className="font-mono">{e.identifier}</span>

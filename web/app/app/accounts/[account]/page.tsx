@@ -99,7 +99,7 @@ export default async function AccountPage({ params }: { params: Promise<{ accoun
             <h2 className="pixel text-lg">KYC and linked accounts</h2>
             <PrintButton label="Print KYC pack" />
           </div>
-          <dl className="grid grid-cols-[150px_1fr] gap-y-2 text-sm">
+          <dl className="grid grid-cols-[150px_minmax(0,1fr)] gap-y-2 text-sm">
             <dt className="text-faint">Holder</dt>
             <dd>{a.holder_name}</dd>
             <dt className="text-faint">Declared profile</dt>

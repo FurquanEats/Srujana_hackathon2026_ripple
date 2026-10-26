@@ -37,7 +37,7 @@ function Result({ request, result }: { request: PaymentCheckRequest; result: Pay
       {result.reasons.length > 0 && (
         <ul className="mt-4 grid gap-2">
           {result.reasons.map((r) => (
-            <li key={r.text} className="grid gap-1 text-sm sm:grid-cols-[170px_1fr]">
+            <li key={r.text} className="grid gap-1 text-sm sm:grid-cols-[170px_minmax(0,1fr)]">
               <span className="text-faint">{SOURCE[r.source]}</span>
               <span>{r.text}</span>
             </li>

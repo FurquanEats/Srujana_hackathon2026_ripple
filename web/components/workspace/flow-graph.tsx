@@ -220,13 +220,13 @@ function Timeline({ events }: { events: FlowEvent[] }) {
           return (
             <li
               key={`${e.at}-${i}`}
-              className="grid grid-cols-[150px_70px_1fr_auto] items-baseline gap-3 text-[13px] max-sm:grid-cols-[1fr_auto]"
+              className="grid grid-cols-[150px_70px_minmax(0,1fr)_auto] items-baseline gap-3 text-[13px] max-sm:grid-cols-[minmax(0,1fr)_auto]"
             >
               <span className="font-mono text-xs tabular-nums">{formatIstSeconds(e.at)}</span>
               <span className="text-faint text-xs max-sm:hidden">
                 {i === 0 ? "start" : `+${minutes} min`}
               </span>
-              <span className="max-sm:col-span-2 max-sm:row-start-2">
+              <span className="break-words max-sm:col-span-2 max-sm:row-start-2">
                 <span
                   aria-hidden
                   className="mr-2 inline-block size-2"

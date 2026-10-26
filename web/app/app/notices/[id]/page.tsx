@@ -183,7 +183,7 @@ export default async function NoticePage({
           <h2 className="pixel mb-3 text-lg">Exits reported for the police</h2>
           <ul className="grid gap-2 md:grid-cols-2">
             {n.exits.map((e) => (
-              <li key={e.reference} className="border-line border p-3 text-sm">
+              <li key={e.reference} className="border-line min-w-0 border p-3 text-sm break-words">
                 {EXIT[e.mode]} of {formatInr(e.traced_amount)} at{" "}
                 <span className="font-mono">{e.identifier}</span>
                 {e.location ? `, ${e.location}` : ""}
