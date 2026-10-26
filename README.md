@@ -76,15 +76,15 @@ cd web && npm run lint && npm run typecheck && npm test && npm run build && npm 
 
 **The next victim.** A customer of Pragati Small Finance Bank who tries to pay Rs 4,00,000 to the same mule the next day gets "hold and call": DPIP finds the mule on the suspect registry built from CFCFRMS trails. A payment to the cement supplier that the mule paid for goods is allowed.
 
-**The document review.** On the synthetic document set (`eval/documents/`, 17 cases covering genuine invoices, a TDS deduction, an e-invoice, Hindi scans, a reused invoice, an invalid GSTIN, a late invoice and planted instructions to the reviewer), Gemini 3.5 Flash read 16 of 18 documents before the free tier's daily quota ran out. On the 15 cases those cover:
+**The document review.** On the synthetic document set (`eval/documents/`, 17 cases and 18 documents covering genuine invoices, a TDS deduction, an e-invoice, Hindi scans, a reused invoice, an invalid GSTIN, a late invoice and planted instructions to the reviewer), Gemini 3.5 Flash read every document:
 
 | Measure | Result |
 | --- | --- |
-| Credits with the right verdict | 14 of 16 |
+| Credits with the right verdict | 17 of 19 |
 | Mismatched, reused or planted-instruction documents marked explained | 0 |
-| Fields read exactly as printed | total 87%, date 87%, issuer GSTIN 93%, payment reference 80% |
+| Fields read exactly as printed | total 88%, date 88%, issuer GSTIN 94%, payment reference 82% |
 
-The two misses are safe ones: a salary slip and a rent agreement were marked "not explained" instead of "explained". The first run of this evaluation found three bad documents marked explained, because Gemini writes dates day first and document types in words, and the rules then skipped the date and GSTIN checks. The rules now read Indian dates, normalise document types, and fail a check they cannot read; a test feeds every case in the model's own spelling. Full results are in `eval/documents/review_results.json`.
+The two misses are safe ones: a salary slip and a rent agreement were marked "not explained" instead of "explained". A salary slip gives a pay period instead of a date, and the rent agreement gives a monthly rent but no total, so the rules would not clear the credit without them. The first run of this evaluation found three bad documents marked explained, because Gemini writes dates day first and document types in words, and the rules then skipped the date and GSTIN checks. The rules now read Indian dates, normalise document types, and fail a check they cannot read; a test feeds every case in the model's own spelling. Full results are in `eval/documents/review_results.json`.
 
 ## How it works
 

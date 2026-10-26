@@ -1762,11 +1762,75 @@
     "language": "en",
     "form": "pdf",
     "quality": "clean",
-    "extraction": null
+    "extraction": {
+     "readable": true,
+     "document_type": {
+      "value": "TAX INVOICE",
+      "quote": "TAX INVOICE",
+      "page": 1
+     },
+     "issuer": {
+      "value": "Farida Tailoring",
+      "quote": "Farida Tailoring",
+      "page": 1
+     },
+     "issuer_gstin": {
+      "value": "23YAIFY0055S1Z0",
+      "quote": "23YAIFY0055S1Z0",
+      "page": 1
+     },
+     "recipient": {
+      "value": "Unique Mobiles",
+      "quote": "Unique Mobiles",
+      "page": 1
+     },
+     "recipient_latin": "Unique Mobiles",
+     "number": {
+      "value": "FT/0021",
+      "quote": "FT/0021",
+      "page": 1
+     },
+     "date": {
+      "value": "07/10/2026",
+      "quote": "07/10/2026",
+      "page": 1
+     },
+     "taxable_value": {
+      "value": "12,32,500.00",
+      "quote": "12,32,500.00",
+      "page": 1
+     },
+     "total": {
+      "value": "14,54,350.00",
+      "quote": "14,54,350.00",
+      "page": 1
+     },
+     "payment_reference": {
+      "value": null,
+      "quote": null,
+      "page": null
+     }
+    }
    }
   ],
-  "read": false,
-  "verdicts": [],
+  "read": true,
+  "verdicts": [
+   {
+    "credit_id": "C1",
+    "verdict": "conflicting",
+    "explained_amount": 0,
+    "unexplained_amount": 145435000,
+    "document": "invoice_FT-0021.pdf",
+    "proposed_action": "keep",
+    "hold_after": 145435000,
+    "failed_checks": [
+     "business_fit"
+    ],
+    "reasons": [
+     "The credit is larger than the holder's whole declared annual turnover or income."
+    ]
+   }
+  ],
   "model": "gemini-3.5-flash"
  },
  {
@@ -1821,11 +1885,88 @@
     "language": "en",
     "form": "pdf",
     "quality": "clean",
-    "extraction": null
+    "extraction": {
+     "readable": true,
+     "document_type": {
+      "value": "BILL OF SUPPLY",
+      "quote": "BILL OF SUPPLY",
+      "page": 1
+     },
+     "issuer": {
+      "value": "Green Leaf Nursery",
+      "quote": "Green Leaf Nursery",
+      "page": 1
+     },
+     "issuer_gstin": {
+      "value": "37CEFFO3430Q1ZL",
+      "quote": "37CEFFO3430Q1ZL",
+      "page": 1
+     },
+     "recipient": {
+      "value": "Vizag Landscapes",
+      "quote": "Vizag Landscapes",
+      "page": 1
+     },
+     "recipient_latin": "Vizag Landscapes",
+     "number": {
+      "value": "GLN/0388",
+      "quote": "GLN/0388",
+      "page": 1
+     },
+     "date": {
+      "value": "12/10/2026",
+      "quote": "12/10/2026",
+      "page": 1
+     },
+     "taxable_value": {
+      "value": null,
+      "quote": null,
+      "page": null
+     },
+     "total": {
+      "value": "96,000.00",
+      "quote": "₹96,000.00",
+      "page": 1
+     },
+     "payment_reference": {
+      "value": null,
+      "quote": null,
+      "page": null
+     }
+    }
    }
   ],
-  "read": false,
-  "verdicts": [],
+  "read": true,
+  "verdicts": [
+   {
+    "credit_id": "C1",
+    "verdict": "explained",
+    "explained_amount": 9600000,
+    "unexplained_amount": 0,
+    "document": "invoice_GLN-0388.pdf",
+    "proposed_action": "lift",
+    "hold_after": 0,
+    "failed_checks": [],
+    "reasons": [
+     "invoice_GLN-0388.pdf accounts for the whole credit and every check passes."
+    ]
+   },
+   {
+    "credit_id": "C2",
+    "verdict": "not_explained",
+    "explained_amount": 0,
+    "unexplained_amount": 9650000,
+    "document": null,
+    "proposed_action": "keep",
+    "hold_after": 9650000,
+    "failed_checks": [
+     "quote_support"
+    ],
+    "reasons": [
+     "No document was offered for this credit."
+    ]
+   }
+  ],
   "model": "gemini-3.5-flash"
  }
 ]

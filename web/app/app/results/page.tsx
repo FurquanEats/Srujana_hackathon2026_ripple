@@ -71,7 +71,11 @@ export default async function ResultsPage() {
           <Metric
             label="Documents read"
             value={`${r.coverage.documents_read} of ${r.coverage.documents}`}
-            note="Free-tier quota ran out"
+            note={
+              r.coverage.documents_read < r.coverage.documents
+                ? "Free-tier quota ran out"
+                : "Every document in the set"
+            }
           />
           <Metric label="Model" value={<span className="text-base">{r.model}</span>} />
         </div>

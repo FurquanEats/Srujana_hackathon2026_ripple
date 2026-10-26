@@ -1,20 +1,20 @@
 {
  "model": "gemini-3.5-flash",
  "coverage": {
-  "documents_read": 16,
+  "documents_read": 18,
   "documents": 18,
-  "cases_reviewed": 15,
+  "cases_reviewed": 17,
   "cases": 17,
   "note": "Cases with a document the model has not read yet are left out, not guessed."
  },
- "credits": 16,
- "correct": 14,
+ "credits": 19,
+ "correct": 17,
  "unsafe_explained": 0,
  "field_accuracy": {
-  "total": 0.867,
-  "date": 0.867,
-  "issuer_gstin": 0.933,
-  "payment_reference": 0.8
+  "total": 0.882,
+  "date": 0.882,
+  "issuer_gstin": 0.941,
+  "payment_reference": 0.824
  },
  "rows": [
   {
@@ -245,6 +245,49 @@
    "reasons": [
     "The total, date or payer was not read from the page with its exact words.",
     "The document's date could not be read, so it cannot be checked against the payment."
+   ]
+  },
+  {
+   "case": "D16",
+   "credit": "C1",
+   "title": "A tailoring shop invoices ₹14.5 lakh of smartphones",
+   "expected": "conflicting",
+   "got": "conflicting",
+   "correct": true,
+   "unsafe": false,
+   "failed_checks": [
+    "business_fit"
+   ],
+   "reasons": [
+    "The credit is larger than the holder's whole declared annual turnover or income."
+   ]
+  },
+  {
+   "case": "D17",
+   "credit": "C1",
+   "title": "Two credits: one invoiced, one with no document",
+   "expected": "explained",
+   "got": "explained",
+   "correct": true,
+   "unsafe": false,
+   "failed_checks": [],
+   "reasons": [
+    "invoice_GLN-0388.pdf accounts for the whole credit and every check passes."
+   ]
+  },
+  {
+   "case": "D17",
+   "credit": "C2",
+   "title": "Two credits: one invoiced, one with no document",
+   "expected": "not_explained",
+   "got": "not_explained",
+   "correct": true,
+   "unsafe": false,
+   "failed_checks": [
+    "quote_support"
+   ],
+   "reasons": [
+    "No document was offered for this credit."
    ]
   }
  ]
