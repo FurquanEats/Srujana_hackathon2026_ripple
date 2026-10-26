@@ -1,0 +1,89 @@
+{
+  "case_id": "D10",
+  "title": "Hindi grocery bill photographed on a phone",
+  "account_holder": {
+    "name": "अन्नपूर्णा किराना स्टोर",
+    "address": "गांधी चौक, सागर, मध्य प्रदेश 470002",
+    "ifsc": "AKSB0000623",
+    "account_number": "80340201500012",
+    "gstin": "23KQCFH2427F1ZR",
+    "kyc": {
+      "occupation": "Grocery wholesaler",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 750000000
+    }
+  },
+  "explanation": "शादी के ऑर्डर के लिए राठौर कैटरर्स ने चावल और तेल का पैसा भेजा। बिल की फोटो भेज रहा हूँ।",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "upi",
+      "reference": "126276621457",
+      "amount": 7681800,
+      "at": "2026-10-18T20:05:00+05:30",
+      "remitter": {
+        "name": "RATHORE CATERERS",
+        "ifsc": "KVSB0000233",
+        "account_number": "05752518521865"
+      },
+      "traced_amount": 7681800
+    }
+  ],
+  "documents": [
+    {
+      "file": "bill_photo.jpg",
+      "language": "hi",
+      "form": "photo",
+      "quality": "photo",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "अन्नपूर्णा किराना स्टोर",
+        "issuer_gstin": "23KQCFH2427F1ZR",
+        "recipient": "राठौर कैटरर्स",
+        "recipient_gstin": "23ESAFY2014P1Z2",
+        "number": "AKS/1147",
+        "date": "2026-10-18",
+        "taxable_value": 7316000,
+        "tax": 365800,
+        "total": 7681800,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "बासमती चावल, 25 किलो बोरी",
+          "hsn": "1006",
+          "qty": 20,
+          "unit": "बोरी",
+          "rate": 235000,
+          "amount": 4700000
+        },
+        {
+          "description": "सरसों का तेल, 15 लीटर",
+          "hsn": "1514",
+          "qty": 12,
+          "unit": "टिन",
+          "rate": 218000,
+          "amount": 2616000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "explained",
+      "explained_amount": 7681800,
+      "unexplained_amount": 0,
+      "document": "bill_photo.jpg",
+      "proposed_action": "lift",
+      "hold_after": 0,
+      "failed_checks": [],
+      "why": "The photo is tilted and dim but every figure is legible; the total equals the credit and the buyer is the remitter."
+    }
+  ]
+}

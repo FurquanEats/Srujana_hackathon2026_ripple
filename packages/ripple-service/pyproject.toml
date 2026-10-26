@@ -1,0 +1,22 @@
+[project]
+name = "ripple-service"
+version = "0.1.0"
+description = "Plumbing every Ripple service shares: configuration, keys, signed requests over mutual TLS, the replay store and the audit log"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ripple-core",
+    "fastapi>=0.115",
+    "httpx>=0.27",
+    "sqlalchemy>=2.0.36",
+    "uvicorn>=0.32",
+]
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ripple_service"]

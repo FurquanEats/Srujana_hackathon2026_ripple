@@ -1,0 +1,17 @@
+[project]
+name = "ripple-hubs"
+version = "0.1.0"
+description = "Simulated national hubs: CFCFRMS (MHA/I4C) routing notices bank to bank, and later DPIP"
+requires-python = ">=3.12,<3.13"
+dependencies = ["ripple-core", "ripple-service"]
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+ripple-service = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ripple_hubs"]

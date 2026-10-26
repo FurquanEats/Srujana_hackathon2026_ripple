@@ -1,0 +1,83 @@
+{
+  "case_id": "D07",
+  "title": "Invoice with an invalid GSTIN (wrong check character)",
+  "account_holder": {
+    "name": "Laxmi Tiles Depot",
+    "address": "NH 48, Morbi, Gujarat 363641",
+    "ifsc": "NVBK0000308",
+    "account_number": "43207355777322",
+    "gstin": "24BTCFK2287S1ZO",
+    "kyc": {
+      "occupation": "Tile dealer",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 850000000
+    }
+  },
+  "explanation": "Payment from Shree Krupa Builders for floor tiles.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "neft",
+      "reference": "PRNBN27785889568",
+      "amount": 29452800,
+      "at": "2026-10-13T10:15:00+05:30",
+      "remitter": {
+        "name": "Shree Krupa Builders",
+        "ifsc": "PRNB0001907",
+        "account_number": "38402654901893"
+      },
+      "traced_amount": 29452800
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_LTD-0081.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Laxmi Tiles Depot",
+        "issuer_gstin": "24TFIFI0853S1ZA",
+        "recipient": "Shree Krupa Builders",
+        "recipient_gstin": "24HNHFX2203G1ZL",
+        "number": "LTD/0081",
+        "date": "2026-10-11",
+        "taxable_value": 24960000,
+        "tax": 4492800,
+        "total": 29452800,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Vitrified floor tiles, 600 x 600 mm",
+          "hsn": "6907",
+          "qty": 320,
+          "unit": "box",
+          "rate": 78000,
+          "amount": 24960000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "not_explained",
+      "explained_amount": 0,
+      "unexplained_amount": 29452800,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 29452800,
+      "failed_checks": [
+        "gstin_valid"
+      ],
+      "why": "The amount, payer and date match, but the issuer GSTIN printed on the invoice (24TFIFI0853S1ZA) fails its check character, and it differs from the GSTIN in the account's KYC (24BTCFK2287S1ZO)."
+    }
+  ]
+}

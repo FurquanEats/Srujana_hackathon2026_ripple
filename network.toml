@@ -1,0 +1,56 @@
+# The simulated payment network. All names and codes are fictional.
+# Each member runs as its own process with its own database, keys and certificate (see `uv run ripple up`).
+
+[[member]]
+id = "cfcfrms"
+name = "CFCFRMS hub (simulated)"
+kind = "hub"
+port = 8100
+
+[[member]]
+id = "bank-a"
+name = "Navodaya National Bank, a public sector bank"
+kind = "bank"
+port = 8101
+bank_code = "BKAA"
+vpa_handles = ["bkaa"]
+
+[[member]]
+id = "bank-b"
+name = "Meridian Private Bank, a private bank"
+kind = "bank"
+port = 8102
+bank_code = "BKBB"
+vpa_handles = ["bkbb"]
+
+[[member]]
+id = "bank-c"
+name = "Pragati Small Finance Bank, a small finance bank"
+kind = "bank"
+port = 8103
+bank_code = "BKCC"
+vpa_handles = ["bkcc"]
+
+[[member]]
+id = "bank-d"
+name = "Sangam Urban Co-operative Bank, a co-operative bank"
+kind = "bank"
+port = 8104
+bank_code = "BKDD"
+vpa_handles = ["bkdd"]
+
+[[member]]
+id = "wallet-w"
+name = "PaySetu Wallet, a prepaid wallet issuer"
+kind = "wallet"
+port = 8105
+bank_code = "WLTW"
+vpa_handles = ["wltw"]
+
+[[member]]
+id = "exchange-x"
+name = "CoinKosh Exchange, a crypto exchange on CFCFRMS"
+kind = "exchange"
+port = 8106
+bank_code = "XCHX"
+vpa_handles = ["xchx"]

@@ -1,0 +1,115 @@
+{
+  "case_id": "D17",
+  "title": "Two credits: one invoiced, one with no document",
+  "account_holder": {
+    "name": "Green Leaf Nursery",
+    "address": "Kadiyam, East Godavari, Andhra Pradesh 533126",
+    "ifsc": "PRNB0000377",
+    "account_number": "23928456428070",
+    "gstin": "37CEFFO3430Q1ZL",
+    "kyc": {
+      "occupation": "Plant nursery",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 500000000
+    }
+  },
+  "explanation": "The first payment is from Vizag Landscapes for plants. The second one I don't recognise; someone may have sent it by mistake.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "neft",
+      "reference": "AKSBN65563374111",
+      "amount": 9600000,
+      "at": "2026-10-13T11:00:00+05:30",
+      "remitter": {
+        "name": "Vizag Landscapes",
+        "ifsc": "AKSB0000733",
+        "account_number": "89850220795056"
+      },
+      "traced_amount": 9600000
+    },
+    {
+      "credit_id": "C2",
+      "rail": "imps",
+      "reference": "204696089679",
+      "amount": 9650000,
+      "at": "2026-10-13T23:48:00+05:30",
+      "remitter": {
+        "name": "RAHUL VERMA",
+        "ifsc": "KVSB0000281",
+        "account_number": "92647968077752"
+      },
+      "traced_amount": 9650000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_GLN-0388.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "bill_of_supply",
+        "issuer": "Green Leaf Nursery",
+        "issuer_gstin": "37CEFFO3430Q1ZL",
+        "recipient": "Vizag Landscapes",
+        "recipient_gstin": "37UMYFH5730D1ZU",
+        "number": "GLN/0388",
+        "date": "2026-10-12",
+        "taxable_value": 9600000,
+        "tax": 0,
+        "total": 9600000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Areca palm saplings, 4 ft",
+          "hsn": "0602",
+          "qty": 300,
+          "unit": "nos",
+          "rate": 18000,
+          "amount": 5400000
+        },
+        {
+          "description": "Ficus plants in pots",
+          "hsn": "0602",
+          "qty": 120,
+          "unit": "nos",
+          "rate": 35000,
+          "amount": 4200000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "explained",
+      "explained_amount": 9600000,
+      "unexplained_amount": 0,
+      "document": "invoice_GLN-0388.pdf",
+      "proposed_action": "lift",
+      "hold_after": 0,
+      "failed_checks": [],
+      "why": "The bill of supply (plants are exempt from GST, so no tax is charged) equals the credit and the buyer is the remitter."
+    },
+    {
+      "credit_id": "C2",
+      "verdict": "not_explained",
+      "explained_amount": 0,
+      "unexplained_amount": 9650000,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 9650000,
+      "failed_checks": [
+        "quote_support"
+      ],
+      "why": "No document was offered, and the holder says they do not recognise the payment."
+    }
+  ]
+}

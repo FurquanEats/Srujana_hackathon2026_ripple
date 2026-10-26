@@ -1,0 +1,72 @@
+{
+  "case_id": "D15",
+  "title": "Monthly rent explained by a rent agreement",
+  "account_holder": {
+    "name": "Sunita Kulkarni",
+    "address": "Flat 302, Shanti Apartments, Kothrud, Pune, Maharashtra 411038",
+    "ifsc": "NVBK0000221",
+    "account_number": "58894788443241",
+    "gstin": null,
+    "kyc": {
+      "occupation": "Retired teacher, rental income",
+      "business_type": "individual",
+      "declared_annual_income": 68000000
+    }
+  },
+  "explanation": "Rent for October from my tenant Aniket Deshmukh.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "upi",
+      "reference": "108575281916",
+      "amount": 2800000,
+      "at": "2026-10-04T08:47:00+05:30",
+      "remitter": {
+        "name": "ANIKET DESHMUKH",
+        "ifsc": "PRNB0000922",
+        "account_number": "62624889626613"
+      },
+      "traced_amount": 2800000
+    }
+  ],
+  "documents": [
+    {
+      "file": "rent_agreement.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "rent_agreement",
+        "issuer": "Sunita Kulkarni",
+        "issuer_gstin": null,
+        "recipient": "Aniket Deshmukh",
+        "recipient_gstin": null,
+        "number": "Leave and licence agreement",
+        "date": "2026-04-01",
+        "taxable_value": null,
+        "tax": null,
+        "total": 2800000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": []
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "explained",
+      "explained_amount": 2800000,
+      "unexplained_amount": 0,
+      "document": "rent_agreement.pdf",
+      "proposed_action": "lift",
+      "hold_after": 0,
+      "failed_checks": [],
+      "why": "The monthly fee equals the credit, the remitter is the licensee, and the payment falls on the due date."
+    }
+  ]
+}

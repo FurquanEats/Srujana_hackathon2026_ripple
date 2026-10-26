@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+/* Design tokens (02 Web app design brief, section 1, as corrected against mosaic.flabbergast.agency).
+   Green marks money that is traced or held, nothing else. With ink text on it, it passes WCAG AA. */
+@theme {
+  --color-ink: #121212;
+  --color-accent: #36a26b;
+  --color-grey-900: #2a2a2a;
+  --color-grey-700: #4b4b4b;
+  --color-grey-500: #6b6b6b;
+  --color-grey-300: #b3b3b3;
+  --color-paper: #ffffff;
+
+  --font-pixel: var(--font-pixel-operator), ui-monospace, monospace;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --tracking-pixel: -0.03em;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Each home page section is dark or light; components take their greys from the section they sit in. */
+@layer base {
+  .tone-dark {
+    --fg: #ffffff;
+    --muted: var(--color-grey-300);
+    --faint: #8f8f8f; /* 5.6:1 on ink, so small captions pass WCAG AA */
+    --surface: var(--color-ink);
+    --line: var(--color-grey-900);
+    --panel: #181818;
+    --hover: rgb(255 255 255 / 0.05);
+    background: var(--color-ink);
+    color: var(--fg);
+  }
+  .tone-light {
+    --fg: var(--color-ink);
+    --muted: var(--color-grey-500);
+    --faint: #6b6b6b; /* 5.3:1 on white, so small captions pass WCAG AA */
+    --surface: #ffffff;
+    --line: #e4e4e4;
+    --panel: #f6f6f6;
+    --hover: rgb(0 0 0 / 0.04);
+    background: var(--color-paper);
+    color: var(--fg);
+  }
+}
+
+@utility text-muted {
+  color: var(--muted);
+}
+@utility text-faint {
+  color: var(--faint);
+}
+@utility bg-surface {
+  background-color: var(--surface);
+}
+@utility bg-line {
+  background-color: var(--line);
+}
+@utility border-line {
+  border-color: var(--line);
+}
+
+@layer components {
+  /* Pixel display type: capitals, tight tracking, crisp edges. */
+  .pixel {
+    font-family: var(--font-pixel);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-pixel);
+    line-height: 1.05;
+    font-weight: 400;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border: 1px solid currentColor;
+    font-size: 0.875rem;
+    font-weight: 400;
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  .button-solid {
+    background: var(--fg, #fff);
+    color: var(--surface, var(--color-ink));
+    border-color: var(--fg, #fff);
+  }
+  .button-solid:hover {
+    opacity: 0.85;
+  }
+  .button-ghost:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+  .tone-light .button-ghost:hover {
+    background: rgb(0 0 0 / 0.06);
+  }
+}
+
+@utility bg-panel {
+  background-color: var(--panel);
+}
+@utility bg-hover {
+  background-color: var(--hover);
+}
+@utility text-fg {
+  color: var(--fg);
+}
+
+@layer components {
+  /* Workspace form controls: square, hairline, readable in both tones. */
+  .field {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 0.875rem;
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 0;
+  }
+  .label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  .table th {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--faint);
+    font-weight: 400;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .table tbody tr:hover {
+    background: var(--hover);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--line);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}
+
+@layer components {
+  /* Anything that navigates looks like it: underlined text links, and rows and cards that lift on hover with an
+     arrow. The whole row is the target, through the first link's stretched hit area. */
+  .link {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--faint);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 150ms;
+  }
+  .link:hover {
+    text-decoration-color: var(--color-accent);
+  }
+  .row-link {
+    position: relative;
+    cursor: pointer;
+  }
+  .row-link .stretch::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .row-link:hover .go,
+  .card-link:hover .go {
+    color: var(--color-accent);
+    transform: translateX(3px);
+  }
+  .go {
+    display: inline-block;
+    color: var(--faint);
+    transition:
+      transform 150ms,
+      color 150ms;
+  }
+  .card-link {
+    display: block;
+    border: 1px solid var(--line);
+    padding: 1rem;
+    transition:
+      border-color 150ms,
+      background-color 150ms;
+  }
+  .card-link:hover {
+    border-color: var(--fg);
+    background: var(--hover);
+  }
+}
+
+/* The workspace reads at a larger size with stronger greys than the marketing page. */
+@layer base {
+  .workspace {
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .workspace.tone-dark {
+    --muted: #c4c4c4;
+    --faint: #8f8f8f;
+    --line: #333333;
+  }
+  .workspace.tone-light {
+    --muted: #4b4b4b;
+    --faint: #6b6b6b;
+    --line: #dcdcdc;
+  }
+  .workspace .table {
+    font-size: 0.875rem;
+  }
+  .workspace .text-xs {
+    font-size: 0.8125rem;
+  }
+  .workspace .text-\[13px\],
+  .workspace .text-\[12\.5px\] {
+    font-size: 0.875rem;
+  }
+  .workspace .text-\[11px\] {
+    font-size: 0.75rem;
+  }
+}
+
+/* Inside the workspace, headings are set in the sans face for reading; the pixel face stays on the home page and
+   the wordmark. */
+@layer components {
+  .workspace .pixel:not(.wordmark) {
+    font-family: var(--font-sans);
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+}
+
+@media print {
+  .workspace aside,
+  .workspace header,
+  .workspace form,
+  .workspace .no-print,
+  .workspace details {
+    display: none !important;
+  }
+  .workspace {
+    background: #fff !important;
+    color: #121212 !important;
+  }
+}

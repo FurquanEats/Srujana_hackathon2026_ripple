@@ -1,0 +1,83 @@
+{
+  "case_id": "D16",
+  "title": "A tailoring shop invoices ₹14.5 lakh of smartphones",
+  "account_holder": {
+    "name": "Farida Tailoring",
+    "address": "Shop 4, Jama Masjid Road, Bhopal, Madhya Pradesh 462001",
+    "ifsc": "KVSB0000460",
+    "account_number": "97048656668349",
+    "gstin": "23YAIFY0055S1Z0",
+    "kyc": {
+      "occupation": "Tailor",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 60000000
+    }
+  },
+  "explanation": "Unique Mobiles paid me for phones I supplied.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "rtgs",
+      "reference": "NVBKR95943134814933147",
+      "amount": 145435000,
+      "at": "2026-10-08T13:10:00+05:30",
+      "remitter": {
+        "name": "Unique Mobiles",
+        "ifsc": "NVBK0000330",
+        "account_number": "69056991163697"
+      },
+      "traced_amount": 145435000
+    }
+  ],
+  "documents": [
+    {
+      "file": "invoice_FT-0021.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "tax_invoice",
+        "issuer": "Farida Tailoring",
+        "issuer_gstin": "23YAIFY0055S1Z0",
+        "recipient": "Unique Mobiles",
+        "recipient_gstin": "23YGGFT4156X1ZB",
+        "number": "FT/0021",
+        "date": "2026-10-07",
+        "taxable_value": 123250000,
+        "tax": 22185000,
+        "total": 145435000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Smartphones, 128 GB",
+          "hsn": "8517",
+          "qty": 85,
+          "unit": "nos",
+          "rate": 1450000,
+          "amount": 123250000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "conflicting",
+      "explained_amount": 0,
+      "unexplained_amount": 145435000,
+      "document": null,
+      "proposed_action": "keep",
+      "hold_after": 145435000,
+      "failed_checks": [
+        "business_fit"
+      ],
+      "why": "The invoice is internally consistent, but a tailoring shop declaring ₹6 lakh a year does not sell smartphones, and this one invoice is more than twice its declared annual turnover."
+    }
+  ]
+}

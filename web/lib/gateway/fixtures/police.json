@@ -1,0 +1,1329 @@
+{
+ "/v1/cases": [
+  {
+   "ack_number": "39600781100000",
+   "cashed_out": 0,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:57.847764Z",
+   "held": 24000000,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 24000000,
+   "victim_name": "Farhan Qureshi",
+   "waiting": 0
+  },
+  {
+   "ack_number": "39600770000000",
+   "cashed_out": 0,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:57.345308Z",
+   "held": 9500000,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 9500000,
+   "victim_name": "Meena Iyer",
+   "waiting": 0
+  },
+  {
+   "ack_number": "33033011273523",
+   "cashed_out": 20000000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:51.696940Z",
+   "held": 60000000,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 80000000,
+   "victim_name": "Retired teacher (victim)",
+   "waiting": 0
+  },
+  {
+   "ack_number": "25300428205673",
+   "cashed_out": 300000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:50.137372Z",
+   "held": 0,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 300000,
+   "victim_name": "Manoj Gupta",
+   "waiting": 0
+  },
+  {
+   "ack_number": "28858815922556",
+   "cashed_out": 1000000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:49.976604Z",
+   "held": 0,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 1000000,
+   "victim_name": "Kavita Rao",
+   "waiting": 0
+  },
+  {
+   "ack_number": "29162403489284",
+   "cashed_out": 500000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:49.780717Z",
+   "held": 0,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 500000,
+   "victim_name": "Arjun Das",
+   "waiting": 0
+  },
+  {
+   "ack_number": "22928096743133",
+   "cashed_out": 200000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:49.602496Z",
+   "held": 0,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 200000,
+   "victim_name": "Priya Nair",
+   "waiting": 0
+  },
+  {
+   "ack_number": "38069132210127",
+   "cashed_out": 8000000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:49.527229Z",
+   "held": 26000000,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 34000000,
+   "victim_name": "Ayesha Siddiqui",
+   "waiting": 0
+  },
+  {
+   "ack_number": "25925884038089",
+   "cashed_out": 2450000,
+   "complete": false,
+   "filed_at": "2026-10-25T20:27:48.665717Z",
+   "held": 0,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 2500000,
+   "victim_name": "Rakesh Kulkarni",
+   "waiting": 50000
+  },
+  {
+   "ack_number": "30391446601247",
+   "cashed_out": 20000000,
+   "complete": true,
+   "filed_at": "2026-10-25T20:27:48.597317Z",
+   "held": 60000000,
+   "not_found": 0,
+   "off_network": 0,
+   "reported": 80000000,
+   "victim_name": "Sudha Raman",
+   "waiting": 0
+  }
+ ],
+ "/v1/cases/39600781100000/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "6960078101",
+     "ifsc": "BKDD0000002",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 24000000,
+     "at": "2026-10-25T20:07:57.208476Z",
+     "rail": "imps",
+     "reference": "960078100000"
+    },
+    "exits": [],
+    "held": 8000000,
+    "holder_name": "Vikram Joshi",
+    "layer": 1,
+    "lien_id": "L245C6F9F91179436",
+    "member": "bank-d",
+    "notice_id": "39600781100000-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 24000000
+   },
+   {
+    "account": {
+     "account_number": "6960078102",
+     "ifsc": "BKCC0000002",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 10000000,
+     "at": "2026-10-25T20:10:57.208476Z",
+     "rail": "imps",
+     "reference": "960078100001"
+    },
+    "exits": [],
+    "held": 10000000,
+    "holder_name": "Nisha Traders",
+    "layer": 2,
+    "lien_id": "L0204F125EADC6A92",
+    "member": "bank-c",
+    "notice_id": "39600781100000-002",
+    "parent_id": "39600781100000-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 10000000
+   },
+   {
+    "account": {
+     "account_number": "6960078103",
+     "ifsc": "XCHX0000002",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 6000000,
+     "at": "2026-10-25T20:13:57.208476Z",
+     "rail": "imps",
+     "reference": "960078100002"
+    },
+    "exits": [],
+    "held": 6000000,
+    "holder_name": "Deepa Kulkarni",
+    "layer": 2,
+    "lien_id": "L0D9810E25E921921",
+    "member": "exchange-x",
+    "notice_id": "39600781100000-003",
+    "parent_id": "39600781100000-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 6000000
+   }
+  ],
+  "ack_number": "39600781100000",
+  "cashed_out": 0,
+  "complete": true,
+  "held": 24000000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 24000000,
+  "waiting": 0
+ },
+ "/v1/cases/39600770000000/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "6960077001",
+     "ifsc": "BKCC0000002",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 9500000,
+     "at": "2026-10-25T20:07:57.208476Z",
+     "rail": "upi",
+     "reference": "960077000000"
+    },
+    "exits": [],
+    "held": 5500000,
+    "holder_name": "Rohit Khanna",
+    "layer": 1,
+    "lien_id": "L9C284934AA2986C9",
+    "member": "bank-c",
+    "notice_id": "39600770000000-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 9500000
+   },
+   {
+    "account": {
+     "account_number": "6960077002",
+     "ifsc": "BKDD0000002",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 4000000,
+     "at": "2026-10-25T20:11:57.208476Z",
+     "rail": "imps",
+     "reference": "960077000001"
+    },
+    "exits": [],
+    "held": 4000000,
+    "holder_name": "Asha Enterprises",
+    "layer": 2,
+    "lien_id": "L5FED22510BF35476",
+    "member": "bank-d",
+    "notice_id": "39600770000000-002",
+    "parent_id": "39600770000000-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 4000000
+   }
+  ],
+  "ack_number": "39600770000000",
+  "cashed_out": 0,
+  "complete": true,
+  "held": 9500000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 9500000,
+  "waiting": 0
+ },
+ "/v1/cases/33033011273523/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "3763953002",
+     "ifsc": "BKBB0000001",
+     "vpa": "m1shop763953@bkbb"
+    },
+    "credit": {
+     "amount": 80000000,
+     "at": "2026-10-25T20:15:50.241850Z",
+     "rail": "rtgs",
+     "reference": "BKAAR76395300000000001"
+    },
+    "exits": [],
+    "held": 10000000,
+    "holder_name": "M1 (mule)",
+    "layer": 1,
+    "lien_id": "L04BF95F1D4E83E3C",
+    "member": "bank-b",
+    "notice_id": "33033011273523-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 80000000
+   },
+   {
+    "account": {
+     "account_number": "5763953002",
+     "ifsc": "BKCC0000001",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 30000000,
+     "at": "2026-10-25T20:17:50.241850Z",
+     "rail": "imps",
+     "reference": "763953000002"
+    },
+    "exits": [
+     {
+      "amount": 10000000,
+      "at": "2026-10-25T20:20:50.241850Z",
+      "identifier": "S1BW000101",
+      "location": "Ameerpet, Hyderabad",
+      "mode": "atm",
+      "reference": "ATMW76395305",
+      "traced_amount": 10000000
+     },
+     {
+      "amount": 10000000,
+      "at": "2026-10-25T20:22:50.241850Z",
+      "identifier": "S1BW000245",
+      "location": "Secunderabad",
+      "mode": "atm",
+      "reference": "ATMW76395309",
+      "traced_amount": 10000000
+     }
+    ],
+    "held": 0,
+    "holder_name": "M2 (mule)",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "33033011273523-002",
+    "parent_id": "33033011273523-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 30000000
+   },
+   {
+    "account": {
+     "account_number": "7763953002",
+     "ifsc": "BKDD0000001",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 25000000,
+     "at": "2026-10-25T20:18:50.241850Z",
+     "rail": "imps",
+     "reference": "763953000003"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "M3 General Store (mule)",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "33033011273523-003",
+    "parent_id": "33033011273523-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 25000000
+   },
+   {
+    "account": {
+     "account_number": "8763953006",
+     "ifsc": "WLTW0000001",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 15000000,
+     "at": "2026-10-25T20:19:50.241850Z",
+     "rail": "imps",
+     "reference": "763953000004"
+    },
+    "exits": [],
+    "held": 15000000,
+    "holder_name": "Kunal Shah (wallet)",
+    "layer": 2,
+    "lien_id": "L6707F7328BF4128C",
+    "member": "wallet-w",
+    "notice_id": "33033011273523-004",
+    "parent_id": "33033011273523-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 15000000
+   },
+   {
+    "account": {
+     "account_number": "9763953006",
+     "ifsc": "XCHX0000001",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 10000000,
+     "at": "2026-10-25T20:21:50.241850Z",
+     "rail": "imps",
+     "reference": "763953000007"
+    },
+    "exits": [],
+    "held": 10000000,
+    "holder_name": "Arvind Menon (crypto account)",
+    "layer": 3,
+    "lien_id": "LD038AE58627570E4",
+    "member": "exchange-x",
+    "notice_id": "33033011273523-005",
+    "parent_id": "33033011273523-002",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 10000000
+   },
+   {
+    "account": {
+     "account_number": "2763953004",
+     "ifsc": "BKAA0000001",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 20000000,
+     "at": "2026-10-25T20:20:50.241850Z",
+     "rail": "neft",
+     "reference": "BKDDN76395300006"
+    },
+    "exits": [],
+    "held": 20000000,
+    "holder_name": "Ravi Traders (cement supplier)",
+    "layer": 3,
+    "lien_id": "LB23C20A87BE5995E",
+    "member": "bank-a",
+    "notice_id": "33033011273523-006",
+    "parent_id": "33033011273523-003",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 20000000
+   },
+   {
+    "account": {
+     "account_number": "4763953006",
+     "ifsc": "BKBB0000001",
+     "vpa": "galaxy763953@bkbb"
+    },
+    "credit": {
+     "amount": 12000000,
+     "at": "2026-10-25T20:21:50.241850Z",
+     "rail": "imps",
+     "reference": "763953000008"
+    },
+    "exits": [],
+    "held": 5000000,
+    "holder_name": "Galaxy Mobiles (phone shop)",
+    "layer": 3,
+    "lien_id": "LF712882F2968D23F",
+    "member": "bank-b",
+    "notice_id": "33033011273523-007",
+    "parent_id": "33033011273523-003",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 5000000
+   }
+  ],
+  "ack_number": "33033011273523",
+  "cashed_out": 20000000,
+  "complete": true,
+  "held": 60000000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 80000000,
+  "waiting": 0
+ },
+ "/v1/cases/25300428205673/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "21003942577828",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 300000,
+     "at": "2026-09-23T04:15:00Z",
+     "rail": "upi",
+     "reference": "472802978554"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Shree Balaji Mobile Recharge",
+    "layer": 1,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "25300428205673-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 300000
+   },
+   {
+    "account": {
+     "account_number": "25118677952238",
+     "ifsc": "BKDD0472583",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 15000000,
+     "at": "2026-09-23T10:40:00Z",
+     "rail": "imps",
+     "reference": "856062676279"
+    },
+    "exits": [
+     {
+      "amount": 2000000,
+      "at": "2026-09-23T12:35:00Z",
+      "identifier": "BKDD1539",
+      "location": "Sector 18, Noida",
+      "mode": "atm",
+      "reference": "365591936596",
+      "traced_amount": 300000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Sanjay Kumar",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "25300428205673-002",
+    "parent_id": "25300428205673-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 300000
+   }
+  ],
+  "ack_number": "25300428205673",
+  "cashed_out": 300000,
+  "complete": true,
+  "held": 0,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 300000,
+  "waiting": 0
+ },
+ "/v1/cases/28858815922556/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "21003942577828",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 1000000,
+     "at": "2026-09-22T08:30:00Z",
+     "rail": "upi",
+     "reference": "749907148055"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Shree Balaji Mobile Recharge",
+    "layer": 1,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "28858815922556-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 1000000
+   },
+   {
+    "account": {
+     "account_number": "25118677952238",
+     "ifsc": "BKDD0472583",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 5000000,
+     "at": "2026-09-22T11:50:00Z",
+     "rail": "imps",
+     "reference": "255549649402"
+    },
+    "exits": [
+     {
+      "amount": 2000000,
+      "at": "2026-09-23T12:35:00Z",
+      "identifier": "BKDD1539",
+      "location": "Sector 18, Noida",
+      "mode": "atm",
+      "reference": "365591936596",
+      "traced_amount": 1000000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Sanjay Kumar",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "28858815922556-002",
+    "parent_id": "28858815922556-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 1000000
+   }
+  ],
+  "ack_number": "28858815922556",
+  "cashed_out": 1000000,
+  "complete": true,
+  "held": 0,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 1000000,
+  "waiting": 0
+ },
+ "/v1/cases/29162403489284/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "21003942577828",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 500000,
+     "at": "2026-09-22T06:40:00Z",
+     "rail": "upi",
+     "reference": "601260318304"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Shree Balaji Mobile Recharge",
+    "layer": 1,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "29162403489284-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 500000
+   },
+   {
+    "account": {
+     "account_number": "25118677952238",
+     "ifsc": "BKDD0472583",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 5000000,
+     "at": "2026-09-22T11:50:00Z",
+     "rail": "imps",
+     "reference": "255549649402"
+    },
+    "exits": [
+     {
+      "amount": 2000000,
+      "at": "2026-09-23T12:35:00Z",
+      "identifier": "BKDD1539",
+      "location": "Sector 18, Noida",
+      "mode": "atm",
+      "reference": "365591936596",
+      "traced_amount": 500000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Sanjay Kumar",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "29162403489284-002",
+    "parent_id": "29162403489284-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 500000
+   }
+  ],
+  "ack_number": "29162403489284",
+  "cashed_out": 500000,
+  "complete": true,
+  "held": 0,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 500000,
+  "waiting": 0
+ },
+ "/v1/cases/22928096743133/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "21003942577828",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 200000,
+     "at": "2026-09-22T05:35:00Z",
+     "rail": "upi",
+     "reference": "709634796451"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Shree Balaji Mobile Recharge",
+    "layer": 1,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "22928096743133-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 200000
+   },
+   {
+    "account": {
+     "account_number": "25118677952238",
+     "ifsc": "BKDD0472583",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 5000000,
+     "at": "2026-09-22T11:50:00Z",
+     "rail": "imps",
+     "reference": "255549649402"
+    },
+    "exits": [
+     {
+      "amount": 2000000,
+      "at": "2026-09-23T12:35:00Z",
+      "identifier": "BKDD1539",
+      "location": "Sector 18, Noida",
+      "mode": "atm",
+      "reference": "365591936596",
+      "traced_amount": 200000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Sanjay Kumar",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "22928096743133-002",
+    "parent_id": "22928096743133-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 200000
+   }
+  ],
+  "ack_number": "22928096743133",
+  "cashed_out": 200000,
+  "complete": true,
+  "held": 0,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 200000,
+  "waiting": 0
+ },
+ "/v1/cases/38069132210127/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "88008423321977",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 34000000,
+     "at": "2026-09-11T14:10:00Z",
+     "rail": "imps",
+     "reference": "372020311032"
+    },
+    "exits": [
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T00:00:00Z",
+      "identifier": "BKBB9572",
+      "location": "Lal Darwaza, Ahmedabad",
+      "mode": "atm",
+      "reference": "686613180589",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T00:06:00Z",
+      "identifier": "BKBB4086",
+      "location": "Lal Darwaza, Ahmedabad",
+      "mode": "atm",
+      "reference": "961177419218",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T00:12:00Z",
+      "identifier": "BKBB8489",
+      "location": "Lal Darwaza, Ahmedabad",
+      "mode": "atm",
+      "reference": "896571667654",
+      "traced_amount": 1000000
+     }
+    ],
+    "held": 12000000,
+    "holder_name": "Deepak Rathore",
+    "layer": 1,
+    "lien_id": "L6C6175B3D6FFF478",
+    "member": "bank-b",
+    "notice_id": "38069132210127-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 34000000
+   },
+   {
+    "account": {
+     "account_number": "22489366128616",
+     "ifsc": "BKAA0260181",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 19000000,
+     "at": "2026-09-11T23:25:00Z",
+     "rail": "imps",
+     "reference": "921058047116"
+    },
+    "exits": [
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T05:25:00Z",
+      "identifier": "BKAA9465",
+      "location": "Kurla West, Mumbai",
+      "mode": "atm",
+      "reference": "939307530932",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T05:30:00Z",
+      "identifier": "BKAA5720",
+      "location": "Kurla West, Mumbai",
+      "mode": "atm",
+      "reference": "745954452441",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T05:35:00Z",
+      "identifier": "BKAA0109",
+      "location": "Kurla West, Mumbai",
+      "mode": "atm",
+      "reference": "239330380571",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T05:40:00Z",
+      "identifier": "BKAA3788",
+      "location": "Kurla West, Mumbai",
+      "mode": "atm",
+      "reference": "716016903718",
+      "traced_amount": 1000000
+     },
+     {
+      "amount": 1000000,
+      "at": "2026-09-12T05:45:00Z",
+      "identifier": "BKAA9983",
+      "location": "Kurla West, Mumbai",
+      "mode": "atm",
+      "reference": "543702920121",
+      "traced_amount": 1000000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Imran Sheikh",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-a",
+    "notice_id": "38069132210127-002",
+    "parent_id": "38069132210127-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 19000000
+   },
+   {
+    "account": {
+     "account_number": "58835656277916",
+     "ifsc": "WLTW0929786",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 14000000,
+     "at": "2026-09-12T06:05:00Z",
+     "rail": "imps",
+     "reference": "603854344950"
+    },
+    "exits": [],
+    "held": 14000000,
+    "holder_name": "Imran Sheikh",
+    "layer": 3,
+    "lien_id": "LAD5C314E9501D104",
+    "member": "wallet-w",
+    "notice_id": "38069132210127-003",
+    "parent_id": "38069132210127-002",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 14000000
+   }
+  ],
+  "ack_number": "38069132210127",
+  "cashed_out": 8000000,
+  "complete": true,
+  "held": 26000000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 34000000,
+  "waiting": 0
+ },
+ "/v1/cases/25925884038089/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "64296450598770",
+     "ifsc": "BKAA0260181",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 2500000,
+     "at": "2026-09-03T04:42:00Z",
+     "rail": "upi",
+     "reference": "838532739753"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Rohan Verma",
+    "layer": 1,
+    "lien_id": null,
+    "member": "bank-a",
+    "notice_id": "25925884038089-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 2500000
+   },
+   {
+    "account": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 2450000,
+     "at": "2026-09-03T05:09:00Z",
+     "rail": "imps",
+     "reference": "111239675420"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Vertex Capital Advisors",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-b",
+    "notice_id": "25925884038089-002",
+    "parent_id": "25925884038089-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 2450000
+   },
+   {
+    "account": {
+     "account_number": "19770520161305",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 5880000,
+     "at": "2026-09-04T05:16:00Z",
+     "rail": "imps",
+     "reference": "183235545094"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": null,
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-b",
+    "notice_id": "25925884038089-003",
+    "parent_id": "25925884038089-001",
+    "reason": "409: ledger does not add up: notice 25925884038089-003: traced amounts do not add up",
+    "state": "waiting",
+    "traced_in": 50000
+   },
+   {
+    "account": {
+     "account_number": "16624411087213",
+     "ifsc": "XCHX0067892",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 7350000,
+     "at": "2026-09-03T14:00:00Z",
+     "rail": "imps",
+     "reference": "173669389380"
+    },
+    "exits": [
+     {
+      "amount": 7350000,
+      "at": "2026-09-03T16:40:00Z",
+      "identifier": "0x06f15ddf2cbd2662a8d6c1bace5d14285d0a190e",
+      "location": null,
+      "mode": "crypto",
+      "reference": "243784442953",
+      "traced_amount": 2450000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Vertex Capital Advisors",
+    "layer": 3,
+    "lien_id": null,
+    "member": "exchange-x",
+    "notice_id": "25925884038089-004",
+    "parent_id": "25925884038089-002",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 2450000
+   }
+  ],
+  "ack_number": "25925884038089",
+  "cashed_out": 2450000,
+  "complete": false,
+  "held": 0,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 2500000,
+  "waiting": 50000
+ },
+ "/v1/cases/30391446601247/trail": {
+  "accounts": [
+   {
+    "account": {
+     "account_number": "97748343517098",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 80000000,
+     "at": "2026-09-18T05:32:00Z",
+     "rail": "rtgs",
+     "reference": "BKAAR70493216524586172"
+    },
+    "exits": [],
+    "held": 10000000,
+    "holder_name": "Arjun Mondal",
+    "layer": 1,
+    "lien_id": "L82A44B48593357B5",
+    "member": "bank-b",
+    "notice_id": "30391446601247-001",
+    "parent_id": null,
+    "reason": null,
+    "state": "answered",
+    "traced_in": 80000000
+   },
+   {
+    "account": {
+     "account_number": "69456866879566",
+     "ifsc": "BKCC0818460",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 30000000,
+     "at": "2026-09-18T05:34:00Z",
+     "rail": "imps",
+     "reference": "231335028248"
+    },
+    "exits": [
+     {
+      "amount": 10000000,
+      "at": "2026-09-18T05:37:00Z",
+      "identifier": "BKCC4808",
+      "location": "Ameerpet, Hyderabad",
+      "mode": "atm",
+      "reference": "589407416208",
+      "traced_amount": 10000000
+     },
+     {
+      "amount": 10000000,
+      "at": "2026-09-18T05:39:00Z",
+      "identifier": "BKCC4559",
+      "location": "Secunderabad",
+      "mode": "atm",
+      "reference": "915806943256",
+      "traced_amount": 10000000
+     }
+    ],
+    "held": 0,
+    "holder_name": "Bikash Shaw",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-c",
+    "notice_id": "30391446601247-002",
+    "parent_id": "30391446601247-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 30000000
+   },
+   {
+    "account": {
+     "account_number": "39185176670281",
+     "ifsc": "BKDD0472583",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 25000000,
+     "at": "2026-09-18T05:35:00Z",
+     "rail": "imps",
+     "reference": "385220500118"
+    },
+    "exits": [],
+    "held": 0,
+    "holder_name": "Sagar Mobile Point",
+    "layer": 2,
+    "lien_id": null,
+    "member": "bank-d",
+    "notice_id": "30391446601247-003",
+    "parent_id": "30391446601247-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 25000000
+   },
+   {
+    "account": {
+     "account_number": "92809843109452",
+     "ifsc": "WLTW0929786",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 15000000,
+     "at": "2026-09-18T05:36:00Z",
+     "rail": "imps",
+     "reference": "102080842859"
+    },
+    "exits": [],
+    "held": 15000000,
+    "holder_name": "Arjun Mondal",
+    "layer": 2,
+    "lien_id": "LE4EFBF3397E7AEB4",
+    "member": "wallet-w",
+    "notice_id": "30391446601247-004",
+    "parent_id": "30391446601247-001",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 15000000
+   },
+   {
+    "account": {
+     "account_number": "91804205117543",
+     "ifsc": "XCHX0067892",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 10000000,
+     "at": "2026-09-18T05:38:00Z",
+     "rail": "imps",
+     "reference": "412178680646"
+    },
+    "exits": [],
+    "held": 10000000,
+    "holder_name": "Bikash Shaw",
+    "layer": 3,
+    "lien_id": "L88A4E0BC3BC1EC04",
+    "member": "exchange-x",
+    "notice_id": "30391446601247-005",
+    "parent_id": "30391446601247-002",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 10000000
+   },
+   {
+    "account": {
+     "account_number": "28684417143731",
+     "ifsc": "BKAA0260181",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 20000000,
+     "at": "2026-09-18T05:37:00Z",
+     "rail": "neft",
+     "reference": "BKDDN50556661782"
+    },
+    "exits": [],
+    "held": 20000000,
+    "holder_name": "Ravi Traders",
+    "layer": 3,
+    "lien_id": "L1A71E2FDEB8CAB49",
+    "member": "bank-a",
+    "notice_id": "30391446601247-006",
+    "parent_id": "30391446601247-003",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 20000000
+   },
+   {
+    "account": {
+     "account_number": "68021018459754",
+     "ifsc": "BKBB0723143",
+     "vpa": null
+    },
+    "credit": {
+     "amount": 12000000,
+     "at": "2026-09-18T05:38:00Z",
+     "rail": "imps",
+     "reference": "345059367388"
+    },
+    "exits": [],
+    "held": 5000000,
+    "holder_name": "Galaxy Mobiles",
+    "layer": 3,
+    "lien_id": "L2CA356F95D16A8F8",
+    "member": "bank-b",
+    "notice_id": "30391446601247-007",
+    "parent_id": "30391446601247-003",
+    "reason": null,
+    "state": "answered",
+    "traced_in": 5000000
+   }
+  ],
+  "ack_number": "30391446601247",
+  "cashed_out": 20000000,
+  "complete": true,
+  "held": 60000000,
+  "not_found": 0,
+  "off_network": 0,
+  "reported": 80000000,
+  "waiting": 0
+ },
+ "/v1/network": {
+  "members": [
+   {
+    "id": "cfcfrms",
+    "name": "CFCFRMS hub (simulated)",
+    "kind": "hub",
+    "bank_code": null
+   },
+   {
+    "id": "bank-a",
+    "name": "Navodaya National Bank, a public sector bank",
+    "kind": "bank",
+    "bank_code": "BKAA"
+   },
+   {
+    "id": "bank-b",
+    "name": "Meridian Private Bank, a private bank",
+    "kind": "bank",
+    "bank_code": "BKBB"
+   },
+   {
+    "id": "bank-c",
+    "name": "Pragati Small Finance Bank, a small finance bank",
+    "kind": "bank",
+    "bank_code": "BKCC"
+   },
+   {
+    "id": "bank-d",
+    "name": "Sangam Urban Co-operative Bank, a co-operative bank",
+    "kind": "bank",
+    "bank_code": "BKDD"
+   },
+   {
+    "id": "wallet-w",
+    "name": "PaySetu Wallet, a prepaid wallet issuer",
+    "kind": "wallet",
+    "bank_code": "WLTW"
+   },
+   {
+    "id": "exchange-x",
+    "name": "CoinKosh Exchange, a crypto exchange on CFCFRMS",
+    "kind": "exchange",
+    "bank_code": "XCHX"
+   }
+  ]
+ },
+ "/v1/hold-reports": [
+  {
+   "hold_id": "H1A6B7D63F328255B",
+   "account_number": "7763953002",
+   "holder_name": "M3 General Store (mule)",
+   "amount": 21500000,
+   "whole_account": false,
+   "reasons": [
+    "Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:48 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year).",
+    "₹2,50,000 arrived on 26 Oct 2026, 01:48 AM IST, and 80% of it left the account within 2 minutes in 1 debit."
+   ],
+   "contact": "Fraud Risk desk, 1800 000 0000, or frm@bank.example",
+   "customer_notice": "Dear M3 General Store (mule),\n\nSangam Urban Co-operative Bank, a co-operative bank has placed a temporary hold on debits of ₹2,15,000 from your account ending 3002, from 26 October 2026. The bank has done this under the Reserve Bank of India's directions on suspected money mule accounts, because of these transactions: Credits of ₹2,50,000 arrived in the 30 days to 26 Oct 2026, 01:48 AM IST, and that is 5.0 times the declared monthly income or turnover of ₹50,000 (₹6,00,000 a year). ₹2,50,000 arrived on 26 Oct 2026, 01:48 AM IST, and 80% of it left the account within 2 minutes in 1 debit.\n\nYou can still receive money, and you can use any balance that is not on hold.\n\nTo have the hold removed, send the bank an explanation of these transactions, with any documents that support it, such as invoices, agreements or salary slips, by 15 November 2026. The bank will decide within 10 days of receiving your explanation. If no explanation reaches the bank, it will decide by 25 November 2026, and it may then report the transactions to the police through the National Cybercrime Reporting Portal.\n\nContact: Fraud Risk desk, 1800 000 0000, or frm@bank.example",
+   "placed_at": "2026-10-25T20:28:01.873274Z",
+   "status": "reported_to_police",
+   "deadlines": [
+    {
+     "due": "2026-10-25T20:28:01.873274Z",
+     "met_at": "2026-10-25T20:28:01.873274Z",
+     "name": "Customer notified",
+     "rule": "Annex III Step 2: at once when the customer is reached digitally",
+     "state": "met"
+    },
+    {
+     "due": "2026-11-14T20:28:01.873274Z",
+     "met_at": "2026-10-25T20:28:01.948858Z",
+     "name": "Customer explanation",
+     "rule": "Annex III Step 3: 20 days from the hold",
+     "state": "met"
+    },
+    {
+     "due": "2026-11-04T20:28:01.948858Z",
+     "met_at": "2026-10-25T20:28:02.009027Z",
+     "name": "Bank decision",
+     "rule": "Annex III Step 4: 10 days from an explanation, or 30 days from the hold without one",
+     "state": "met"
+    },
+    {
+     "due": "2026-11-24T20:28:02.009027Z",
+     "met_at": null,
+     "name": "Release unless the police instruct otherwise",
+     "rule": "Annex III Step 6: the 31st day from the report, within 60 days of the hold",
+     "state": "open"
+    }
+   ],
+   "next_deadline": "2026-11-24T20:28:02.009027Z",
+   "expires_at": "2026-11-24T20:28:02.009027Z",
+   "explanation": "The customer sent no documents and said the money was a loan from a friend.",
+   "explanation_at": "2026-10-25T20:28:01.948858Z",
+   "decision": "report",
+   "decision_reason": "No document supports the credit, which is five times the declared turnover and left within two minutes.",
+   "released_at": null,
+   "release_reason": null,
+   "reported_at": "2026-10-25T20:28:02.009027Z",
+   "member": "bank-d",
+   "member_name": "Sangam Urban Co-operative Bank, a co-operative bank",
+   "instruction": null,
+   "str_filed_at": null,
+   "mule_confirmed_at": null
+  }
+ ]
+}

@@ -1,0 +1,130 @@
+{
+  "case_id": "D03",
+  "title": "E-invoice with delivery challan, interstate, paid by UPI",
+  "account_holder": {
+    "name": "Kaveri Agro Implements",
+    "address": "Survey 41, Hubballi Road, Dharwad, Karnataka 580011",
+    "ifsc": "KVSB0000520",
+    "account_number": "82895425339854",
+    "gstin": "29VQLFX3677B1Z9",
+    "kyc": {
+      "occupation": "Farm equipment dealer",
+      "business_type": "proprietorship",
+      "declared_annual_turnover": 9500000000
+    }
+  },
+  "explanation": "Payment from Shivneri Krishi Kendra, Kolhapur, for sprayers and drip kits. E-invoice and challan attached.",
+  "tds_rate_percent": null,
+  "held_credits": [
+    {
+      "credit_id": "C1",
+      "rail": "upi",
+      "reference": "594479664447",
+      "amount": 6646500,
+      "at": "2026-10-10T09:18:00+05:30",
+      "remitter": {
+        "name": "Shivneri Krishi Kendra",
+        "ifsc": "NVBK0000902",
+        "account_number": "72364820120196"
+      },
+      "traced_amount": 6646500
+    }
+  ],
+  "documents": [
+    {
+      "file": "einvoice_KAI-0977.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "e_invoice",
+        "issuer": "Kaveri Agro Implements",
+        "issuer_gstin": "29VQLFX3677B1Z9",
+        "recipient": "Shivneri Krishi Kendra",
+        "recipient_gstin": "27HOHFG3088H1Z7",
+        "number": "KAI/0977",
+        "date": "2026-10-08",
+        "taxable_value": 6330000,
+        "tax": 316500,
+        "total": 6646500,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": "ad8cd6a2fdd02664803330fc7d123e359a6b2e38502204cf54fc0d10c144dc4b"
+      },
+      "items": [
+        {
+          "description": "Power sprayer, 16 litre",
+          "hsn": "842441",
+          "qty": 6,
+          "unit": "nos",
+          "rate": 425000,
+          "amount": 2550000
+        },
+        {
+          "description": "Drip irrigation kit, 1 acre",
+          "hsn": "842482",
+          "qty": 2,
+          "unit": "nos",
+          "rate": 1890000,
+          "amount": 3780000
+        }
+      ]
+    },
+    {
+      "file": "challan_KAI-DC-0977.pdf",
+      "language": "en",
+      "form": "pdf",
+      "quality": "clean",
+      "readable": true,
+      "planted_instruction": null,
+      "fields": {
+        "document_type": "delivery_challan",
+        "issuer": "Kaveri Agro Implements",
+        "issuer_gstin": "29VQLFX3677B1Z9",
+        "recipient": "Shivneri Krishi Kendra",
+        "recipient_gstin": "27HOHFG3088H1Z7",
+        "number": "KAI/DC/0977",
+        "date": "2026-10-08",
+        "taxable_value": 6330000,
+        "tax": 0,
+        "total": 6330000,
+        "payment_reference": null,
+        "issuer_bank_account": null,
+        "irn": null
+      },
+      "items": [
+        {
+          "description": "Power sprayer, 16 litre",
+          "hsn": "842441",
+          "qty": 6,
+          "unit": "nos",
+          "rate": 425000,
+          "amount": 2550000
+        },
+        {
+          "description": "Drip irrigation kit, 1 acre",
+          "hsn": "842482",
+          "qty": 2,
+          "unit": "nos",
+          "rate": 1890000,
+          "amount": 3780000
+        }
+      ]
+    }
+  ],
+  "expected": [
+    {
+      "credit_id": "C1",
+      "verdict": "explained",
+      "explained_amount": 6646500,
+      "unexplained_amount": 0,
+      "document": "einvoice_KAI-0977.pdf",
+      "proposed_action": "lift",
+      "hold_after": 0,
+      "failed_checks": [],
+      "why": "E-invoice total (with IGST at 5%) equals the credit; the challan confirms delivery on the same date. The QR code's IRP signature cannot be verified offline."
+    }
+  ]
+}

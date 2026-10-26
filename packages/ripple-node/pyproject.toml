@@ -1,0 +1,17 @@
+[project]
+name = "ripple-node"
+version = "0.1.0"
+description = "The Ripple bank node: the bank's ledger view, liens, and automatic answers to CFCFRMS notices"
+requires-python = ">=3.12,<3.13"
+dependencies = ["ripple-core", "ripple-service"]
+
+[tool.uv.sources]
+ripple-core = { workspace = true }
+ripple-service = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ripple_node"]
