@@ -1,4 +1,4 @@
-name: Rebuild
+name: CI
 
 on:
   push:
