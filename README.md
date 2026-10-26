@@ -115,7 +115,7 @@ The first version of Ripple, built in the first day of the hackathon, is in the 
 
 ## AI usage
 
-AI tools were used, as the hackathon rules allow. Most of the code was written with an AI coding assistant (Claude Code, by Anthropic), working under the team's direction: the team set the design and the requirements, decided every trade-off, reviewed the changes and tested the result. AI also helped research and summarise Indian regulations, draft tests and documentation, and review the code for bugs and security issues. Inside the product, Google Gemini reads documents into fixed fields for the explanation review; fixed rules make every decision, and an officer confirms it.
+We used AI tools, as the hackathon rules allow. We wrote most of the code with an AI coding assistant (Claude Code, by Anthropic), working under our direction: we set the design and the requirements, made every trade-off, reviewed each change and tested the result. We also used AI to help research and summarise Indian regulations, draft tests and documentation, and review the code for bugs and security issues. Inside the product, Google Gemini reads documents into fixed fields for the explanation review; fixed rules make every decision, and an officer confirms it.
 
 ## Acknowledgements
 
@@ -126,4 +126,4 @@ AI tools were used, as the hackathon rules allow. Most of the code was written w
 
 ## Team
 
-Mohammed Furquan, Haameem and Tina, for Srujana Tech Fest 2026. The project report describes each person's part.
+We are Mohammed Furquan, Haameem and Tina, building for Srujana Tech Fest 2026. Our project report describes each person's part.
