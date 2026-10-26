@@ -115,4 +115,15 @@ The first version of Ripple, built in the first day of the hackathon, is in the 
 
 ## AI usage
 
-The team used AI coding assistants (Claude Code) to research Indian regulations, plan the architecture, and draft code, tests and documentation. The team reviews every change and can explain each module.
+AI tools were used, as the hackathon rules allow. Most of the code was written with an AI coding assistant (Claude Code, by Anthropic), working under the team's direction: the team set the design and the requirements, decided every trade-off, reviewed the changes and tested the result. AI also helped research and summarise Indian regulations, draft tests and documentation, and review the code for bugs and security issues. Inside the product, Google Gemini reads documents into fixed fields for the explanation review; fixed rules make every decision, and an officer confirms it.
+
+## Acknowledgements
+
+- Regulations and procedures: the MHA/I4C Standard Operating Procedure for NCRP-CFCFRMS (January 2026), RBI's draft directions on suspected money mule accounts (Annex III, 11 September 2026), and the Bharatiya Nagarik Suraksha Sanhita, 2023.
+- APIs: Google Gemini, through the `google-genai` SDK.
+- Data: every record is synthetic. The first version was also evaluated on IBM's public synthetic AML transactions dataset.
+- Open-source libraries: FastAPI, Pydantic, SQLAlchemy, httpx, cryptography, pypdfium2, Pillow, Next.js, React, Tailwind CSS, jose, pytest, Hypothesis, Vitest, Playwright and axe-core, under their own licences. Fonts: Geist, Pixel Operator and DejaVu Sans.
+
+## Team
+
+Mohammed Furquan, Haameem and Tina, for Srujana Tech Fest 2026. The project report describes each person's part.
