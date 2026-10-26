@@ -168,3 +168,12 @@ test("the demo operator plays the demo story and lands on its trail", async ({ p
   await expect(page).toHaveURL(/\/app\/cases\/[23]\d{13}$/);
   await expect(page.getByRole("heading", { name: "Money trail" })).toBeVisible();
 });
+
+test("a trail ending in a crypto wallet fits a phone screen", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await signIn(page, "police_officer");
+  await page.goto("/app/cases/25925884038089");
+  await expect(page.getByRole("heading", { name: "Money trail" })).toBeVisible();
+  const sideways = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(sideways).toBeLessThanOrEqual(0);
+});
