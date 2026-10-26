@@ -111,7 +111,7 @@ The two misses are safe ones: a salary slip and a rent agreement were marked "no
 
 ## The earlier version
 
-The first version of Ripple, built in the first day of the hackathon, is in `backup/`. It traced money inside a single bank only. We rebuilt Ripple because banks cannot see a payment once it leaves them, and the real-world fix is to make every bank's answer to CFCFRMS instant and exact.
+The first version of Ripple, built in the first day of the hackathon, is in the git history (commit `2b3fcb3`, folder `backup/`). It traced money inside a single bank only. We rebuilt Ripple because banks cannot see a payment once it leaves them, and the real-world fix is to make every bank's answer to CFCFRMS instant and exact.
 
 ## AI usage
 

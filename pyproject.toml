@@ -35,7 +35,6 @@ dev = [
 line-length = 110
 target-version = "py312"
 src = ["packages/*/src", "packages/*/tests"]
-extend-exclude = ["backup"]
 
 [tool.ruff.lint]
 select = [
@@ -69,7 +68,6 @@ mypy_path = [
 ]
 explicit_package_bases = true
 plugins = ["pydantic.mypy"]
-exclude = ["^backup/"]
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]
